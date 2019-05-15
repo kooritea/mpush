@@ -168,22 +168,22 @@ ws.onopen=function(){
 }
 ```
 如果TOKEN认证成功
-```JSON
+```javascript
 {
-  cmd: "AUTH",
-  data: {
-    code: 200,
-    msg: "Successful authentication"
+  "cmd": "AUTH",
+  "data": {
+    "code": 200,
+    "msg": "Successful authentication"
   }
 }
 ```
 不成功
-```JSON
+```javascript
 {
-  cmd: "AUTH",
-  data: {
-    code: 403,
-    msg: "Token invalid"
+  "cmd": "AUTH",
+  "data": {
+    "code": 403,
+    "msg": "Token invalid"
   }
 }
 ```
@@ -194,11 +194,11 @@ TOKEN认证后直接发送设备标识
 ws.send(DEVICE_ID)
 ```
 服务端响应
-```JSON
+```javascript
 {
-  cmd: "LOGIN",
-  data:{
-    name: DEVICE_ID
+  "cmd": "LOGIN",
+  "data":{
+    "name": DEVICE_ID
   }
 }
 ```
@@ -213,15 +213,15 @@ ws.send(DEVICE_ID)
 ### 3、消息协议
 推送消息
 服务端 -> 客户端
-```JSON
+```javascript
 {
-  cmd: "MESSAGE", //: String
-  data: { //: Object
-    msgList: [ //: ObjectArray
+  "cmd": "MESSAGE", //: String
+  "data": { //: Object
+    "msgList": [ //: ObjectArray
       {
-        title: '开播通知_高槻律_', //: String
-        content: '', //: String
-        mid: "1557901952810" //: String
+        "title": '开播通知_高槻律_', //: String
+        "content": '', //: String
+        "mid": "1557901952810" //: String
       } 
     ]
   }
@@ -232,11 +232,11 @@ mid是接受HTTP请求时的时间戳，可以直接格式化成时间表示消�
 ---
 客户端收到消息后的回复
 客户端 -> 服务端
-```JSON
+```javascript
 {
-  cmd: "SENDMSG_CB", //: String
-  data: { //: Object
-    midList: [ //: StringArray
+  "cmd": "SENDMSG_CB", //: String
+  "data": { //: Object
+    "midList": [ //: StringArray
       "1557901952810"
     ]
   }
