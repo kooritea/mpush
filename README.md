@@ -158,7 +158,7 @@ node main.js
 
 推送和回复都是JSON格式，需要客户端自行序列化
 
-### 1、TOkEN认证
+### 1、TOKEN认证
 打开websocket连接后第一个数据包就是token字符串  
 打开连接后30s内未发送TOKEN服务端会主动断开连接
 
@@ -188,7 +188,7 @@ ws.onopen=function(){
 }
 ```
 ### 2、注册设备
-TOKEN认证后直接发送设备标识
+TOKEN认证后直接发送设备标识  
 打开连接后30s内未发送设备标识服务端会主动断开连接
 ```javascript
 ws.send(DEVICE_ID)
