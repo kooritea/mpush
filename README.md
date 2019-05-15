@@ -42,15 +42,7 @@ module.exports = {
 - registers
 > 预注册设备  
 下面会说明
-### 3、启动服务器
-```bash
-npm start
-```
-或者
 
-```bash
-node main.js
-```
 ### 配置nginx(可选)
 
 #### ws反向代理
@@ -130,6 +122,11 @@ server {
 
 ## 二、运行项目
 ```bash
+npm start
+```
+或者
+
+```bash
 node main.js
 ```
 
@@ -189,7 +186,7 @@ ws.onopen=function(){
 ```
 ### 2、注册设备
 TOKEN认证后直接发送设备标识  
-打开连接后30s内未发送设备标识服务端会主动断开连接
+TOKEN认证后30s内未发送设备标识服务端会主动断开连接
 ```javascript
 ws.send(DEVICE_ID)
 ```
