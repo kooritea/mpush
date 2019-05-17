@@ -46,7 +46,7 @@ class Device {
         },2000)
       }
     })
-    if(this.isConnection && this.msgList.length){
+    if(this.isConnection && pushList.length){
       this._push(JSON.stringify({
         cmd: "MESSAGE",
         data: {
