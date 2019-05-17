@@ -144,7 +144,8 @@ node main.js
 使用POST方法只能使用x-www-form-urlencoded格式
 
 响应
-> ok: 表示设备在线，已发出推送（不保证已成功，不成功会等待设备重连后重新发送）  
+> ok: 表示设备已经成功收到推送
+> online: 表示设备在线，但未在指定时间内回复
 > offline: 表示设备不在线，但已保留消息，等待设备连接  
 > no: 表示设备未注册，该消息会被丢弃  
 
@@ -274,8 +275,8 @@ client.onmessage=function(wsres){
     case "MESSAGE":
       let {msgList} = data
       let midList = []
+      console.log(`${msgList.length}条来自服务器的消息：`)
       msgList.forEach((item)=>{
-        console.log(`来自服务器的消息：`)
         console.log(`title: ${item.title}`)
         console.log(`content: ${item.content}`)
         console.log(`mid: ${item.mid}`)

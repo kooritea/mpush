@@ -59,7 +59,7 @@ class Device {
   setName(name){
     this.name = name
   }
-  sendMsgCb({midList}){
+  sendMsgCb({midList = []}){
     for(let msg of this.msgList){
       if(midList.includes(String(msg.mid))){
         Log.debug(`[${this.name}][msgcb]${msg.mid}`)

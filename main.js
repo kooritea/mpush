@@ -4,6 +4,7 @@ const querystring = require('querystring');
 
 const WebsocketServer = require("./src/Websocket.js")
 const Device = require("./src/Device.js")
+const responseManager = new (require("./src/ResponseManager.js"))()
 const Log = new (require("./src/Logger.js"))("main")
 const config = require("./src/_config.js")
 
@@ -99,6 +100,7 @@ new WebsocketServer({
               //   }
               // }
               device.sendMsgCb(json.data)//推送消息后客户端的反馈
+              responseManager.msgCallback(json.data)
               break
             default :
               Log.debug(`[${device.name}]${data}`)
@@ -114,23 +116,29 @@ new WebsocketServer({
   }
 })
 
-function sendData(name,data){
+async function sendData(name,data,response){
   let status = "no"
   data.content = data.content?data.content:""
   data.mid=(new Date()).valueOf() + ""
   Log.debug("[http]" + name)
   Log.debug("[http]" + JSON.stringify(data))
+  let isRegister = false
   devices.forEach((device)=>{
     if(device.name === name){
+      isRegister = true
       if(device.isConnection){
-        status = "ok"
+        status = "online"
+        responseManager.addResponse(data.mid,status,response)
       }else{
         status = "offline"
+        response.end(status + "\n")
       }
       device.send(data)
     }
   })
-  return status
+  if(!isRegister){
+    response.end(status + "\n")
+  }
 }
 
 http.createServer(function(request, response){
@@ -139,8 +147,7 @@ http.createServer(function(request, response){
   response.writeHead(200);
   if(request.method === 'GET'){
     let {title,content} = params.query
-    let status = sendData(name,{title,content})
-    response.end(status + "\n");
+    sendData(name,{title,content},response)
   }else if (request.method === "POST"){
     let raw = ""
     request.on("data",function(chunk){
@@ -149,8 +156,7 @@ http.createServer(function(request, response){
     request.on("end",function(){
       raw  = decodeURI(raw);
       let {title,content} = querystring.parse(raw)
-      let status = sendData(name,{title,content})
-      response.end(status + "\n");
+      sendData(name,{title,content},response)
     })
   }else{
     response.writeHead(405);
