@@ -59,7 +59,8 @@ class Device {
   setName(name){
     this.name = name
   }
-  sendMsgCb({midList = []}){
+  sendMsgCb({midList}){
+    if(!Array.isArray(midList)) throw (new Error("the SENDMSG_CB midList is not a Array"))
     for(let msg of this.msgList){
       if(midList.includes(String(msg.mid))){
         Log.debug(`[${this.name}][msgcb]${msg.mid}`)

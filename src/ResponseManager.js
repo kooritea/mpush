@@ -18,7 +18,8 @@ class ResponseManager {
       }
     },3000)
   }
-  msgCallback({midList=[]}){//
+  msgCallback({midList}){//
+    if(!Array.isArray(midList)) throw (new Error("the SENDMSG_CB midList is not a Array"))
     midList.forEach((mid)=>{
       mid = String(mid)
       if(this.list[mid]){
