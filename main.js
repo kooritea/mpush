@@ -28,7 +28,7 @@ new WebsocketServer({
     let TimeoutId2 = null //登录timeout
     connection.on('close',()=>{
       Log.debug(`[${device.name}]连接关闭`)
-      device.close()
+      device.close(connection)
     })
     connection.on('ping',()=>{
       if(device.isAuthenticated){

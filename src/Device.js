@@ -5,6 +5,7 @@ class Device {
     this.connection = connection
     this.isConnection = false
     this.isAuthenticated = false //是否已验证
+    this._hasNewConnection = false
     this.name = name
     this.msgList = [
       // {
@@ -72,18 +73,20 @@ class Device {
       }
     }
   }
-  close(){
-    if(this.isConnection){
+  close(oldConnection){
+    if(!this._hasNewConnection){
       Log.notice("logout: " + this.name)
       this.isConnection = false
       if(this.connection){
-        this.connection.close()
+        oldConnection.close()
       }
     }
+    this._hasNewConnection = false
   }
   setNewConnection(connection){
-    if(this.connection){
+    if(this.connection && this.isConnection){
       this.connection.close()
+      this._hasNewConnection = true
     }
     this.connection = connection
     this.isConnection = true
