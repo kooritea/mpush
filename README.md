@@ -36,10 +36,10 @@ module.exports = {
 例如：GET http://127.0.0.1:2246?title=testmsg  
 下面会详细说明
 
-- debug
+- DEBUG
 > 打印更多日志
 
-- registers
+- REGISTERS
 > 预注册设备  
 下面会说明
 
@@ -144,8 +144,8 @@ node main.js
 使用POST方法只能使用x-www-form-urlencoded格式
 
 响应
-> ok: 表示设备已经成功收到推送
-> online: 表示设备在线，但未在指定时间内回复
+> ok: 表示设备已经成功收到推送  
+> online: 表示设备在线，但未在指定时间内回复  
 > offline: 表示设备不在线，但已保留消息，等待设备连接  
 > no: 表示设备未注册，该消息会被丢弃  
 
@@ -157,7 +157,7 @@ node main.js
 推送和回复都是JSON格式，需要客户端自行序列化
 
 ### 1、TOKEN认证
-打开websocket连接后第一个数据包就是token字符串  
+打开websocket连接后客户端第一个数据包就是token字符串  
 打开连接后30s内未发送TOKEN服务端会主动断开连接
 
 ```javascript
@@ -185,8 +185,8 @@ ws.onopen=function(){
   }
 }
 ```
-### 2、注册设备
-TOKEN认证后直接发送设备标识  
+### 2、登录设备
+TOKEN认证后客户端发送设备标识进行设备登录(不管有没有预注册，没有预注册第一次登录会自动注册)  
 TOKEN认证后30s内未发送设备标识服务端会主动断开连接
 ```javascript
 ws.send(DEVICE_ID)
@@ -250,7 +250,7 @@ mid是接受HTTP请求时的时间戳，可以直接格式化成时间表示消�
 - 当有两个相同设备ID的连接被建立时，第一个连接会被主动断开(在线的话)
 - 客户端可以根据客户端实际情况发送ping(0x9)包保持连接
 
-##　五、客户端示例代码（浏览器）
+## 五、客户端示例代码（浏览器）
 ```javascript
 var client = new WebSocket("ws://127.0.0.1:2245")
 var TOKEN = "mpush"
