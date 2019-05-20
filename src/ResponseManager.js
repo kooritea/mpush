@@ -13,7 +13,7 @@ class ResponseManager {
     }
     this.list[mid].timeoutId = setTimeout(()=>{
       if(this.list[mid]){
-        this.list[mid].response.end(this.list[mid].status + "\n")
+        this.list[mid].response.end(this.list[mid].status)
         delete this.list[mid]
       }
     },3000)
@@ -26,7 +26,7 @@ class ResponseManager {
         let msg = this.list[mid]
         clearTimeout(msg.timeoutId)
         msg.status = "ok"
-        msg.response.end(msg.status + "\n")
+        msg.response.end(msg.status)
         delete this.list[mid]
       }
     })

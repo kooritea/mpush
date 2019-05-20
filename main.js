@@ -34,6 +34,7 @@ new WebsocketServer({
       if(device.isAuthenticated){
         Log.debug(`[${device.name}]ping`)
         connection.pong()
+        device._nextPush()
       }
     })
     connection.on('message',(data)=>{
@@ -131,13 +132,13 @@ async function sendData(name,data,response){
         responseManager.addResponse(data.mid,status,response)
       }else{
         status = "offline"
-        response.end(status + "\n")
+        response.end(status)
       }
       device.send(data)
     }
   })
   if(!isRegister){
-    response.end(status + "\n")
+    response.end(status)
   }
 }
 
