@@ -118,6 +118,12 @@ new WebsocketServer({
 })
 
 async function sendData(name,data,response){
+  if(!name || (!data.title && !data.content)){
+    Log.debug("[http]非合法请求，已丢弃")
+    Log.debug({ name,data })
+    response.end("no")
+    return
+  }
   let status = "no"
   data.content = data.content?data.content:""
   data.mid=(new Date()).valueOf() + ""

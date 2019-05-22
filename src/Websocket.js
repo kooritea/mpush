@@ -7,7 +7,7 @@ class Websocket {
     this.userConnectioncb = connectioncb
     this.userClosecb = closecb
     this.userErrorcb = errorcb
-    this.port = port | 2245
+    this.port = port || 2245
     this.wss = new WebSocketServer({ port: this.port });
     this.createServer()
   }
