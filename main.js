@@ -1,11 +1,11 @@
 const http = require('http');
 const {parse} = require('url');
-const querystring = require('querystring');
 
 const WebsocketServer = require("./src/Websocket.js")
 const Device = require("./src/Device.js")
 const responseManager = new (require("./src/ResponseManager.js"))()
 const Log = new (require("./src/Logger.js"))("main")
+const bodyparser = require("./src/bodyparser.js")
 const config = require("./src/_config.js")
 
 const devices = [] //通过身份验证的用户
@@ -162,12 +162,12 @@ http.createServer(function(request, response){
     })
     request.on("end",function(){
       raw  = decodeURI(raw);
-      let {title,content} = querystring.parse(raw)
+      let {title,content} = bodyparser(request.headers,raw)
       sendData(name,{title,content},response)
     })
   }else{
     response.writeHead(405);
-    response.end("no\n");
+    response.end("no");
   }
 }).listen(config.HTTP_PORT);
 
