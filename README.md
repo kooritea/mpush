@@ -141,7 +141,7 @@ node main.js
 
 > GET http://127.0.0.1/kooritea?title=encodeURI("测试标题")
 
-使用POST方法只能使用x-www-form-urlencoded格式
+使用POST方法只能使用www-form-urlencoded格式和json格式
 
 响应
 > ok: 表示设备已经成功收到推送  
