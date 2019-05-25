@@ -161,7 +161,6 @@ http.createServer(function(request, response){
       raw += chunk
     })
     request.on("end",function(){
-      raw  = decodeURI(raw);
       let {title,content} = bodyparser(request.headers,raw)
       sendData(name,{title,content},response)
     })
