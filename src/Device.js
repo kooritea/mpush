@@ -65,6 +65,7 @@ class Device {
     for(let msg of this.msgList){
       if(midList.includes(String(msg.mid))){
         Log.debug(`[${this.name}][msgcb]${msg.mid}`)
+        Log.debug(`[${this.name}][消息推送用时]${parseInt(((new Date()).valueOf() - msg.mid)/1000)}s`)
         clearTimeout(msg.timeoutId)
         setTimeout(()=>{
           let index = this.msgList.indexOf(msg)
