@@ -1,4 +1,5 @@
 const Log = new (require("./Logger.js"))("Device")
+const { nowDiff } = require("./public.js")
 
 class Device {
   constructor({connection,name=null}){
@@ -7,6 +8,7 @@ class Device {
     this.isAuthenticated = false //是否已验证
     this._hasNewConnection = false
     this.name = name
+    this.loginTimestamp = 0
     this.msgList = [
       // {
       //   mid: string,
@@ -53,8 +55,8 @@ class Device {
           msgList: pushList
         }
       }))
-      Log.debug(`[${this.name}][send]`)
-      Log.debug(pushList)
+      Log.notice(`[${this.name}][send]`)
+      Log.notice(pushList)
     }
   }
   setName(name){
@@ -64,8 +66,8 @@ class Device {
     if(!Array.isArray(midList)) throw (new Error("the SENDMSG_CB midList is not a Array"))
     for(let msg of this.msgList){
       if(midList.includes(String(msg.mid))){
-        Log.debug(`[${this.name}][msgcb]${msg.mid}`)
-        Log.debug(`[${this.name}][消息推送用时]${parseInt(((new Date()).valueOf() - msg.mid)/1000)}s`)
+        Log.notice(`[${this.name}][msgcb]${msg.mid}`)
+        Log.notice(`[${this.name}]消息推送用时: ${nowDiff(msg.mid)}s`)
         clearTimeout(msg.timeoutId)
         setTimeout(()=>{
           let index = this.msgList.indexOf(msg)
@@ -77,6 +79,7 @@ class Device {
   close(oldConnection){
     if(!this._hasNewConnection){
       Log.notice("logout: " + this.name)
+      Log.notice(`在线时长: ${nowDiff(this.loginTimestamp)}`)
       this.isConnection = false
       if(this.connection){
         oldConnection.close()

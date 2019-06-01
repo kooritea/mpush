@@ -72,6 +72,7 @@ new WebsocketServer({
             device.setNewConnection(connection)
             isRegister = true
             Log.notice("login: " + data)
+            device.loginTimestamp = (new Date()).valueOf()
             break
           }
         }
