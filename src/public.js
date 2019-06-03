@@ -5,7 +5,7 @@ const nowDiff = function(timestamp){//计算某个时间与当前时间相差的
     return `${subtract}ms`
   } else if(subtract <= 60000){
     return `${parseInt(subtract/1000)}s`
-  } else if(subtract <= 3600000){
+  } else {
     let min = subtract / 60000
     let sec = subtract % 60000
     return `${parseInt(min)}min${parseInt(sec/1000)}s`

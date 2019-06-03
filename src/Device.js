@@ -67,7 +67,7 @@ class Device {
     for(let msg of this.msgList){
       if(midList.includes(String(msg.mid))){
         Log.notice(`[${this.name}][msgcb]${msg.mid}`)
-        Log.notice(`[${this.name}]消息推送用时: ${nowDiff(msg.mid)}s`)
+        Log.notice(`[${this.name}]消息推送用时: ${nowDiff(msg.mid)}`)
         clearTimeout(msg.timeoutId)
         setTimeout(()=>{
           let index = this.msgList.indexOf(msg)
