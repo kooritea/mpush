@@ -1,3 +1,5 @@
 {
-    "HTTP_PORT":8090
+    "HTTP_PORT":8090,
+    "WEBSOCKET_PORT":8091,
+    "TOKEN": "test"
 }

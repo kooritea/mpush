@@ -3,7 +3,6 @@
     "target": "es6",
     "module": "commonjs",
     "resolveJsonModule": true,
-    "allowJs": true,
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true
