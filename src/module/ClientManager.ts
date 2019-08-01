@@ -69,13 +69,13 @@ export default class ClientManager {
      * @param packet 
      */
     private WebSocketClientMessage(packet: WebSocketMessage.Packet) {
-        if (packet.cmd === 'message') {
+        if (packet.cmd === 'MESSAGE') {
             const data: WebSocketMessage.MessageData = <WebSocketMessage.MessageData>packet.data
             data.messages.forEach((item) => {
                 const message = new Message(data.sendType, data.target, item.text, item.desp)
                 this.postMessage(message)
             })
-        } else if (packet.cmd === 'messageCallback') {
+        } else if (packet.cmd === 'MESSAGE_CALLBACK') {
             const data: WebSocketMessage.MessageCallbackData = <WebSocketMessage.MessageCallbackData>packet.data
             this.postMessageCallback(data.mids)
         }

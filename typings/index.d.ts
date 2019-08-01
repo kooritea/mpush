@@ -3,6 +3,8 @@ import 'ws'
 
 declare module 'ws' {
     interface Connection extends events.EventEmitter {
+        on(event: 'decodeMessage', listener: (packet: WebSocketMessage.Packet) => void): void
+        on(event: 'encodeMessage', listener: (data: object) => void): void
         on(event: string | symbol, listener: (...args: any[]) => void): this;
 
         close(code?: number, data?: string): void;
@@ -15,10 +17,10 @@ declare module 'ws' {
 
 declare namespace WebSocketMessage {
     interface Packet {
-        cmd: 'login' | 'messageCallback' | 'message',
-        data: LoginData | MessageCallbackData | MessageData
+        cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE',
+        data: AuthData | MessageCallbackData | MessageData
     }
-    interface LoginData {
+    interface AuthData {
         token: string,
         name: string,
         group?: string

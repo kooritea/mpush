@@ -32,16 +32,44 @@ export default class WebSocketServer {
         connection.on('message', (originData: string) => {
             try {
                 const packet: WebSocketMessage.Packet = this.decode(originData)
-                if (isAuth && packet.cmd !== 'login') {
+                if (isAuth && packet.cmd !== 'AUTH') {
+                    // 外部监听decodeMessage获取解码后的packet
                     connection.emit('decodeMessage', packet)
                 } else {
-                    if (packet.cmd === 'login') {
-                        const data: WebSocketMessage.LoginData = <WebSocketMessage.LoginData>packet.data
+                    if (packet.cmd === 'AUTH') {
+                        const data: WebSocketMessage.AuthData = <WebSocketMessage.AuthData>packet.data
                         if (data.token === this.token && data.name) {
                             clearTimeout(timeout)
                             isAuth = true
                             this.clientManager.putWebSocketClient(data.name, connection, data.group)
+                            // 监听encodeMessage事件接受外部消息,编码后发送
+                            connection.on('encodeMessage', (data: object) => {
+                                connection.send(data)
+                            })
+                            connection.send(this.encode({
+                                cmd: 'AUTH',
+                                data: {
+                                    code: 200,
+                                    status: 'Successful authentication'
+                                }
+                            }))
+                        } else {
+                            connection.send(this.encode({
+                                cmd: 'AUTH',
+                                data: {
+                                    code: 403,
+                                    status: 'Token invalid'
+                                }
+                            }))
                         }
+                    } else {
+                        connection.send(this.encode({
+                            cmd: 'AUTH',
+                            data: {
+                                code: 403,
+                                status: 'Not Auth'
+                            }
+                        }))
                     }
                 }
             } catch (e) {
@@ -60,5 +88,8 @@ export default class WebSocketServer {
         } catch (e) {
             throw new Error("The Packet Is Not A WebSocketMessage")
         }
+    }
+    private encode(data: object): string {
+        return JSON.stringify(data)
     }
 }
