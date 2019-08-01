@@ -11,12 +11,14 @@ export default class Message {
     public target: string
     public text: string
     public desp: string
+    public readonly mid: number
 
     constructor() {
         this.sendType = 'personal'
         this.target = ''
         this.text = ''
         this.desp = ''
+        this.mid = (new Date()).valueOf()
     }
     public verify(): boolean {
         return !!this.text || !!this.desp
