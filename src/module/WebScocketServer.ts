@@ -44,7 +44,7 @@ export default class WebSocketServer {
                             this.clientManager.putWebSocketClient(data.name, connection, data.group)
                             // 监听encodeMessage事件接受外部消息,编码后发送
                             connection.on('encodeMessage', (data: object) => {
-                                connection.send(data)
+                                connection.send(this.encode(data))
                             })
                             connection.send(this.encode({
                                 cmd: 'AUTH',

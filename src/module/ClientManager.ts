@@ -8,18 +8,10 @@
 
 
 import Client from "../model/Client";
-import Message from "../model/Message";
 import WebSocketClient from "../model/WebSocketClient";
 import WebHookClient from "../model/WebHookClient";
 import { Connection } from "ws";
-import { WebSocketMessage } from "../../typings";
-
-interface ClientPostMessage {
-    (message: Message): void
-}
-interface ClientPostMessageCallback {
-    (mids: number[]): void
-}
+import { WebHookClientConfig, ClientPostMessage, ClientPostMessageCallback } from "../../typings";
 
 export default class ClientManager {
 
@@ -35,49 +27,44 @@ export default class ClientManager {
      * 所有的设备发出的消息都会转换成Message对象并触发这个postMessage回调方法
      * @param postMessage 
      */
-    constructor(postMessage: ClientPostMessage, postMessageCallback: ClientPostMessageCallback) {
+    constructor(webHookClientConfig: WebHookClientConfig[], postMessage: ClientPostMessage, postMessageCallback: ClientPostMessageCallback) {
         this.clients = []
         this.websocketClients = []
         this.webhookClients = []
+
         this.postMessage = postMessage
         this.postMessageCallback = postMessageCallback
+
+        this.initWebHookClient(webHookClientConfig)
     }
     /**
-     * 根据name参数更新设备连接,并移除旧连接的监听事件
+     * 传入webhook配置初始化webhook客户端
+     * @param webHookClientConfig 配置文件
+     */
+    private initWebHookClient(webHookClientConfig: WebHookClientConfig[]): void {
+        for (const config of webHookClientConfig) {
+            this.webhookClients.push(new WebHookClient(config.NAME, config.METHOD, config.URL, config.GROUP))
+        }
+    }
+
+    /**
+     * 有新的websocket连接时会调用此方法
+     * 根据name参数更新设备连接
      * 若该name设备不存在,则创建
      * @param name 
      * @param connection 与客户端的连接实体
      * @param group 
      */
     public putWebSocketClient(name: string, connection: Connection, group?: string): void {
-        connection.on('decodeMessage', this.WebSocketClientMessage.bind(this))
+
         for (const websocketClient of this.websocketClients) {
             if (websocketClient.name === name) {
-                websocketClient.getConnection().removeAllListeners('decodeMessage')
-                websocketClient.getConnection().close()
                 websocketClient.setConnection(connection)
                 return
             }
         }
-        const websocketClient: WebSocketClient = new WebSocketClient(name, connection, group)
+        const websocketClient: WebSocketClient = new WebSocketClient(name, connection, this.postMessage, this.postMessageCallback, group)
         this.clients.push(websocketClient)
         this.websocketClients.push(websocketClient)
-    }
-
-    /**
-     * websocket接收到消息会调用该方法
-     * @param packet 
-     */
-    private WebSocketClientMessage(packet: WebSocketMessage.Packet) {
-        if (packet.cmd === 'MESSAGE') {
-            const data: WebSocketMessage.MessageData = <WebSocketMessage.MessageData>packet.data
-            data.messages.forEach((item) => {
-                const message = new Message(data.sendType, data.target, item.text, item.desp)
-                this.postMessage(message)
-            })
-        } else if (packet.cmd === 'MESSAGE_CALLBACK') {
-            const data: WebSocketMessage.MessageCallbackData = <WebSocketMessage.MessageCallbackData>packet.data
-            this.postMessageCallback(data.mids)
-        }
     }
 }

@@ -1,5 +1,6 @@
 import * as events from 'events';
 import 'ws'
+import Message from '../src/model/Message';
 
 declare module 'ws' {
     interface Connection extends events.EventEmitter {
@@ -7,6 +8,9 @@ declare module 'ws' {
         on(event: 'encodeMessage', listener: (data: object) => void): void
         on(event: string | symbol, listener: (...args: any[]) => void): this;
 
+        emit(event: 'encodeMessage', data: object): boolean
+        emit(event: 'decodeMessage', data: WebSocketMessage.Packet): boolean
+        
         close(code?: number, data?: string): void;
         ping(data?: any, mask?: boolean, cb?: (err: Error) => void): void;
         pong(data?: any, mask?: boolean, cb?: (err: Error) => void): void;
@@ -36,4 +40,17 @@ declare namespace WebSocketMessage {
             desp: string
         }>
     }
+}
+
+interface WebHookClientConfig {
+    NAME: string,
+    GROUP?: string,
+    URL: string,
+    METHOD: 'GET' | 'POST'
+}
+interface ClientPostMessage {
+    (message: Message): void
+}
+interface ClientPostMessageCallback {
+    (mids: number[]): void
 }
