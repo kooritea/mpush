@@ -12,6 +12,7 @@ import WebSocketClient from "../model/WebSocketClient";
 import WebHookClient from "../model/WebHookClient";
 import { Connection } from "ws";
 import { WebHookClientConfig, ClientPostMessage, ClientPostMessageCallback } from "../../typings";
+import Message from "../model/Message";
 
 export default class ClientManager {
 
@@ -43,7 +44,7 @@ export default class ClientManager {
      */
     private initWebHookClient(webHookClientConfig: WebHookClientConfig[]): void {
         for (const config of webHookClientConfig) {
-            this.webhookClients.push(new WebHookClient(config.NAME, config.METHOD, config.URL, config.GROUP))
+            this.webhookClients.push(new WebHookClient(config.NAME, config.METHOD, config.URL, this.postMessageCallback, config.GROUP))
         }
     }
 
@@ -66,5 +67,26 @@ export default class ClientManager {
         const websocketClient: WebSocketClient = new WebSocketClient(name, connection, this.postMessage, this.postMessageCallback, group)
         this.clients.push(websocketClient)
         this.websocketClients.push(websocketClient)
+    }
+
+    /**
+     * 根据message对象指定的target将消息分配到对应的客户端类
+     * @param message 
+     */
+    public sendMessage(message: Message): void {
+        if(message.sendType === 'personal'){
+            for(const client of this.clients){
+                if(client.name === message.target){
+                    client.send(message)
+                    break
+                }
+            }
+        }else if(message.sendType === 'group'){
+            for(const client of this.clients){
+                if(client.group === message.target){
+                    client.send(message)
+                }
+            }
+        }
     }
 }

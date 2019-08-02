@@ -43,14 +43,14 @@ export default class WebSocketServer {
                             isAuth = true
                             this.clientManager.putWebSocketClient(data.name, connection, data.group)
                             // 监听encodeMessage事件接受外部消息,编码后发送
-                            connection.on('encodeMessage', (data: object) => {
+                            connection.on('encodeMessage', (data) => {
                                 connection.send(this.encode(data))
                             })
                             connection.send(this.encode({
                                 cmd: 'AUTH',
                                 data: {
                                     code: 200,
-                                    status: 'Successful authentication'
+                                    msg: 'Successful authentication'
                                 }
                             }))
                         } else {
@@ -58,7 +58,7 @@ export default class WebSocketServer {
                                 cmd: 'AUTH',
                                 data: {
                                     code: 403,
-                                    status: 'Token invalid'
+                                    msg: 'Token invalid'
                                 }
                             }))
                         }
@@ -67,7 +67,7 @@ export default class WebSocketServer {
                             cmd: 'AUTH',
                             data: {
                                 code: 403,
-                                status: 'Not Auth'
+                                msg: 'Not Auth'
                             }
                         }))
                     }
@@ -89,7 +89,7 @@ export default class WebSocketServer {
             throw new Error("The Packet Is Not A WebSocketMessage")
         }
     }
-    private encode(data: object): string {
+    private encode(data: WebSocketMessage.Packet): string {
         return JSON.stringify(data)
     }
 }

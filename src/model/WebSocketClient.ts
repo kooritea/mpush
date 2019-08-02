@@ -13,16 +13,20 @@ export default class WebSocketClient extends Client {
     private connection: Connection
     private postMessage: ClientPostMessage
     private postMessageCallback: ClientPostMessageCallback
+    private readonly messages: Message[]
+    private SendTimer: NodeJS.Immediate | null
 
     constructor(name: string, connection: Connection, postMessage: ClientPostMessage, postMessageCallback: ClientPostMessageCallback, group?: string) {
         super(name, group)
         this.connection = connection
         this.postMessage = postMessage
         this.postMessageCallback = postMessageCallback
+        this.messages = []
+        this.SendTimer = null
         this.setConnection(connection)
     }
     public setConnection(connection: Connection): void {
-        if(this.connection !== connection){
+        if (this.connection !== connection) {
             connection.close()
             this.connection.removeAllListeners('decodeMessage')
             this.connection.removeAllListeners('encodeMessage')
@@ -31,8 +35,26 @@ export default class WebSocketClient extends Client {
         this.connection.on('decodeMessage', this.WebSocketClientMessage.bind(this))
     }
 
-    public send(data: object): void {
-        this.connection.emit('encodeMessage', data)
+    public send(message: Message): void {
+        this.messages.push(message)
+        if (!this.SendTimer) {
+            this.SendTimer = setImmediate(() => {
+                this.sendAll()
+                this.SendTimer = null
+            })
+        }
+    }
+
+    public sendAll(): void {
+        this.connection.emit('encodeMessage', {
+            cmd: 'MESSAGE',
+            data: this.messages.map((item: Message) => {
+                return {
+                    text: item.text,
+                    desp: item.desp
+                }
+            })
+        })
     }
 
     /**
