@@ -22,7 +22,7 @@ declare module 'ws' {
 declare namespace WebSocketMessage {
     interface Packet {
         cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE',
-        data: AuthData | AuthReplyData | MessageCallbackData | MessageData | PushMessageData
+        data: AuthData | AuthReplyData | MessageCallbackData | MessageData
     }
     interface AuthData {
         token: string,
@@ -34,7 +34,7 @@ declare namespace WebSocketMessage {
         msg: string
     }
     interface MessageCallbackData {
-        mids: number[]
+        mid: number
     }
     /**
      * 从websocket客户端接收到的消息组
@@ -42,20 +42,12 @@ declare namespace WebSocketMessage {
     interface MessageData {
         sendType: 'personal' | 'group',
         target: string,
-        messages: Array<{
+        message: {
             text: string,
             desp: string
-        }>
+        }
     }
 }
-
-/**
- * 即将推送到客户端的消息组
- */
-type PushMessageData = Array<{
-    text: string,
-    desp: string
-}>
 
 interface WebHookClientConfig {
     NAME: string,
@@ -67,5 +59,5 @@ interface ClientPostMessage {
     (message: Message): void
 }
 interface ClientPostMessageCallback {
-    (mids: number[]): void
+    (mid: number): void
 }

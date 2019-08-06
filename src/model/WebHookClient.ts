@@ -1,13 +1,20 @@
 /**
  * WebHookClient
  * create 2019/8/1
+ * 消息首次进入messages队列,待当前事件循环结束后马上发送messages中的所有消息
+ * 并进入waitMessage队列
+ * 
  */
 
-import axios from 'axios'
+import originAxios from 'axios'
 
 import Client from "./Client";
 import Message from "./Message";
 import { ClientPostMessageCallback } from "../../typings";
+
+const axios = originAxios.create({
+    timeout: 10000
+})
 
 export default class WebHookClient extends Client {
 
@@ -15,7 +22,7 @@ export default class WebHookClient extends Client {
     private readonly url: string
     private postMessageCallback: ClientPostMessageCallback
     private readonly messages: Message[]
-    private SendTimer: NodeJS.Immediate | null
+    private sendLock:boolean
 
     constructor(name: string, method: 'GET' | 'POST', url: string, postMessageCallback: ClientPostMessageCallback, group?: string) {
         super(name, group)
@@ -23,45 +30,75 @@ export default class WebHookClient extends Client {
         this.url = url
         this.postMessageCallback = postMessageCallback
         this.messages = []
-        this.SendTimer = null
+        this.sendLock = false
     }
 
+    /**
+     * 外部调用的send方法
+     * 发送失败或响应格式错误会进入failMessages队列等待重发
+     * @param message 
+     */
     public send(message: Message): void {
         this.messages.push(message)
-        if (!this.SendTimer) {
-            this.SendTimer = setImmediate(() => {
-                this.sendAll()
-                this.SendTimer = null
+        this.autoSend()
+    }
+
+    private autoSend(): void {
+        if(!this.sendLock && this.messages.length > 0){
+            this.sendLock = true
+            const message = this.messages[0]
+            this.curl(message).then((response: any) => {
+                if (/^[0-9]+$/.test(response.data)) {
+                    const mid = Number(response.data)
+                    this.clearMessage(mid)
+                    this.autoSend()
+                    this.postMessageCallback(Number(response.data))
+                } else {
+                    setTimeout(()=>{
+                        this.autoSend()
+                    },10000)
+                }
+            }).catch((e) => {
+                setTimeout(()=>{
+                    this.autoSend()
+                },10000)
+            }).finally(()=>{
+                this.sendLock = false
             })
         }
     }
 
-    /**
-     * 结束这次事件循环后把send收集的全部消息全部发送
-     */
-    private sendAll(): void {
-        for (const message of this.messages) {
+    private curl(message: Message): Promise<any> {
+        return (new Promise((resolve) => {
             switch (this.method) {
                 case 'GET':
-                    axios.get(this.url, {
+                    resolve(axios.get(this.url, {
                         params: {
                             text: message.text,
                             desp: message.desp
                         }
-                    }).then((response) => {
-                        this.postMessageCallback(response.data)
-                    })
+                    }))
                     break;
                 case 'POST':
-                    axios.post(this.url, {
+                    resolve(axios.post(this.url, {
                         text: message.text,
                         desp: message.desp
-                    }).then((response) => {
-                        this.postMessageCallback(response.data)
-                    })
+                    }))
+                    break;
+            }
+        }))
+    }
+
+    /**
+     * 删除已确认送达的消息
+     * @param mid
+     */
+    private clearMessage(mid: number): void {
+        for (let index = 0; index < this.messages.length; index++) {
+            if (this.messages[index].mid === mid) {
+                this.messages.splice(index, 1)
+                break
             }
         }
-        //  清空数组    
-        this.messages.length = 0
     }
 }

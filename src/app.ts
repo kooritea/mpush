@@ -9,7 +9,7 @@ new HttpServer(config.HTTP_PORT, async function (message) {
     return { status: 200, responseBody: '233' }
 })
 
-const clientManager = new ClientManager(function (message: Message) {
+const clientManager = new ClientManager(config.WEBHOOK_CLIENTS,function (message: Message) {
     console.log(message)
 }, function (mids: number[]) {
     console.log(mids)
