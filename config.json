@@ -5,7 +5,7 @@
     "WEBHOOK_CLIENTS": [
         {
             "NAME": "TEST_WEBHOOK_GET",
-            "GROUP": "test1",
+            "GROUP": "ws_group_test1",
             "URL": "http://127.0.0.1:8092/mpush",
             "METHOD": "GET"
         },

@@ -51,9 +51,9 @@ export default class WebHookClient extends Client {
                 if (/^[0-9]+$/.test(response.data)) {
                     const mid = Number(response.data)
                     this.clearMessage(mid)
-                    this.autoSend()
                     this.postMessageCallback(Number(response.data))
                     this.sendLock = false
+                    this.autoSend()
                 } else {
                     setTimeout(() => {
                         this.sendLock = false
