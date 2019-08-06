@@ -44,7 +44,9 @@ export default class ClientManager {
      */
     private initWebHookClient(webHookClientConfig: WebHookClientConfig[]): void {
         for (const config of webHookClientConfig) {
-            this.webhookClients.push(new WebHookClient(config.NAME, config.METHOD, config.URL, this.postMessageCallback, config.GROUP))
+            const webHookClient = new WebHookClient(config.NAME, config.METHOD, config.URL, this.postMessageCallback, config.GROUP)
+            this.clients.push(webHookClient)
+            this.webhookClients.push(webHookClient)
         }
     }
 

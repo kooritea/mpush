@@ -5,6 +5,7 @@ import WebSocketServer from './module/WebScocketServer';
 
 const clientManager = new ClientManager(config.WEBHOOK_CLIENTS, (message) => {
     console.log(message)
+    clientManager.sendMessage(message)
 }, function (mid: number) {
     console.log(mid)
 })

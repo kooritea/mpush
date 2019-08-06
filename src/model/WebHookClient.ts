@@ -53,17 +53,18 @@ export default class WebHookClient extends Client {
                     this.clearMessage(mid)
                     this.autoSend()
                     this.postMessageCallback(Number(response.data))
+                    this.sendLock = false
                 } else {
                     setTimeout(() => {
+                        this.sendLock = false
                         this.autoSend()
                     }, 10000)
                 }
             }).catch((e) => {
                 setTimeout(() => {
+                    this.sendLock = false
                     this.autoSend()
                 }, 10000)
-            }).finally(() => {
-                this.sendLock = false
             })
         }
     }
@@ -74,6 +75,7 @@ export default class WebHookClient extends Client {
                 case 'GET':
                     resolve(axios.get(this.url, {
                         params: {
+                            mid: message.mid,
                             text: message.text,
                             desp: message.desp
                         }
@@ -81,6 +83,7 @@ export default class WebHookClient extends Client {
                     break;
                 case 'POST':
                     resolve(axios.post(this.url, {
+                        mid: message.mid,
                         text: message.text,
                         desp: message.desp
                     }))

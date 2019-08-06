@@ -22,7 +22,7 @@ declare module 'ws' {
 declare namespace WebSocketMessage {
     interface Packet {
         cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE',
-        data: AuthData | AuthReplyData | MessageCallbackData | MessageData
+        data: AuthData | AuthReplyData | MessageCallbackData | MessageData | MessageDataFromClient
     }
     interface AuthData {
         token: string,
@@ -37,12 +37,23 @@ declare namespace WebSocketMessage {
         mid: number
     }
     /**
-     * 从websocket客户端接收到的消息组
+     * websocket传递的消息对象
      */
     interface MessageData {
         sendType: 'personal' | 'group',
         target: string,
         mid: number,
+        message: {
+            text: string,
+            desp: string
+        }
+    }
+    /**
+     * 消息由客户端发往服务器,没有mid字段
+     */
+    interface MessageDataFromClient {
+        sendType: 'personal' | 'group',
+        target: string,
         message: {
             text: string,
             desp: string
