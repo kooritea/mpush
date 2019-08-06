@@ -42,6 +42,7 @@ declare namespace WebSocketMessage {
     interface MessageData {
         sendType: 'personal' | 'group',
         target: string,
+        mid: number,
         message: {
             text: string,
             desp: string

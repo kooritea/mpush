@@ -31,7 +31,7 @@ export default class WebSocketClient extends Client {
     }
     public setConnection(connection: Connection): void {
         if (this.connection !== connection) {
-            connection.close()
+            this.connection.close()
             this.connection.removeAllListeners('decodeMessage')
             this.connection.removeAllListeners('encodeMessage')
         }
@@ -61,6 +61,7 @@ export default class WebSocketClient extends Client {
                 data: {
                     sendType: message.sendType,
                     target: message.target,
+                    mid: message.mid,
                     message: {
                         text: message.text,
                         desp: message.desp

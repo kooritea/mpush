@@ -74,16 +74,16 @@ export default class ClientManager {
      * @param message 
      */
     public sendMessage(message: Message): void {
-        if(message.sendType === 'personal'){
-            for(const client of this.clients){
-                if(client.name === message.target){
+        if (message.sendType === 'personal') {
+            for (const client of this.clients) {
+                if (client.name === message.target) {
                     client.send(message)
                     break
                 }
             }
-        }else if(message.sendType === 'group'){
-            for(const client of this.clients){
-                if(client.group === message.target){
+        } else if (message.sendType === 'group') {
+            for (const client of this.clients) {
+                if (client.group === message.target) {
                     client.send(message)
                 }
             }

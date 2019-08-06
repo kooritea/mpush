@@ -59,9 +59,10 @@ export default class HttpServer {
     private async verifyRequest(request: http.IncomingMessage): Promise<Message> {
         const { pathname, query } = parse(<string>request.url, true)
         const message = new Message()
-        if (/^\/[0-9a-zA-Z]+\.(send|group)$/.test(<string>pathname)) {
+        if (/^\/[0-9a-zA-Z_-]+\.(send|group)$/.test(<string>pathname)) {
             let path = (<string>pathname).slice(1);
-            [message.target, message.sendType] = <[string, 'personal' | 'group']>path.split(".")
+            message.target = path.split(".")[0]
+            message.sendType = path.split(".")[1] === 'send' ? 'personal' : 'group'
         } else {
             throw new HttpError(400, "Request Path Invalid Format")
         }

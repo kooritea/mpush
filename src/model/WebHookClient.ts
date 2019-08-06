@@ -22,7 +22,7 @@ export default class WebHookClient extends Client {
     private readonly url: string
     private postMessageCallback: ClientPostMessageCallback
     private readonly messages: Message[]
-    private sendLock:boolean
+    private sendLock: boolean
 
     constructor(name: string, method: 'GET' | 'POST', url: string, postMessageCallback: ClientPostMessageCallback, group?: string) {
         super(name, group)
@@ -44,7 +44,7 @@ export default class WebHookClient extends Client {
     }
 
     private autoSend(): void {
-        if(!this.sendLock && this.messages.length > 0){
+        if (!this.sendLock && this.messages.length > 0) {
             this.sendLock = true
             const message = this.messages[0]
             this.curl(message).then((response: any) => {
@@ -54,15 +54,15 @@ export default class WebHookClient extends Client {
                     this.autoSend()
                     this.postMessageCallback(Number(response.data))
                 } else {
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         this.autoSend()
-                    },10000)
+                    }, 10000)
                 }
             }).catch((e) => {
-                setTimeout(()=>{
+                setTimeout(() => {
                     this.autoSend()
-                },10000)
-            }).finally(()=>{
+                }, 10000)
+            }).finally(() => {
                 this.sendLock = false
             })
         }

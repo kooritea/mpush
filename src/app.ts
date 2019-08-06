@@ -1,18 +1,17 @@
 import HttpServer from './module/HttpServer'
 import config from './_config'
 import ClientManager from './module/ClientManager';
-import Message from './model/Message';
 import WebSocketServer from './module/WebScocketServer';
 
-new HttpServer(config.HTTP_PORT, async function (message) {
+const clientManager = new ClientManager(config.WEBHOOK_CLIENTS, (message) => {
     console.log(message)
-    return { status: 200, responseBody: '233' }
+}, function (mid: number) {
+    console.log(mid)
 })
 
-const clientManager = new ClientManager(config.WEBHOOK_CLIENTS,function (message: Message) {
-    console.log(message)
-}, function (mids: number[]) {
-    console.log(mids)
+new HttpServer(config.HTTP_PORT, async (message) => {
+    clientManager.sendMessage(message)
+    return { status: 200, responseBody: 'ok' }
 })
 
 new WebSocketServer(config.WEBSOCKET_PORT, config.TOKEN, clientManager)

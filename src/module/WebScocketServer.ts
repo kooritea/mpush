@@ -76,6 +76,9 @@ export default class WebSocketServer {
                 console.error(e)
             }
         })
+        connection.on('ping', () => {
+            connection.pong()
+        })
     }
     private decode(data: string): WebSocketMessage.Packet {
         try {
