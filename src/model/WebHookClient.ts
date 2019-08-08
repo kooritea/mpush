@@ -10,21 +10,23 @@ import originAxios from 'axios'
 
 import Client from "./Client";
 import Message from "./Message";
-import { ClientPostMessageCallback } from "../../typings";
+import config from "../_config";
+
+import { PostMessageCallback } from "../../typings";
 
 const axios = originAxios.create({
-    timeout: 10000
+    timeout: config.PUSH_TIMEOUT
 })
 
 export default class WebHookClient extends Client {
 
     private readonly method: 'GET' | 'POST'
     private readonly url: string
-    private postMessageCallback: ClientPostMessageCallback
+    private postMessageCallback: PostMessageCallback
     private readonly messages: Message[]
     private sendLock: boolean
 
-    constructor(name: string, method: 'GET' | 'POST', url: string, postMessageCallback: ClientPostMessageCallback, group?: string) {
+    constructor(name: string, method: 'GET' | 'POST', url: string, postMessageCallback: PostMessageCallback, group?: string) {
         super(name, group)
         this.method = method
         this.url = url
@@ -38,33 +40,37 @@ export default class WebHookClient extends Client {
      * 发送失败或响应格式错误会进入failMessages队列等待重发
      * @param message 
      */
-    public send(message: Message): void {
+    public push(message: Message): void {
         this.messages.push(message)
-        this.autoSend()
+        this.autoPush()
     }
 
-    private autoSend(): void {
+    private autoPush(): void {
         if (!this.sendLock && this.messages.length > 0) {
             this.sendLock = true
             const message = this.messages[0]
+            message.setClientStatus(this, 'wait')
             this.curl(message).then((response: any) => {
                 if (/^[0-9]+$/.test(response.data)) {
                     const mid = Number(response.data)
                     this.clearMessage(mid)
+                    message.setClientStatus(this, 'ok')
                     this.postMessageCallback(Number(response.data))
                     this.sendLock = false
-                    this.autoSend()
+                    this.autoPush()
                 } else {
+                    message.setClientStatus(this, 'timeout')
                     setTimeout(() => {
                         this.sendLock = false
-                        this.autoSend()
-                    }, 10000)
+                        this.autoPush()
+                    }, config.PUSH_INTERVAL)
                 }
             }).catch((e) => {
+                message.setClientStatus(this, 'timeout')
                 setTimeout(() => {
                     this.sendLock = false
-                    this.autoSend()
-                }, 10000)
+                    this.autoPush()
+                }, config.PUSH_INTERVAL)
             })
         }
     }

@@ -9,7 +9,7 @@ import Message from "./Message";
 export default abstract class Client {
 
     public readonly name: string
-    public readonly group?: string
+    public group?: string
 
     constructor(name: string, group?: string) {
         this.name = name
@@ -20,5 +20,5 @@ export default abstract class Client {
      * 接收消息但未正真发送
      * @param messages 
      */
-    abstract send(messages: Message): void
+    abstract push(messages: Message): void
 }

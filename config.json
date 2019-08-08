@@ -4,8 +4,8 @@
     "TOKEN": "test",
     "WEBHOOK_CLIENTS": [
         {
-            "NAME": "TEST_WEBHOOK_GET",
-            "GROUP": "ws_group_test1",
+            "NAME": "wh1",
+            "GROUP": "group2",
             "URL": "http://127.0.0.1:8092/mpush",
             "METHOD": "GET"
         },
@@ -14,5 +14,7 @@
             "URL": "http://127.0.0.1:8092/mpush",
             "METHOD": "POST"
         }
-    ]
+    ],
+    "PUSH_TIMEOUT": 10000,
+    "PUSH_INTERVAL": 10000
 }

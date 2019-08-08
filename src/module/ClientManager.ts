@@ -11,7 +11,7 @@ import Client from "../model/Client";
 import WebSocketClient from "../model/WebSocketClient";
 import WebHookClient from "../model/WebHookClient";
 import { Connection } from "ws";
-import { WebHookClientConfig, ClientPostMessage, ClientPostMessageCallback } from "../../typings";
+import { WebHookClientConfig, PostMessage, PostMessageCallback } from "../../typings";
 import Message from "../model/Message";
 
 export default class ClientManager {
@@ -20,15 +20,18 @@ export default class ClientManager {
     private readonly websocketClients: WebSocketClient[]
     private readonly webhookClients: WebHookClient[]
     // 设备发出的推送请求回调
-    private readonly postMessage: ClientPostMessage
+    private readonly postMessage: PostMessage
     // 设备收到推送后反馈回调
-    private readonly postMessageCallback: ClientPostMessageCallback
+    private readonly postMessageCallback: PostMessageCallback
+
 
     /**
-     * 所有的设备发出的消息都会转换成Message对象并触发这个postMessage回调方法
-     * @param postMessage 
+     * 客户端消息发送和接收的管理类
+     * @param webHookClientConfig webhook配置
+     * @param postMessage [callback]客户端的推送请求,当该方法返回promise时,不会等待
+     * @param postMessageCallback [callback]消息推送到客户端后返回的推送确认,当该方法返回promise时,不会等待
      */
-    constructor(webHookClientConfig: WebHookClientConfig[], postMessage: ClientPostMessage, postMessageCallback: ClientPostMessageCallback) {
+    constructor(webHookClientConfig: WebHookClientConfig[], postMessage: PostMessage, postMessageCallback: PostMessageCallback) {
         this.clients = []
         this.websocketClients = []
         this.webhookClients = []
@@ -63,6 +66,9 @@ export default class ClientManager {
         for (const websocketClient of this.websocketClients) {
             if (websocketClient.name === name) {
                 websocketClient.setConnection(connection)
+                if (group) {
+                    websocketClient.setGroup(group)
+                }
                 return
             }
         }
@@ -76,19 +82,27 @@ export default class ClientManager {
      * @param message 
      */
     public sendMessage(message: Message): void {
+        let hasClient: boolean = false
         if (message.sendType === 'personal') {
             for (const client of this.clients) {
                 if (client.name === message.target) {
-                    client.send(message)
+                    message.addClient(client)
+                    client.push(message)
+                    hasClient = true
                     break
                 }
             }
         } else if (message.sendType === 'group') {
             for (const client of this.clients) {
                 if (client.group === message.target) {
-                    client.send(message)
+                    message.addClient(client)
+                    client.push(message)
+                    hasClient = true
                 }
             }
+        }
+        if (!hasClient) {
+            message.emit('PushComplete', message.getStatus())
         }
     }
 }

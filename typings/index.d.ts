@@ -21,8 +21,8 @@ declare module 'ws' {
 
 declare namespace WebSocketMessage {
     interface Packet {
-        cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE',
-        data: AuthData | AuthReplyData | MessageCallbackData | MessageData | MessageDataFromClient
+        cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE' | 'MESSAGE_REPLY',
+        data: AuthData | AuthReplyData | MessageCallbackData | MessageData | MessageDataFromClient | MessageDataFromClientReply
     }
     interface AuthData {
         token: string,
@@ -33,11 +33,18 @@ declare namespace WebSocketMessage {
         code: number,
         msg: string
     }
+    /**
+     * cmd: MESSAGE_CALLBACK
+     * direction: 客户端->服务端
+     * 客户端收到推送消息返回的推送确认
+     */
     interface MessageCallbackData {
         mid: number
     }
     /**
-     * websocket传递的消息对象
+     * cmd: MESSAGE
+     * direction: 服务端->客户端
+     * 服务器推送消息到客户端
      */
     interface MessageData {
         sendType: 'personal' | 'group',
@@ -49,7 +56,9 @@ declare namespace WebSocketMessage {
         }
     }
     /**
-     * 消息由客户端发往服务器,没有mid字段
+     * cmd: MESSAGE
+     * direction: 客户端->服务端
+     * 服务器接收客户端发送的推送请求,没有mid字段
      */
     interface MessageDataFromClient {
         sendType: 'personal' | 'group',
@@ -59,6 +68,15 @@ declare namespace WebSocketMessage {
             desp: string
         }
     }
+
+    /**
+     * cmd: MESSAGE_REPLY
+     * direction: 服务端->客户端
+     * 接收到客户端的推送请求后返回给客户端的推送情况
+     */
+    interface MessageDataFromClientReply {
+        [name: string]: 'ready' | 'ok' | 'no' | 'wait' | 'timeout'
+    }
 }
 
 interface WebHookClientConfig {
@@ -67,9 +85,18 @@ interface WebHookClientConfig {
     URL: string,
     METHOD: 'GET' | 'POST'
 }
-interface ClientPostMessage {
-    (message: Message): void
+
+/**
+ * 将推送请求传递到总线的回调方法
+ */
+interface PostMessage {
+    (message: Message): Promise<{
+        [name: string]: 'ready' | 'ok' | 'no' | 'wait' | 'timeout'
+    }>
 }
-interface ClientPostMessageCallback {
+/**
+ * 将推送确认信息传递到总线的回调方法
+ */
+interface PostMessageCallback {
     (mid: number): void
 }

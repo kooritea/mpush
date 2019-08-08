@@ -11,10 +11,7 @@ import { parse } from 'url'
 import querystring from 'querystring';
 
 import Message from '../model/Message'
-
-interface RequestCallback {
-    (message: Message): Promise<{ status: number, responseBody: string }>
-}
+import { PostMessage } from '../../typings';
 
 class HttpError extends Error {
     public status: number
@@ -27,12 +24,20 @@ class HttpError extends Error {
 }
 
 export default class HttpServer {
-    constructor(port: number, callback: RequestCallback) {
+    /**
+     * Http服务器,负责解析curl方法发送的推送请求
+     * @param port 监听端口
+     * @param callback [callback]传递解析后的message对象,该方法的返回值将返回给客户端
+     */
+    constructor(port: number, PostMessage: PostMessage) {
         http.createServer(async (request, response) => {
             try {
-                let { status = 200, responseBody = '' } = await callback(await this.verifyRequest(request))
-                response.writeHead(status);
-                response.end(responseBody)
+                let message: Message = await this.verifyRequest(request)
+                PostMessage(message).then((status) => {
+                    response.writeHead(200);
+                    response.write(JSON.stringify(status))
+                    response.end()
+                })
             } catch (e) {
                 response.writeHead(e.status);
                 response.end(e.HttpErrorMsg)
