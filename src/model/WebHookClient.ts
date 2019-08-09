@@ -81,6 +81,7 @@ export default class WebHookClient extends Client {
                 case 'GET':
                     resolve(axios.get(this.url, {
                         params: {
+                            token: config.TOKEN,
                             mid: message.mid,
                             text: message.text,
                             desp: message.desp
@@ -89,6 +90,7 @@ export default class WebHookClient extends Client {
                     break;
                 case 'POST':
                     resolve(axios.post(this.url, {
+                        token: config.TOKEN,
                         mid: message.mid,
                         text: message.text,
                         desp: message.desp
