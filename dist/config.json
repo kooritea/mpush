@@ -1,0 +1,20 @@
+{
+    "HTTP_PORT": 8090,
+    "WEBSOCKET_PORT": 8091,
+    "TOKEN": "test",
+    "WEBHOOK_CLIENTS": [
+        {
+            "NAME": "wh1",
+            "GROUP": "group2",
+            "URL": "http://127.0.0.1:8092/mpush",
+            "METHOD": "GET"
+        },
+        {
+            "NAME": "TEST_WEBHOOK_POST",
+            "URL": "http://127.0.0.1:8092/mpush",
+            "METHOD": "POST"
+        }
+    ],
+    "PUSH_TIMEOUT": 10000,
+    "PUSH_INTERVAL": 10000
+}

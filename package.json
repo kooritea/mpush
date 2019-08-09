@@ -4,7 +4,10 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsc && node src/app.js",
+    "start": "node dist/src/app.js",
+    "test": "node test.js",
+    "build": "tsc --outDir ./dist"
   },
   "repository": {
     "type": "git",
