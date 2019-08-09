@@ -16,5 +16,5 @@
         }
     ],
     "PUSH_TIMEOUT": 10000,
-    "PUSH_INTERVAL": 10000
+    "PUSH_INTERVAL": 5000
 }

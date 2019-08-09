@@ -17,7 +17,7 @@ const clientManager = new ClientManager(config.WEBHOOK_CLIENTS, async (message) 
     })
 }, async (mid: number) => {
     // 确认推送成功的mid
-    console.log(`已确认推送成功: ` + mid)
+    // console.log(`已确认推送成功: ` + mid)
 })
 
 new HttpServer(config.HTTP_PORT, async (message) => {
@@ -35,3 +35,6 @@ new HttpServer(config.HTTP_PORT, async (message) => {
 
 
 new WebSocketServer(config.WEBSOCKET_PORT, config.TOKEN, clientManager)
+
+console.log(`HttpServer listen on ${config.HTTP_PORT}`)
+console.log(`WebSocketServer listen on ${config.WEBSOCKET_PORT}`)
