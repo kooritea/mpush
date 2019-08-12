@@ -28,7 +28,7 @@ git clone https://github.com/kooritea/mpush.git
 * 开发版只需编辑根目录的config.json
 * 直接运行dist目录下编译后的应用则需要运行npm run build覆盖配置或手动编辑  
 
-```json
+```javascript
 {
     "HTTP_PORT":8090, // http服务器监听的地址
     "WEBSOCKET_PORT":8091, // websocket服务器监听的地址
