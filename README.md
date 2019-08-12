@@ -95,5 +95,5 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 #### (2) 通过websocket客户端发送推送消息请求
 这部分会由客户端实现(具体实现方式可以看下面的开发文档),用户只需要选择目标和内容
 
-## 五、wensocket客户端开发
+## 五、websocket客户端开发
 [通信方式](./WSCLIENT_DEV.md)
