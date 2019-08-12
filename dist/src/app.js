@@ -28,7 +28,7 @@ const clientManager = new ClientManager_1.default(_config_1.default.WEBHOOK_CLIE
     });
 }), (mid) => __awaiter(this, void 0, void 0, function* () {
     // 确认推送成功的mid
-    console.log(`已确认推送成功: ` + mid);
+    // console.log(`已确认推送成功: ` + mid)
 }));
 new HttpServer_1.default(_config_1.default.HTTP_PORT, (message) => __awaiter(this, void 0, void 0, function* () {
     return new Promise((resolve) => {
@@ -42,4 +42,6 @@ new HttpServer_1.default(_config_1.default.HTTP_PORT, (message) => __awaiter(thi
     });
 }));
 new WebScocketServer_1.default(_config_1.default.WEBSOCKET_PORT, _config_1.default.TOKEN, clientManager);
+console.log(`HttpServer listen on ${_config_1.default.HTTP_PORT}`);
+console.log(`WebSocketServer listen on ${_config_1.default.WEBSOCKET_PORT}`);
 //# sourceMappingURL=app.js.map
