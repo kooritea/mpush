@@ -91,12 +91,13 @@ group为可选项
 ```
 
 一个websocket包只包含一条消息  
-key | 意义 | 可能的值
--|-|-
-sendType | 单发 \| 组发 | "personal" \| "group"
-target | 目标标识 | 单发的时候是客户端的name,组发的时候是group name
-mid | 标识消息生成的时间,也是消息的唯一标示 | timestamp
-message | 若如果desp或text为空,则该字段为空字符串 | { text: string, desp: string }
+
+|key | 意义 | 可能的值|
+|------|---|---|
+|sendType | 单发 \| 组发 | "personal" \| "group"|
+|target | 目标标识 | 单发的时候是客户端的name,组发的时候是group name|
+|mid | 标识消息生成的时间,也是消息的唯一标示 | timestamp|
+|message | 若如果desp或text为空,则该字段为空字符串 | { text: string, desp: string }|
 
 ### 2、确认消息
 
@@ -158,10 +159,10 @@ message | 若如果desp或text为空,则该字段为空字符串 | { text: strin
 
 data字段会包含所有目标,没有推送目标时为 data:{}
 
-status | 意义
-- | -
-ready | 消息队列中还有未发送的消息,正在等待前面的消息推送完成
-ok | 推送成功
-no | 推送失败,没有找到该客户端(只会出现在一对一推送)
-wait | 正在等待回复确认
-timeout | 首次推送超过时间未回复确认,该消息会等待重发
+|status | 意义|
+|------|---|
+|ready | 消息队列中还有未发送的消息,正在等待前面的消息推送完成|
+|ok | 推送成功|
+|no | 推送失败,没有找到该客户端(只会出现在一对一推送)|
+|wait | 正在等待回复确认|
+|timeout | 首次推送超过时间未回复确认,该消息会等待重发|
