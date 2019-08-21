@@ -83,6 +83,23 @@ npm run dev
 
 收到消息会以http请求的方式发送到指定的服务器，配置参考第二点中WEBHOOK字段
 
+```javascript
+// get
+'/mpush?token=test&sendType=personal&target=wh1&mid=111111111111&text=text10&desp=desp10'
+
+// post
+{
+    token: config.TOKEN,
+    sendType: "personal" | "group",
+    target: name | group name,
+    mid: timestamp,
+    message: {
+        text: string,
+        desp: string
+    }
+}
+```
+
 ### 2、发送消息
 
 #### (1) 使用http请求发送消息，可以使用GET和POST方法,接收text和desp两个字段，text一般用作title，参考server酱
@@ -108,6 +125,28 @@ curl http://HOST:HTTP_PORT/kooritea.send?text=hello&desp=world
 ```bash
 curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 ```
+---
+
+```javascript
+// response
+{
+    cmd: 'MESSAGE_REPLY',
+    data: {
+        "client1 name": "ready",
+        "client2 name": "ok",
+        "client3 name": "no",
+        "client4 name": "wait",
+        "client5 name": "timeout",
+    }
+}
+```
+status | 意义
+- | -
+ready | 消息队列中还有未发送的消息,正在等待前面的消息推送完成
+ok | 推送成功
+no | 推送失败,没有找到该客户端(只会出现在一对一推送)
+wait | 正在等待回复确认
+timeout | 首次推送超过时间未回复确认,正在等待重发
 
 注意: 假如该消息目标未进行第一次连接或未在config定义wenhook,则会默默失效
 

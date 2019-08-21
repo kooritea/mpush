@@ -10,11 +10,11 @@
             "METHOD": "GET"
         },
         {
-            "NAME": "TEST_WEBHOOK_POST",
+            "NAME": "wh2",
             "URL": "http://127.0.0.1:8092/mpush",
             "METHOD": "POST"
         }
     ],
-    "PUSH_TIMEOUT": 10000,
-    "PUSH_INTERVAL": 5000
+    "PUSH_TIMEOUT": 5000,
+    "PUSH_INTERVAL": 1000
 }
