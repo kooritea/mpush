@@ -66,8 +66,8 @@ export default class WebSocketServer {
                         connection.send(this.encode({
                             cmd: 'AUTH',
                             data: {
-                                code: 403,
-                                msg: 'Not Auth'
+                                code: 401,
+                                msg: 'Need Auth'
                             }
                         }))
                     }
