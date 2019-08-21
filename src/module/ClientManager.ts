@@ -102,6 +102,9 @@ export default class ClientManager {
             }
         }
         if (!hasClient) {
+            if (message.sendType === 'personal') {
+                message.setFailedClient(message.target)
+            }
             message.emit('PushComplete', message.getStatus())
         }
     }

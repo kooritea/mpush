@@ -44,6 +44,15 @@ export default class Message extends EventEmitter {
     }
 
     /**
+     * 设置推送失败的客户端
+     * 只会用于一对一推送时
+     * @param name 
+     */
+    public setFailedClient(name: string): void {
+        this.status[name] = 'no'
+    }
+
+    /**
      * 改变该消息推送目标的接收状态
      * @param client 
      * @param status 
