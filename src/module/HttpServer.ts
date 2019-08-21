@@ -35,11 +35,18 @@ export default class HttpServer {
                 let message: Message = await this.verifyRequest(request)
                 PostMessage(message).then((status) => {
                     response.writeHead(200);
-                    response.write(JSON.stringify(status))
+                    response.write(JSON.stringify({
+                        cmd: 'MESSAGE_REPLY',
+                        data: status
+                    }))
                     response.end()
                 })
             } catch (e) {
-                response.writeHead(e.status);
+                response.writeHead(200);
+                response.write(JSON.stringify({
+                    cmd: 'MESSAGE_REPLY_ERROR',
+                    data: e.message
+                }))
                 response.end(e.HttpErrorMsg)
             }
 
