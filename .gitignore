@@ -1,4 +1,4 @@
 node_modules/
 *.js
 *.map
-!dist/**/*.js
+dist/
