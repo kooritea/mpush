@@ -80,7 +80,11 @@ group为可选项
     cmd: 'MESSAGE',
     data: {
         sendType: "personal" | "group",
-        target: string,
+        target: name | group name,
+        from: {
+            method: 'websocket' | 'curl',
+            name: name | 'anonymous'
+        },
         mid: timestamp,
         message: {
             text: string,
@@ -129,7 +133,7 @@ group为可选项
     cmd: 'MESSAGE',
     data: {
         sendType: "personal" | "group",
-        target: string,
+        target: name | group name,
         message: {
             text: string,
             desp: string
@@ -138,7 +142,7 @@ group为可选项
 }
 ```
 
-和接收消息的结构基本相同,只是没有mid字段
+和接收消息的结构基本相同,只是没有mid和from字段
 
 ### 2、推送结果
 

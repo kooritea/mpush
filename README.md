@@ -85,13 +85,17 @@ npm run dev
 
 ```javascript
 // get
-'/mpush?token=test&sendType=personal&target=wh1&mid=111111111111&text=text10&desp=desp10'
+'/mpush?token=test&sendType=personal&target=wh1&fromMethod=websock&fromName=anonymous&mid=111111111111&text=text10&desp=desp10'
 
 // post
 {
     token: config.TOKEN,
     sendType: "personal" | "group",
     target: name | group name,
+    from: {
+        method: 'websocket' | 'curl',
+        name: name | 'anonymous'
+    },
     mid: timestamp,
     message: {
         text: string,

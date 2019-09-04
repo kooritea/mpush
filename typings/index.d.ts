@@ -49,6 +49,7 @@ declare namespace WebSocketMessage {
     interface MessageData {
         sendType: 'personal' | 'group',
         target: string,
+        from: MessageType.from
         mid: number,
         message: {
             text: string,
@@ -99,4 +100,11 @@ interface PostMessage {
  */
 interface PostMessageCallback {
     (mid: number): void
+}
+
+declare namespace MessageType {
+    interface from {
+        method: "webscoket" | "curl" | '',
+        name: string
+    }
 }

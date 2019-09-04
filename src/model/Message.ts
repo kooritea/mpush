@@ -9,11 +9,12 @@
 import EventEmitter from 'events'
 import Client from './Client';
 import config from "../_config";
-import { WebSocketMessage } from "../../typings";
+import { WebSocketMessage, MessageType } from "../../typings";
 
 export default class Message extends EventEmitter {
     public sendType: 'personal' | 'group'
     public target: string
+    public from: MessageType.from
     public text: string
     public desp: string
     public readonly mid: number
@@ -22,10 +23,11 @@ export default class Message extends EventEmitter {
     }
     // 记录是否所有客户端的状态都更新了
 
-    constructor(sendType: 'personal' | 'group' = 'personal', target: string = '', text: string = '', desp: string = '') {
+    constructor(sendType: 'personal' | 'group' = 'personal', target: string = '', from: MessageType.from = { method: '', name: '' }, text: string = '', desp: string = '') {
         super()
         this.sendType = sendType
         this.target = target
+        this.from = from
         this.text = text
         this.desp = desp
         this.mid = (new Date()).valueOf()
@@ -90,6 +92,8 @@ export default class Message extends EventEmitter {
             token: config.TOKEN,
             sendType: this.sendType,
             target: this.target,
+            fromMethod: this.from.method,
+            fromName: this.from.name,
             mid: this.mid,
             text: this.text,
             desp: this.desp
@@ -104,6 +108,7 @@ export default class Message extends EventEmitter {
             token: config.TOKEN,
             sendType: this.sendType,
             target: this.target,
+            from: this.from,
             mid: this.mid,
             message: {
                 text: this.text,
@@ -119,6 +124,7 @@ export default class Message extends EventEmitter {
         return {
             sendType: this.sendType,
             target: this.target,
+            from: this.from,
             mid: this.mid,
             message: {
                 text: this.text,

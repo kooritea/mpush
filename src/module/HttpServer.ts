@@ -129,6 +129,11 @@ export default class HttpServer {
             throw new HttpError(400, "Text And Desp Not Found")
         }
 
+        message.from = {
+            method: 'curl',
+            name: 'anonymous'
+        }
+
         return message
     }
 }

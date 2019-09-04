@@ -97,7 +97,7 @@ export default class WebSocketClient extends Client {
     private WebSocketClientMessage(packet: WebSocketMessage.Packet): void {
         if (packet.cmd === 'MESSAGE') {
             const data: WebSocketMessage.MessageDataFromClient = <WebSocketMessage.MessageDataFromClient>packet.data
-            const message = new Message(data.sendType, data.target, data.message.text, data.message.desp)
+            const message = new Message(data.sendType, data.target, { method: 'webscoket', name: this.name }, data.message.text, data.message.desp)
             // 交给总线选择推送目标并推送
             // 异步返回推送结果
             this.postMessage(message).then((status) => {
