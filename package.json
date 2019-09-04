@@ -7,7 +7,7 @@
     "dev": "tsc && node src/app.js",
     "start": "node dist/src/app.js",
     "test": "node test.js",
-    "build": "rm -rf ./dist && tsc --outDir ./dist && cp package.json ./dist/package.json"
+    "build": "rm -rf ./dist && tsc --sourceMap false --outDir ./dist && cp package.json ./dist/package.json && zip -r mpush.zip ./dist"
   },
   "repository": {
     "type": "git",
