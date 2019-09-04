@@ -31,6 +31,7 @@ export default class HttpServer {
      */
     constructor(port: number, PostMessage: PostMessage) {
         http.createServer(async (request, response) => {
+            response.setHeader('content-type', 'application/json; charset=utf-8')
             try {
                 let message: Message = await this.verifyRequest(request)
                 PostMessage(message).then((status) => {
