@@ -79,27 +79,17 @@ export default class WebHookClient extends Client {
         return (new Promise((resolve) => {
             switch (this.method) {
                 case 'GET':
-                    resolve(axios.get(this.url, {
-                        params: {
-                            token: config.TOKEN,
-                            sendType: message.sendType,
-                            target: message.target,
-                            mid: message.mid,
-                            text: message.text,
-                            desp: message.desp
-                        }
+                    resolve(axios({
+                        method: 'GET',
+                        url: this.url,
+                        params: message.toCurlGetParams()
                     }))
                     break;
                 case 'POST':
-                    resolve(axios.post(this.url, {
-                        token: config.TOKEN,
-                        sendType: message.sendType,
-                        target: message.target,
-                        mid: message.mid,
-                        message: {
-                            text: message.text,
-                            desp: message.desp
-                        }
+                    resolve(axios({
+                        method: 'POST',
+                        url: this.url,
+                        data: message.toCurlPostData()
                     }))
                     break;
             }

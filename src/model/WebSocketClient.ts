@@ -66,15 +66,7 @@ export default class WebSocketClient extends Client {
             message.setClientStatus(this, 'wait')
             this.send({
                 cmd: 'MESSAGE',
-                data: {
-                    sendType: message.sendType,
-                    target: message.target,
-                    mid: message.mid,
-                    message: {
-                        text: message.text,
-                        desp: message.desp
-                    }
-                }
+                data: message.toWebSocketData()
             })
             this.SendTimer = {
                 mid: message.mid,

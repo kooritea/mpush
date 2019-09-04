@@ -8,6 +8,8 @@
 
 import EventEmitter from 'events'
 import Client from './Client';
+import config from "../_config";
+import { WebSocketMessage } from "../../typings";
 
 export default class Message extends EventEmitter {
     public sendType: 'personal' | 'group'
@@ -79,4 +81,51 @@ export default class Message extends EventEmitter {
     public getStatus(): { [name: string]: 'ready' | 'ok' | 'no' | 'wait' | 'timeout' } {
         return this.status
     }
+
+    /**
+     * 返回用于webhook GET方法的数据
+     */
+    public toCurlGetParams(): object {
+        return {
+            token: config.TOKEN,
+            sendType: this.sendType,
+            target: this.target,
+            mid: this.mid,
+            text: this.text,
+            desp: this.desp
+        }
+    }
+
+    /**
+     * 返回用于webhook Post方法的数据
+     */
+    public toCurlPostData(): object {
+        return {
+            token: config.TOKEN,
+            sendType: this.sendType,
+            target: this.target,
+            mid: this.mid,
+            message: {
+                text: this.text,
+                desp: this.desp
+            }
+        }
+    }
+
+    /**
+     * 返回用于ws方式发送的数据
+     */
+    public toWebSocketData(): WebSocketMessage.MessageData {
+        return {
+            sendType: this.sendType,
+            target: this.target,
+            mid: this.mid,
+            message: {
+                text: this.text,
+                desp: this.desp
+            }
+        }
+    }
+
+
 }
