@@ -32,7 +32,7 @@ git clone https://github.com/kooritea/mpush.git
 {
     "HTTP_PORT":8090, // http服务器监听的地址
     "WEBSOCKET_PORT":8091, // websocket服务器监听的地址
-    "TOKEN": "test", // 客户端接入需要与这个token匹配,webkooh会带上这个token用于接收方校验
+    "TOKEN": "test", // 客户端接入需要与这个token匹配,webhook会带上这个token用于接收方校验
     "WEBHOOK_CLIENTS": [ // webhook配置,不使用可以留空(不要删除中括号[])
         {
             "NAME": "wh1", // 唯一名称,不应该与其他任何客户端同名,否则只有先接入的客户端能接收到消息
