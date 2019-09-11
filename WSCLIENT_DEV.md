@@ -76,6 +76,7 @@ group为可选项
 
 ```javascript
 // server -> client
+// 额外信息会全部放到message.extra字段,没有额外信息字段的时候extra为空对象
 {
     cmd: 'MESSAGE',
     data: {
@@ -88,7 +89,13 @@ group为可选项
         mid: timestamp,
         message: {
             text: string,
-            desp: string
+            desp: string,
+            extra: {
+                a: 233,
+                b: {
+                    hello: 'world'
+                }
+            }
         }
     }
 }
@@ -101,7 +108,7 @@ group为可选项
 |sendType | 单发 \| 组发 | "personal" \| "group"|
 |target | 目标标识 | 单发的时候是客户端的name,组发的时候是group name|
 |mid | 消息生成的时间,也是消息的唯一标识 | timestamp|
-|message | 若如果desp或text为空,则该字段为空字符串 | { text: string, desp: string }|
+|message | 若如果desp或text为空,则该字段为空字符串 | { text: string, desp: string, extra: { [name:string]: any }} |
 
 ### 2、确认消息
 
@@ -129,6 +136,8 @@ group为可选项
 
 ```javascript
 // client -> server
+// 额外信息放进message.extra才能被正确读取
+// 没有额外信息的时候建议传入空对象
 {
     cmd: 'MESSAGE',
     data: {
@@ -136,7 +145,8 @@ group为可选项
         target: name | group name,
         message: {
             text: string,
-            desp: string
+            desp: string,
+            extra: {}
         }
     }
 }

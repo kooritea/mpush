@@ -53,7 +53,7 @@ export default class HttpServer {
 
         }).listen(port);
     }
-    private bodyparser(headers: http.IncomingHttpHeaders, raw: string): { text?: string, desp?: string } {
+    private bodyparser(headers: http.IncomingHttpHeaders, raw: string): { [name: string]: any } {
         let result = {}
         let contentType = headers['content-type']
         try {
@@ -91,6 +91,10 @@ export default class HttpServer {
             if (query.desp) {
                 message.desp = decodeURI(<string>query.desp)
             }
+            let extra = JSON.parse(JSON.stringify(query))
+            delete extra.text
+            delete extra.desp
+            message.extra = extra
         } else if (request.method === 'POST') {
             let raw: string = await new Promise((resolve) => {
                 let raw = ""
@@ -103,11 +107,15 @@ export default class HttpServer {
             })
             const body = this.bodyparser(request.headers, raw)
             if (body.text) {
-                message.text = decodeURI(<string>body.text)
+                message.text = body.text
             }
             if (body.desp) {
-                message.desp = decodeURI(<string>body.desp)
+                message.desp = body.desp
             }
+            let extra = JSON.parse(JSON.stringify(body))
+            delete extra.text
+            delete extra.desp
+            message.extra = extra
         }
 
         if (!message.verify()) {

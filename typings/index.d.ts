@@ -53,7 +53,10 @@ declare namespace WebSocketMessage {
         mid: number,
         message: {
             text: string,
-            desp: string
+            desp: string,
+            extra: {
+                [name: string]: any
+            }
         }
     }
     /**
@@ -66,7 +69,10 @@ declare namespace WebSocketMessage {
         target: string,
         message: {
             text: string,
-            desp: string
+            desp: string,
+            extra: {
+                [name: string]: any
+            }
         }
     }
 

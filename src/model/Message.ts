@@ -17,23 +17,27 @@ export default class Message extends EventEmitter {
     public from: MessageType.from
     public text: string
     public desp: string
+    public extra: {
+        [name: string]: any
+    }
     public readonly mid: number
     private readonly status: {
         [name: string]: 'ready' | 'ok' | 'no' | 'wait' | 'timeout'
     }
     // 记录是否所有客户端的状态都更新了
 
-    constructor(sendType: 'personal' | 'group' = 'personal', target: string = '', from: MessageType.from = { method: '', name: '' }, text: string = '', desp: string = '') {
+    constructor(sendType: 'personal' | 'group' = 'personal', target: string = '', from: MessageType.from = { method: '', name: '' }, text: string = '', desp: string = '', extra: { [name: string]: any } = {}) {
         super()
         this.sendType = sendType
         this.target = target
         this.from = from
         this.text = text
         this.desp = desp
+        this.extra = extra
         this.mid = (new Date()).valueOf()
         this.status = {}
-
     }
+
     public verify(): boolean {
         return !!this.text || !!this.desp
     }
@@ -88,7 +92,10 @@ export default class Message extends EventEmitter {
      * 返回用于webhook GET方法的数据
      */
     public toCurlGetParams(): object {
-        return {
+        const result = {}
+        // 将extra平铺到返回的对象中
+        // 后面的优先级更高 相同字段会被后面覆盖
+        Object.assign(result, this.extra, {
             token: config.TOKEN,
             sendType: this.sendType,
             target: this.target,
@@ -96,8 +103,9 @@ export default class Message extends EventEmitter {
             fromName: this.from.name,
             mid: this.mid,
             text: this.text,
-            desp: this.desp
-        }
+            desp: this.desp,
+        })
+        return result
     }
 
     /**
@@ -112,7 +120,8 @@ export default class Message extends EventEmitter {
             mid: this.mid,
             message: {
                 text: this.text,
-                desp: this.desp
+                desp: this.desp,
+                extra: this.extra
             }
         }
     }
@@ -128,7 +137,8 @@ export default class Message extends EventEmitter {
             mid: this.mid,
             message: {
                 text: this.text,
-                desp: this.desp
+                desp: this.desp,
+                extra: this.extra
             }
         }
     }

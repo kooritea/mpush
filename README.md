@@ -83,11 +83,18 @@ npm run dev
 
 收到消息会以http请求的方式发送到指定的服务器，配置参考第二点中WEBHOOK字段
 
+`额外信息(extra)是指指定的字段外的字段`
+`额外信息可以配合客户端实现例如: 优先级,scheme等功能`
+
 ```javascript
 // get
-'/mpush?token=test&sendType=personal&target=wh1&fromMethod=websock&fromName=anonymous&mid=111111111111&text=text10&desp=desp10'
+// 所有额外信息都会平铺到url上,但额外信息如果是多层对象则不会继续平铺,例如下面的a字段和b字段,b是一个编码的JSON字符串{hello:'world'}
+
+'/mpush?token=test&sendType=personal&target=wh1&fromMethod=websock&fromName=anonymous&mid=111111111111&text=text10&desp=desp10&a=233&b=%7B%22hello%22:%22world%22%7D'
+
 
 // post
+// 这里的额外信息会全部放到message.extra字段,没有额外信息字段的时候extra为空对象
 {
     token: config.TOKEN,
     sendType: "personal" | "group",
@@ -99,19 +106,25 @@ npm run dev
     mid: timestamp,
     message: {
         text: string,
-        desp: string
+        desp: string,
+        extra: {
+            a: 233,
+            b: {
+                hello: 'world'
+            }
+        }
     }
 }
 ```
 
 ### 2、发送消息
 
-#### (1) 使用http请求发送消息，可以使用GET和POST方法,接收text和desp两个字段，text一般用作title，参考server酱
+#### (1) 使用http请求发送消息，可以使用GET和POST方法,接收text和desp两个字段，text一般用作title，参考server酱,除了text和desp参数,其他参数都会被放到extra字段中返回给客户端
 
 格式
 
 ```bash
-curl http://${HOST}:${HTTP_PORT}/${name}.${type:'send' | 'group'}?text=${text}&desp=${desp}
+curl http://${HOST}:${HTTP_PORT}/${name}.${type:'send' | 'group'}?text=${text}&desp=${desp}&a=233&b=%7B%22hello%22:%22world%22%7D
 ```
 
 其中`type`为`send`的时候name为客户端的name  
