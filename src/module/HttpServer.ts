@@ -85,19 +85,11 @@ export default class HttpServer {
         }
 
         if (request.method === 'GET') {
-            if (typeof query.text === 'string') {
+            if (query.text) {
                 message.text = decodeURI(<string>query.text)
-            } else {
-                if (query.text) {
-                    throw new HttpError(400, "Text Is Not A String")
-                }
             }
-            if (typeof query.desp === 'string') {
+            if (query.desp) {
                 message.desp = decodeURI(<string>query.desp)
-            } else {
-                if (query.desp) {
-                    throw new HttpError(400, "Desp Is Not A String")
-                }
             }
         } else if (request.method === 'POST') {
             let raw: string = await new Promise((resolve) => {
@@ -110,19 +102,11 @@ export default class HttpServer {
                 })
             })
             const body = this.bodyparser(request.headers, raw)
-            if (typeof body.text === 'string') {
+            if (body.text) {
                 message.text = decodeURI(<string>body.text)
-            } else {
-                if (body.text) {
-                    throw new HttpError(400, "Text Is Not A String")
-                }
             }
-            if (typeof body.desp === 'string') {
+            if (body.desp) {
                 message.desp = decodeURI(<string>body.desp)
-            } else {
-                if (body.desp) {
-                    throw new HttpError(400, "Desp Is Not A String")
-                }
             }
         }
 
