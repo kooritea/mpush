@@ -4,10 +4,7 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "dev": "tsc && node src/app.js",
-    "start": "node mpush/src/app.js",
-    "test": "node test.js",
-    "build": "rm -rf ./dist && tsc --sourceMap false --outDir ./dist && cp package-prod.json ./dist/package.json && cd ./dist && zip -r ../mpush.zip ./* && cd -"
+    "start": "node src/app.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +16,6 @@
     "url": "https://github.com/kooritea/mpush/issues"
   },
   "homepage": "https://github.com/kooritea/mpush#readme",
-  "devDependencies": {
-    "@types/node": "^12.6.8",
-    "@types/ws": "^6.0.1",
-    "typescript": "^3.6.3"
-  },
   "dependencies": {
     "axios": "^0.19.0",
     "ws": "^7.1.1"
