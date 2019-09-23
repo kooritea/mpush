@@ -39,7 +39,7 @@ declare namespace WebSocketMessage {
      * 客户端收到推送消息返回的推送确认
      */
     interface MessageCallbackData {
-        mid: number
+        mid: string
     }
     /**
      * cmd: MESSAGE
@@ -50,7 +50,7 @@ declare namespace WebSocketMessage {
         sendType: 'personal' | 'group',
         target: string,
         from: MessageType.from
-        mid: number,
+        mid: string,
         message: {
             text: string,
             desp: string,
@@ -105,7 +105,7 @@ interface PostMessage {
  * 将推送确认信息传递到总线的回调方法
  */
 interface PostMessageCallback {
-    (mid: number): void
+    (mid: string): void
 }
 
 declare namespace MessageType {

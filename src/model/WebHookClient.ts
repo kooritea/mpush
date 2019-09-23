@@ -52,10 +52,10 @@ export default class WebHookClient extends Client {
             message.setClientStatus(this, 'wait')
             this.curl(message).then((response: any) => {
                 if (/^[0-9]+$/.test(response.data)) {
-                    const mid = Number(response.data)
+                    const mid = response.data
                     this.clearMessage(mid)
                     message.setClientStatus(this, 'ok')
-                    this.postMessageCallback(Number(response.data))
+                    this.postMessageCallback(mid)
                     this.sendLock = false
                     this.autoPush()
                 } else {
@@ -100,7 +100,7 @@ export default class WebHookClient extends Client {
      * 删除已确认送达的消息
      * @param mid
      */
-    private clearMessage(mid: number): void {
+    private clearMessage(mid: string): void {
         for (let index = 0; index < this.messages.length; index++) {
             if (this.messages[index].mid === mid) {
                 this.messages.splice(index, 1)

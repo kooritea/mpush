@@ -20,7 +20,7 @@ export default class Message extends EventEmitter {
     public extra: {
         [name: string]: any
     }
-    public readonly mid: number
+    public readonly mid: string
     private readonly status: {
         [name: string]: 'ready' | 'ok' | 'no' | 'wait' | 'timeout'
     }
@@ -34,7 +34,7 @@ export default class Message extends EventEmitter {
         this.text = text
         this.desp = desp
         this.extra = extra
-        this.mid = (new Date()).valueOf()
+        this.mid = String((new Date()).valueOf())
         this.status = {}
     }
 

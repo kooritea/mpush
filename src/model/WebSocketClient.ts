@@ -16,7 +16,7 @@ export default class WebSocketClient extends Client {
     private postMessageCallback: PostMessageCallback
     private readonly messages: Message[]
     private SendTimer: {
-        mid: number,
+        mid: string,
         timer: NodeJS.Timer
     } | null
 
@@ -123,7 +123,7 @@ export default class WebSocketClient extends Client {
      * 删除等待队列中已确认送达的消息
      * @param mid
      */
-    private clearMessage(mid: number): void {
+    private clearMessage(mid: string): void {
         for (let index = 0; index < this.messages.length; index++) {
             if (this.messages[index].mid === mid) {
                 this.messages[index].setClientStatus(this, 'ok')

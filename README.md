@@ -118,6 +118,14 @@ npm run dev
 }
 ```
 
+接收到webhook请求后 需要返回mid,不需要json格式,直接响应mid字符串
+
+```javascript
+GET 
+-> mid
+
+```
+
 ### 2、发送消息
 
 #### (1) 使用http请求发送消息，可以使用GET和POST方法,接收text和desp两个字段，text一般用作title，参考server酱,除了text和desp参数,其他参数都会被放到extra字段中返回给客户端
