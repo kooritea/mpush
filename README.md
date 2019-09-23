@@ -48,6 +48,7 @@ git clone https://github.com/kooritea/mpush.git
     ],
     "PUSH_TIMEOUT": 10000, // 等待回复确认的时间,超时未确认将会重发消息
     "PUSH_INTERVAL": 5000, // 重试间隔 推送失败或异常等待多少时间再重发
+    "DEBUG": false, // 打印更多信息
 }
 ```
 

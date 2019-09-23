@@ -7,7 +7,8 @@ interface Config {
     TOKEN: string,
     WEBHOOK_CLIENTS: WebHookClientConfig[],
     PUSH_TIMEOUT: number,
-    PUSH_INTERVAL: number
+    PUSH_INTERVAL: number,
+    DEBUG: boolean
 }
 
 export default <Config>config

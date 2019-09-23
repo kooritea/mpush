@@ -9,6 +9,7 @@
 import ClientManager from "./ClientManager";
 import { Server, Connection } from 'ws'
 import { WebSocketMessage } from "../../typings";
+import Logger from './Logger'
 
 export default class WebSocketServer {
 
@@ -32,6 +33,7 @@ export default class WebSocketServer {
         connection.on('message', (originData: string) => {
             try {
                 const packet: WebSocketMessage.Packet = this.decode(originData)
+                Logger.debug(packet)
                 if (isAuth && packet.cmd !== 'AUTH') {
                     // 外部监听decodeMessage获取解码后的packet
                     connection.emit('decodeMessage', packet)

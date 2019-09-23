@@ -1,6 +1,6 @@
 {
-    "HTTP_PORT":8090,
-    "WEBSOCKET_PORT":8091,
+    "HTTP_PORT": 8090,
+    "WEBSOCKET_PORT": 8091,
     "TOKEN": "test",
     "WEBHOOK_CLIENTS": [
         {
@@ -16,5 +16,6 @@
         }
     ],
     "PUSH_TIMEOUT": 5000,
-    "PUSH_INTERVAL": 1000
+    "PUSH_INTERVAL": 1000,
+    "DEBUG": false
 }
