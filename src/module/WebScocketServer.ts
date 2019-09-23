@@ -17,7 +17,7 @@ export default class WebSocketServer {
     private readonly server: Server
     private readonly clientManager: ClientManager
 
-    constructor(port: number = 2245, token: string, clientManager: ClientManager) {
+    constructor(port: number, token: string, clientManager: ClientManager) {
         this.token = token
         this.server = new Server({ port })
         this.clientManager = clientManager
@@ -75,7 +75,8 @@ export default class WebSocketServer {
                     }
                 }
             } catch (e) {
-                console.error(e)
+                Logger.error(e)
+                Logger.debug(originData)
             }
         })
         connection.on('ping', () => {
