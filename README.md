@@ -1,11 +1,20 @@
 # Mpush 2.0
+
+## 功能
+mpush是一套致力于用最简单,最快速的方式把消息从任何地方推送到指定的人的终端的系统,就像[server酱](http://sc.ftqq.com/3.version)一样  
+只不过接收消息的不是微信而是任何可以建立websocket的客户端,就像下一点提到的安卓客户端,又或者是http服务器(webhook方式)  
+
+## 安卓客户端仓库
+[mpush-android-client(2.x)](https://github.com/kooritea/mpush-android-client/tree/2.x)
+
+- 已经可以使用,功能正在完善中 
+- 2.x版本mpush需要配合使用2.x版本的mpush-android-client
+
 ## 新特性
 - 使用typescript重新编写
 - 新增一对多按组推送
 - 新增webhook的接入方式
 - 新增websocket客户端双向传递消息
-
-### 注意,和1.0版本的客户端不通用,适配2.0的客户端还在开发中 :)
 
 ## 一、安装
 - ### 稳定版  
