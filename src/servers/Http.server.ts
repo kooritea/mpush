@@ -87,9 +87,11 @@ export class HttpServer {
     message: Message,
     status: TypeObject<MessageStatus>
   }): void {
-    const response = this.messageMap.get(payload.message)
-    response?.setHeader('content-type', 'application/json; charset=utf-8')
-    response?.end(JSON.stringify(new MsgReplyServerSocketPacket(payload.status)))
+    try {
+      const response = this.messageMap.get(payload.message)
+      response?.setHeader('content-type', 'application/json; charset=utf-8')
+      response?.end(JSON.stringify(new MsgReplyServerSocketPacket(payload.message.mid, payload.status)))
+    } catch (e) { }
     this.messageMap.delete(payload.message)
   }
   private verifyToken(request: Http.IncomingMessage): void {

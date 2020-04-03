@@ -5,20 +5,21 @@ import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, 
 import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
 import { Ebus } from "../Ebus";
+import { Client } from "../model/Client";
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
 
   private server: Server
-  private nameMap: Map<string, {
-    client: Client,
-    group: string
-  }> = new Map()
+  private nameMap: Map<string, SocketClient> = new Map()
   /**
    * 记录发送消息的Client和Message的对应关系  
    * 用于message-end事件订阅中查找消息来源并发送反馈
    */
-  private messageMap: Map<Message, Client> = new Map()
+  private messageMap: Map<Message, {
+    client: SocketClient,
+    timer: NodeJS.Timeout
+  }> = new Map()
   constructor(
     private readonly context: Context
   ) {
@@ -39,16 +40,12 @@ export class WebsocketServer {
         socket.close()
       }, this.context.config.websocket.authTimeout);
       socket.onmessage = (event: MessageEvent) => {
-        this.onmessage(event.target, event.data, name)
+        this.onSocketMessage(event.target, event.data, name)
       }
       socket.on('auth-success', (event: AuthClientSocketPacket['data']) => {
         // socket认证成功后,event是认证的name
         name = event.name
         clearInterval(timer)
-        this.context.ebus.emit('user-register', {
-          name: event.name,
-          group: event.group
-        })
       })
       socket.on('ping', () => {
         socket.pong()
@@ -74,14 +71,14 @@ export class WebsocketServer {
    */
   private onMessageStart(message: Message): void {
     if (message.sendType === 'personal') {
-      const client = this.nameMap.get(message.target)?.client
+      const client = this.nameMap.get(message.target)
       if (client) {
         client.sendMessage(message)
       }
     } else if (message.sendType === 'group') {
       this.nameMap.forEach((item) => {
         if (item.group === message.target) {
-          item.client.sendMessage(message)
+          item.sendMessage(message)
         }
       })
     }
@@ -96,8 +93,9 @@ export class WebsocketServer {
   private onMessageEnd(message: Message, status: TypeObject<MessageStatus>): void {
     const client = this.messageMap.get(message)
     if (client) {
-      client.sendPacket(new MsgReplyServerSocketPacket(status))
+      client.client.sendPacket(new MsgReplyServerSocketPacket(message.mid, status))
     }
+    this.messageMap.delete(message)
   }
 
   /**
@@ -106,7 +104,7 @@ export class WebsocketServer {
    * @param data 
    * @param name 
    */
-  private onmessage(socket: Socket, data: SocketData, name: string) {
+  private onSocketMessage(socket: Socket, data: SocketData, name: string) {
     try {
       const clientSocketPacket: ClientSocketPacket = Utils.decodeSocketData(data)
       if (name === '' && clientSocketPacket.cmd !== 'AUTH') {
@@ -115,16 +113,16 @@ export class WebsocketServer {
           msg: 'Need Auth'
         })
       }
-      const client = this.nameMap.get(name)?.client
+      const client = this.nameMap.get(name)
       switch (clientSocketPacket.cmd) {
         case 'AUTH':
           this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
           break
         case 'MESSAGE':
-          this.runCmdMessage(<Client>client, name, new MessageClientSocketPacket(clientSocketPacket))
+          this.runCmdMessage(<SocketClient>client, name, new MessageClientSocketPacket(clientSocketPacket))
           break
         case 'MESSAGE_CALLBACK':
-          this.runCmdMgsCb(<Client>client, name, new MgsCbClientSocketPacket(clientSocketPacket))
+          this.runCmdMgsCb(<SocketClient>client, name, new MgsCbClientSocketPacket(clientSocketPacket))
           break
         default:
           throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
@@ -145,27 +143,24 @@ export class WebsocketServer {
         code: 403,
         msg: 'Token invalid'
       })
-    } else if (packet.data.name === '') {
-      throw new AuthServerSocketPacket({
-        code: 403,
-        msg: 'name is required'
-      })
     } else {
-      let client = this.nameMap.get(packet.data.name)?.client
+      let client = this.nameMap.get(packet.data.name)
       if (client) {
         client.updateSocket(socket)
       } else {
-        client = new Client(
+        this.context.messageManager.registerUser(
+          packet.data.name,
+          packet.data.group
+        )
+        client = new SocketClient(
           socket,
           this.context.config.websocket.retryTimeout,
           this.context.ebus,
-          packet.data.name
+          packet.data.name,
+          packet.data.group
         )
       }
-      this.nameMap.set(packet.data.name, {
-        client,
-        group: packet.data.group
-      })
+      this.nameMap.set(packet.data.name, client)
       this.sendMsg(socket, new AuthServerSocketPacket({
         code: 200,
         msg: 'Successful authentication'
@@ -173,7 +168,7 @@ export class WebsocketServer {
       socket.emit('auth-success', packet.data)
     }
   }
-  private runCmdMessage(client: Client, name: string, packet: MessageClientSocketPacket) {
+  private runCmdMessage(client: SocketClient, name: string, packet: MessageClientSocketPacket) {
     const message = new Message({
       sendType: packet.data.sendType,
       target: packet.data.target,
@@ -183,10 +178,18 @@ export class WebsocketServer {
       },
       message: packet.data.message
     })
-    this.messageMap.set(message, client)
+    this.messageMap.set(message, {
+      client: client,
+      timer: setTimeout(() => {
+        this.onMessageEnd(
+          message,
+          this.context.messageManager.getMessageStatus(message.mid)
+        )
+      }, this.context.config.websocket.waitTimeout)
+    })
     this.context.ebus.emit('message-start', message)
   }
-  private runCmdMgsCb(client: Client, name: string, packet: MgsCbClientSocketPacket) {
+  private runCmdMgsCb(client: SocketClient, name: string, packet: MgsCbClientSocketPacket) {
     this.context.ebus.emit('message-client-status', {
       mid: packet.data.mid,
       name,
@@ -205,16 +208,15 @@ export class WebsocketServer {
  * 把socket包装成client  
  * client里面控制消息顺序
  */
-class Client {
-  private readonly messages: Message[] = []
-  private lock: boolean = false
-  private timer: NodeJS.Timeout
+class SocketClient extends Client<Message> {
   constructor(
     private socket: Socket,
-    private retryTimeout: number,
+    retryTimeout: number,
     private ebus: Ebus,
-    private name: string
+    public readonly name: string,
+    public readonly group: string
   ) {
+    super(retryTimeout)
   }
 
   close() {
@@ -222,45 +224,17 @@ class Client {
   }
   updateSocket(socket: Socket) {
     this.socket = socket
-    this.lock = false
-    this.next()
-  }
-  /**
-   * 发送message  
-   * 会进入消息队列排队
-   * @param message 
-   */
-  sendMessage(message: Message): void {
-    this.messages.push(message)
-    this.next()
+    this.unlock()
   }
 
-  /**
-   * 上一条消息已送达确认
-   */
-  comfirm() {
-    this.messages.shift()
-    this.lock = false
-    this.next()
-  }
-  private next() {
-    let message = this.messages[0]
-    if (message && !this.lock) {
-      this.lock = true
-      if (this.retryTimeout > -1) {
-        this.timer = setTimeout(() => {
-          this.lock = false
-          this.next()
-        }, this.retryTimeout)
-      }
-      let data = new MessageServerSocketPacket(message)
-      this.ebus.emit('message-client-status', {
-        mid: message.mid,
-        name: this.name,
-        status: 'wait'
-      })
-      this.sendPacket(data)
-    }
+  send(message: Message) {
+    let data = new MessageServerSocketPacket(message)
+    this.ebus.emit('message-client-status', {
+      mid: message.mid,
+      name: this.name,
+      status: 'wait'
+    })
+    this.sendPacket(data)
   }
   /**
    * 直接发送数据包

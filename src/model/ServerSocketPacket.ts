@@ -31,9 +31,15 @@ export class MessageServerSocketPacket extends ServerSocketPacket {
   }
 }
 export class MsgReplyServerSocketPacket extends ServerSocketPacket {
-  public readonly data: TypeObject<MessageStatus>
-  constructor(status: TypeObject<MessageStatus>) {
+  public readonly data: {
+    mid: string,
+    status: TypeObject<MessageStatus>
+  }
+  constructor(mid: string, status: TypeObject<MessageStatus>) {
     super('MESSAGE_REPLY', status)
-    this.data = status
+    this.data = {
+      mid,
+      status
+    }
   }
 }

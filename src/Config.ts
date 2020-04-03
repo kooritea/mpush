@@ -12,5 +12,10 @@ export const Config = {
     verifyToken: _Config?.websocket?.verifyToken === true || false,
     authTimeout: Math.max(_Config?.websocket?.authTimeout, 100),
     retryTimeout: Math.max(_Config?.websocket?.retryTimeout, 100),
+    waitTimeout: Math.max(_Config?.websocket?.waitTimeout, 500)
+  },
+  webhook: {
+    retryTimeout: Math.max(_Config?.webhook?.retryTimeout, 100),
+    clients: Array.isArray(_Config.webhook.clients) ? _Config.webhook.clients : []
   }
 }

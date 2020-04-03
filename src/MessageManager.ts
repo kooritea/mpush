@@ -1,5 +1,6 @@
 import { Ebus } from "./Ebus";
 import { Message } from "./model/Message.model";
+import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
 
 /**
  * 负责管理一对一消息和多对一消息  
@@ -32,10 +33,6 @@ export class MessageManager {
     })
     this.ebus.on('message-end', ({ message }) => {
       this.onMessageEnd(message)
-    })
-    this.ebus.on('user-register', ({ name, group }) => {
-      console.log(`[user-register]: name: ${name}${group ? ',group: ' + group : ''}`)
-      this.onUserRegister(name, group)
     })
   }
 
@@ -99,16 +96,34 @@ export class MessageManager {
   private onMessageEnd(message: Message) {
     this.midMap.delete(message.mid)
   }
-  private onUserRegister(name: string, group: string) {
-    if (group !== "") {
-      let groupSet = this.groupMap.get(group)
-      if (groupSet) {
-        groupSet.add(name)
-      } else {
-        this.groupMap.set(group, new Set<string>([name]))
+  /**
+   * 重复注册或name为空会抛出AuthServerSocketPacket
+   * @param name 
+   * @param group 
+   */
+  public registerUser(name: string, group: string) {
+    if (this.nameSet.has(name)) {
+      throw new AuthServerSocketPacket({
+        code: 403,
+        msg: `The name [${name}] is already used`
+      })
+    } else if (!name) {
+      throw new AuthServerSocketPacket({
+        code: 403,
+        msg: `name is required`
+      })
+    } else {
+      console.log(`[user-register]: name: ${name}${group ? ',group: ' + group : ''}`)
+      if (group !== "") {
+        let groupSet = this.groupMap.get(group)
+        if (groupSet) {
+          groupSet.add(name)
+        } else {
+          this.groupMap.set(group, new Set<string>([name]))
+        }
       }
+      this.nameSet.add(name)
     }
-    this.nameSet.add(name)
   }
 
   /**
