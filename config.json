@@ -2,10 +2,13 @@
   "token": "test",
   "http": {
     "verifyToken": false,
-    "port": 9093
+    "port": 9093,
+    "waitTimeout": 5000
   },
   "websocket": {
-    "verifyToken": false,
-    "port": 9094
+    "verifyToken": true,
+    "port": 9094,
+    "authTimeout": 3000,
+    "retryTimeout": 3000
   }
 }
