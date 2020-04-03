@@ -16,11 +16,29 @@
     "retryTimeout": 3000,
     "clients": [
       {
-        "NAME": "wh1",
-        "GROUP": "group2",
-        "URL": "http://127.0.0.1:8092/mpush",
-        "METHOD": "GET"
+        "name": "wh1",
+        "group": "group2",
+        "url": "http://127.0.0.1:8089/",
+        "method": "GET",
+        "proxy": {
+          "host": "127.0.0.1",
+          "port": 12333,
+          "auth": {
+            "username": "string",
+            "password": "string"
+          },
+          "protocol": "http"
+        }
       }
-    ]
+    ],
+    "proxy": {
+      "host": "127.0.0.1",
+      "port": 12333,
+      "auth": {
+        "username": "string",
+        "password": "string"
+      },
+      "protocol": "http"
+    }
   }
 }

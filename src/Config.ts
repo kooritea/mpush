@@ -1,4 +1,5 @@
 import * as _Config from '../config.json'
+import { AxiosProxyConfig } from 'axios'
 
 export const Config = {
   token: _Config?.token || "",
@@ -16,6 +17,13 @@ export const Config = {
   },
   webhook: {
     retryTimeout: Math.max(_Config?.webhook?.retryTimeout, 100),
-    clients: Array.isArray(_Config.webhook.clients) ? _Config.webhook.clients : []
+    clients: <Array<{
+      name: string,
+      group: string,
+      url: string,
+      method: string,
+      proxy: AxiosProxyConfig
+    }>>(Array.isArray(_Config.webhook.clients) ? _Config.webhook.clients : []),
+    proxy: <AxiosProxyConfig>_Config.webhook?.proxy
   }
 }

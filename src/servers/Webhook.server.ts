@@ -1,7 +1,7 @@
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
 import { Client } from "../model/Client";
-import Axios, { AxiosInstance, AxiosPromise } from 'axios'
+import Axios, { AxiosInstance, AxiosPromise, AxiosProxyConfig } from 'axios'
 import { MessageServerSocketPacket } from "../model/ServerSocketPacket";
 import { Ebus } from "../Ebus";
 
@@ -15,10 +15,11 @@ export class WebhookServer {
     })
     this.context.config.webhook.clients.forEach((item) => {
       this.registerClient(
-        item.URL,
-        <'GET' | 'POST'>item.METHOD,
-        item.NAME,
-        item.GROUP
+        item.url,
+        <'GET' | 'POST'>item.method,
+        item.name,
+        item.group,
+        item.proxy || this.context.config.webhook.proxy
       )
     })
   }
@@ -38,7 +39,7 @@ export class WebhookServer {
     }
   }
 
-  private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string) {
+  private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string, proxy: AxiosProxyConfig) {
     this.context.messageManager.registerUser(
       name,
       group
@@ -48,6 +49,7 @@ export class WebhookServer {
       method,
       name,
       group,
+      proxy,
       this.context.config.token,
       this.context.config.webhook.retryTimeout,
       this.context.ebus
@@ -63,14 +65,13 @@ class WebhookClient extends Client<Message>{
     private method: 'GET' | 'POST',
     public name: string,
     public group: string,
+    proxy: AxiosProxyConfig,
     private token: string,
     retryTimeout: number,
     private ebus: Ebus
   ) {
     super(retryTimeout)
-    this.axios = Axios.create({
-
-    })
+    this.axios = proxy.host && proxy.port ? Axios.create({ proxy }) : Axios.create()
   }
   protected send(message: Message) {
     this.sendRequest(message).then((response) => {
