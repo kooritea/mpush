@@ -3,7 +3,7 @@
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE'
+  public readonly cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE' | 'REGISTER_FCM' | 'REGISTER_FCM_2'
   public readonly data: any
 
   constructor(json: any) {
@@ -76,3 +76,4 @@ export class MgsCbClientSocketPacket extends ClientSocketPacket {
     }
   }
 }
+

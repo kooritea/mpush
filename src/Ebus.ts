@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 import { Message } from "./model/Message.model";
+import { Client } from "./model/Client";
+import * as WebPush from "web-push"
 
 export class Ebus {
 
@@ -36,6 +38,12 @@ export class Ebus {
     message: Message,
     status: TypeObject<MessageStatus>
   }) => void): void;
+
+  on(event: 'register-fcm', listener: (client: Client<Message>) => void): void;
+  on(event: 'register-fcm-2', listener: (payload: {
+    client: Client<Message>,
+    pushSubscription: WebPush.PushSubscription
+  }) => void): void;
   on(event: string, listener: (payload: any) => void): void {
     this.emitter.on(event, listener)
   }
@@ -49,6 +57,11 @@ export class Ebus {
   emit(event: 'message-end', payload: {
     message: Message,
     status: TypeObject<MessageStatus>
+  }): void;
+  emit(event: 'register-fcm', client: Client<Message>): void;
+  emit(event: 'register-fcm-2', payload: {
+    client: Client<Message>,
+    pushSubscription: WebPush.PushSubscription
   }): void;
   emit(event: string, payload: any): void {
     this.emitter.emit(event, payload)

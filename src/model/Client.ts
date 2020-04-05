@@ -1,3 +1,5 @@
+import { ServerSocketPacket } from "./ServerSocketPacket"
+
 /**
  * 附带消息队列和重试机制的客户端基类  
  * 推送方式由子类实现
@@ -6,18 +8,20 @@ export abstract class Client<T> {
   private readonly messages: T[] = []
   private lock: boolean = false
   private timer: NodeJS.Timeout
-
   /**
    * 
    * @param retryTimeout 重试等待时间,-1时不重试
    */
   constructor(
     private retryTimeout: number,
+    public readonly name: string,
+    public readonly group: string
   ) { }
 
   /**
    * 发送message  
-   * 会进入消息队列排队
+   * 会进入消息队列排队  
+   * 只有有回复的消息类型才可以进入队列发送,否则没有人调用comfirm
    * @param message 
    */
   sendMessage(message: T): void {
@@ -63,6 +67,12 @@ export abstract class Client<T> {
    * @param message 
    */
   protected abstract send(message: T): void
+
+  /**
+   * 直接发送数据包,忽略队列
+   * @param packet 
+   */
+  public abstract sendPacket(packet: ServerSocketPacket): any
 }
 
 interface ClientImp<T> {

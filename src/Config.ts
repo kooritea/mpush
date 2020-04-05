@@ -25,5 +25,9 @@ export const Config = {
       proxy: AxiosProxyConfig
     }>>(Array.isArray(_Config.webhook.clients) ? _Config.webhook.clients : []),
     proxy: <AxiosProxyConfig>_Config.webhook?.proxy
+  },
+  fcm: {
+    serverKey: _Config.fcm.serverKey,
+    proxy: _Config.fcm.proxy
   }
 }

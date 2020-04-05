@@ -45,7 +45,7 @@ export class WebsocketServer {
       socket.on('auth-success', (event: AuthClientSocketPacket['data']) => {
         // socket认证成功后,event是认证的name
         name = event.name
-        clearInterval(timer)
+        clearTimeout(timer)
       })
       socket.on('ping', () => {
         socket.pong()
@@ -77,7 +77,7 @@ export class WebsocketServer {
       }
     } else if (message.sendType === 'group') {
       this.nameMap.forEach((item) => {
-        if (item.group === message.target) {
+        if (item.group && item.group === message.target) {
           item.sendMessage(message)
         }
       })
@@ -123,6 +123,15 @@ export class WebsocketServer {
           break
         case 'MESSAGE_CALLBACK':
           this.runCmdMgsCb(<SocketClient>client, name, new MgsCbClientSocketPacket(clientSocketPacket))
+          break
+        case 'REGISTER_FCM':
+          this.context.ebus.emit('register-fcm', <SocketClient>client)
+          break
+        case 'REGISTER_FCM_2':
+          this.context.ebus.emit('register-fcm-2', {
+            client: <SocketClient>client,
+            pushSubscription: clientSocketPacket.data
+          })
           break
         default:
           throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
@@ -213,10 +222,10 @@ class SocketClient extends Client<Message> {
     private socket: Socket,
     retryTimeout: number,
     private ebus: Ebus,
-    public readonly name: string,
-    public readonly group: string
+    name: string,
+    group: string
   ) {
-    super(retryTimeout)
+    super(retryTimeout, name, group)
   }
 
   close() {
@@ -236,10 +245,6 @@ class SocketClient extends Client<Message> {
     })
     this.sendPacket(data)
   }
-  /**
-   * 直接发送数据包
-   * @param packet 
-   */
   sendPacket(packet: ServerSocketPacket) {
     this.socket.send(Utils.encodeSocketData(packet))
   }

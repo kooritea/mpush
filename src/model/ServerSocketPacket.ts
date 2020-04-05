@@ -6,7 +6,7 @@ import { Message } from "./Message.model"
  */
 export class ServerSocketPacket {
   constructor(
-    public readonly cmd: 'AUTH' | 'MESSAGE_REPLY' | 'MESSAGE' | 'INFO',
+    public readonly cmd: 'AUTH' | 'MESSAGE_REPLY' | 'MESSAGE' | 'INFO' | 'REGISTER_FCM',
     public readonly data: any
   ) { }
 }
@@ -40,6 +40,18 @@ export class MsgReplyServerSocketPacket extends ServerSocketPacket {
     this.data = {
       mid,
       status
+    }
+  }
+}
+
+export class RegisterFcmServerSocketPacket extends ServerSocketPacket {
+  public readonly data: {
+    applicationServerKey: string
+  }
+  constructor(applicationServerKey: string) {
+    super('REGISTER_FCM', applicationServerKey)
+    this.data = {
+      applicationServerKey
     }
   }
 }

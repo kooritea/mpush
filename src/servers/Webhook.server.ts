@@ -2,7 +2,7 @@ import { Context } from "../Context";
 import { Message } from "../model/Message.model";
 import { Client } from "../model/Client";
 import Axios, { AxiosInstance, AxiosPromise, AxiosProxyConfig } from 'axios'
-import { MessageServerSocketPacket } from "../model/ServerSocketPacket";
+import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
 import { Ebus } from "../Ebus";
 
 export class WebhookServer {
@@ -32,7 +32,7 @@ export class WebhookServer {
       }
     } else if (message.sendType === 'group') {
       this.nameMap.forEach((item) => {
-        if (item.group === message.target) {
+        if (item.group && item.group === message.target) {
           item.sendMessage(message)
         }
       })
@@ -63,18 +63,18 @@ class WebhookClient extends Client<Message>{
   constructor(
     private url: string,
     private method: 'GET' | 'POST',
-    public name: string,
-    public group: string,
+    name: string,
+    group: string,
     proxy: AxiosProxyConfig,
     private token: string,
     retryTimeout: number,
     private ebus: Ebus
   ) {
-    super(retryTimeout)
+    super(retryTimeout, name, group)
     this.axios = proxy.host && proxy.port ? Axios.create({ proxy }) : Axios.create()
   }
   protected send(message: Message) {
-    this.sendRequest(message).then((response) => {
+    this.sendPacket(new MessageServerSocketPacket(message)).then((response) => {
       this.ebus.emit('message-client-status', {
         mid: message.mid,
         name: this.name,
@@ -89,16 +89,16 @@ class WebhookClient extends Client<Message>{
       })
     })
   }
-  private sendRequest(message: Message): AxiosPromise {
+  sendPacket(packet: ServerSocketPacket): AxiosPromise {
     if (this.method === 'GET') {
       return this.axios({
         url: this.url,
         method: 'GET',
         params: {
           token: this.token,
-          text: message.message.text,
-          desp: message.message.desp,
-          ...message.message.extra
+          text: packet.data?.message?.text,
+          desp: packet.data?.message?.desp,
+          ...packet.data?.message?.extra
         }
       })
     } else {
@@ -107,7 +107,7 @@ class WebhookClient extends Client<Message>{
         method: 'POST',
         data: {
           token: this.token,
-          ...new MessageServerSocketPacket(message)
+          ...packet
         }
       })
     }

@@ -27,7 +27,9 @@
     "typescript": "^3.6.3"
   },
   "dependencies": {
+    "@types/web-push": "^3.3.0",
     "axios": "^0.19.0",
+    "web-push": "^3.4.3",
     "ws": "^7.1.1"
   }
 }
