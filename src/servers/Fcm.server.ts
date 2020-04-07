@@ -157,19 +157,16 @@ class FcmClient extends Client<Message> {
     super(retryTimeout, name, group)
   }
   protected send(message: Message) {
-    console.log(`[FCM loop send]: ${message.message.text}`)
-    this.ebus.emit('message-client-status', {
-      mid: message.mid,
-      name: this.name,
-      status: 'fcm-wait'
-    })
-    let data = new MessageServerSocketPacket(message)
-    this.sendPacket(data)
-  }
-  sendPacket(packet: MessageServerSocketPacket) {
     if (!this.sendPacketLock) {
       this.sendPacketLock = true
-      WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options).then(() => {
+      console.log(`[FCM loop send]: ${message.message.text}`)
+      this.ebus.emit('message-client-status', {
+        mid: message.mid,
+        name: this.name,
+        status: 'fcm-wait'
+      })
+      let packet = new MessageServerSocketPacket(message)
+      this.sendPacket(packet).then(() => {
         this.ebus.emit('message-client-status', {
           mid: packet.data.mid,
           name: this.name,
@@ -183,5 +180,8 @@ class FcmClient extends Client<Message> {
       })
     }
 
+  }
+  sendPacket(packet: ServerSocketPacket): Promise<WebPush.SendResult> {
+    return WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options)
   }
 }

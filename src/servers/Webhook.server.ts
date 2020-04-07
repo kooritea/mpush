@@ -94,8 +94,10 @@ class WebhookClient extends Client<Message>{
       return this.axios({
         url: this.url,
         method: 'GET',
+        headers: {
+          authorization: this.token
+        },
         params: {
-          token: this.token,
           text: packet.data?.message?.text,
           desp: packet.data?.message?.desp,
           ...packet.data?.message?.extra
@@ -105,10 +107,10 @@ class WebhookClient extends Client<Message>{
       return this.axios({
         url: this.url,
         method: 'POST',
-        data: {
-          token: this.token,
-          ...packet
-        }
+        headers: {
+          authorization: this.token
+        },
+        data: packet
       })
     }
   }
