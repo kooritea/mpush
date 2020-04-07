@@ -5,8 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "tsnd -P ./tsconfig.json --respawn ./src/main.ts",
-    "build": "tsc",
-    "start": "node mpush/src/main.js",
+    "build": "rm -rf ./dist && tsc --build ./tsconfig.prod.json && cp ./package.json ./dist/package.json",
+    "start": "node src/main.js",
     "test": "node test.js"
   },
   "repository": {
