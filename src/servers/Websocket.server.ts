@@ -52,7 +52,6 @@ export class WebsocketServer {
         socket.pong()
       })
       socket.on('close', () => {
-        console.log(`[${name}]: close`)
         socket.removeAllListeners()
         socket.close()
       })
@@ -114,29 +113,36 @@ export class WebsocketServer {
           msg: 'Need Auth'
         })
       }
-      const client = this.nameMap.get(name)
-      switch (clientSocketPacket.cmd) {
-        case 'AUTH':
-          this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
-          break
-        case 'MESSAGE':
-          this.runCmdMessage(<SocketClient>client, name, new MessageClientSocketPacket(clientSocketPacket))
-          break
-        case 'MESSAGE_CALLBACK':
-          this.runCmdMgsCb(<SocketClient>client, name, new MgsCbClientSocketPacket(clientSocketPacket))
-          break
-        case 'REGISTER_FCM':
-          this.context.ebus.emit('register-fcm', <SocketClient>client)
-          break
-        case 'REGISTER_FCM_2':
-          this.context.ebus.emit('register-fcm-2', {
-            client: <SocketClient>client,
-            pushSubscription: clientSocketPacket.data
-          })
-          break
-        default:
-          throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
+      if (clientSocketPacket.cmd === 'AUTH') {
+        this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
+      } else {
+        const client = this.nameMap.get(name)
+        if (client) {
+          switch (clientSocketPacket.cmd) {
+            case 'MESSAGE':
+              this.runCmdMessage(client, name, new MessageClientSocketPacket(clientSocketPacket))
+              break
+            case 'MESSAGE_CALLBACK':
+              this.runCmdMgsCb(client, name, new MgsCbClientSocketPacket(clientSocketPacket))
+              break
+            case 'REGISTER_FCM':
+              this.context.ebus.emit('register-fcm', client)
+              break
+            case 'REGISTER_FCM_2':
+              this.context.ebus.emit('register-fcm-2', {
+                client: client,
+                pushSubscription: clientSocketPacket.data
+              })
+              break
+            case 'PING':
+              client.sendPacket(new ServerSocketPacket('PONG', ""))
+              break
+            default:
+              throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
+          }
+        }
       }
+
     } catch (e) {
       console.error(e)
       if (e instanceof ServerSocketPacket) {

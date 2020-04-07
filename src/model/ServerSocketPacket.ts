@@ -6,7 +6,7 @@ import { Message } from "./Message.model"
  */
 export class ServerSocketPacket {
   constructor(
-    public readonly cmd: 'AUTH' | 'MESSAGE_REPLY' | 'MESSAGE' | 'INFO' | 'REGISTER_FCM',
+    public readonly cmd: 'AUTH' | 'MESSAGE_REPLY' | 'MESSAGE' | 'INFO' | 'REGISTER_FCM' | 'PONG',
     public readonly data: any
   ) { }
 }

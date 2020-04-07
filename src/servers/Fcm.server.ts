@@ -66,13 +66,39 @@ export class FcmServer {
       const fcmClient = this.nameMap.get(message.target)
       if (fcmClient) {
         // fcmClient.sendMessage(message)
-        fcmClient.sendPacket(new MessageServerSocketPacket(message))
+        this.context.ebus.emit('message-client-status', {
+          mid: message.mid,
+          name: fcmClient.name,
+          status: 'fcm-wait'
+        })
+        fcmClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
+          this.context.ebus.emit('message-client-status', {
+            mid: message.mid,
+            name: fcmClient.name,
+            status: 'fcm'
+          })
+        }).catch((e) => {
+          console.log(`[FCM Error]: ${e.message}`)
+        })
       }
     } else if (message.sendType === 'group') {
       this.nameMap.forEach((fcmClient) => {
         if (fcmClient.group && fcmClient.group === message.target) {
           // fcmClient.sendMessage(message)
-          fcmClient.sendPacket(new MessageServerSocketPacket(message))
+          this.context.ebus.emit('message-client-status', {
+            mid: message.mid,
+            name: fcmClient.name,
+            status: 'fcm-wait'
+          })
+          fcmClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
+            this.context.ebus.emit('message-client-status', {
+              mid: message.mid,
+              name: fcmClient.name,
+              status: 'fcm'
+            })
+          }).catch((e) => {
+            console.log(`[FCM Error]: ${e.message}`)
+          })
         }
       })
     }
@@ -128,8 +154,6 @@ class FcmClient extends Client<Message> {
     //     this.sendPacketLock = true
     //   })
     // }
-    WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options).catch((e) => {
-      console.log(`[FCM Error]: ${e.message}`)
-    })
+    return WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options)
   }
 }
