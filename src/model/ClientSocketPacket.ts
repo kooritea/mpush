@@ -36,9 +36,9 @@ export class AuthClientSocketPacket extends ClientSocketPacket {
   constructor(packet: ClientSocketPacket) {
     super(packet)
     this.data = {
-      token: String(packet.data.token || ""),
-      name: String(packet.data.name || ""),
-      group: String(packet.data.group || "")
+      token: String(packet?.data?.token || ""),
+      name: String(packet?.data?.name || ""),
+      group: String(packet?.data?.group || "")
     }
     if (!this.data.name) {
       throw new Error("name property is required")
@@ -61,15 +61,15 @@ export class MessageClientSocketPacket extends ClientSocketPacket {
       sendType: packet.data.sendType === 'personal' ? 'personal' : 'group',
       target: packet.data.target,
       message: {
-        text: String(packet.data.message.text || ""),
-        desp: String(packet.data.message.desp || ""),
-        extra: packet.data.message.extra || {}
+        text: String(packet?.data?.message?.text || ""),
+        desp: String(packet?.data?.message?.desp || ""),
+        extra: typeof packet?.data?.message?.extra === 'object' ? packet.data.message.extra : {}
       }
     }
     if (!this.data.target) {
       throw new Error("target property is required")
     }
-    if (packet.data.sendType !== 'personal' && packet.data.sendType !== 'group') {
+    if (packet?.data?.sendType !== 'personal' && packet.data.sendType !== 'group') {
       throw new Error("sendType property must 'personal' or 'group'")
     }
   }
@@ -81,9 +81,9 @@ export class MgsCbClientSocketPacket extends ClientSocketPacket {
   constructor(packet: ClientSocketPacket) {
     super(packet)
     this.data = {
-      mid: String(packet.data.mid || "")
+      mid: String(packet?.data?.mid || "")
     }
-    if (!this.data.mid) {
+    if (!this?.data?.mid) {
       throw new Error("mid property is required")
     }
   }

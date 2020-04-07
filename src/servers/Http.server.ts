@@ -80,7 +80,7 @@ export class HttpServer {
       target: packet.data.target,
       from: {
         method: 'http',
-        name: '',
+        name: clientSocketPacket?.auth?.name || '',
       },
       message: packet.data.message
     })
