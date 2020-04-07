@@ -1,6 +1,6 @@
 import { Context } from "../Context";
 import * as WebPush from "web-push"
-import { RegisterFcmServerSocketPacket, ServerSocketPacket, MessageServerSocketPacket } from "../model/ServerSocketPacket";
+import { RegisterFcmServerSocketPacket, ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 import { Client } from "../model/Client";
 import { Message } from "../model/Message.model";
 import { Ebus } from "../Ebus";
@@ -38,6 +38,10 @@ export class FcmServer {
       // this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
       //   this.onMessageFcmCallback(mid, name)
       // })
+    } else {
+      this.context.ebus.on('register-fcm', (client) => {
+        client.sendPacket(new InfoServerSocketPacket("服务端未提供fcm.serverKey"))
+      })
     }
   }
 

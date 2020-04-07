@@ -2,7 +2,7 @@ import { Context } from "src/Context";
 import { Server, MessageEvent, Data as SocketData } from "ws"
 import { Message } from "../model/Message.model";
 import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket } from "../model/ClientSocketPacket";
-import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket } from "../model/ServerSocketPacket";
+import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { Ebus } from "../Ebus";
@@ -148,7 +148,7 @@ export class WebsocketServer {
       if (e instanceof ServerSocketPacket) {
         this.sendMsg(socket, e)
       } else {
-        this.sendMsg(socket, new ServerSocketPacket('INFO', e.message))
+        this.sendMsg(socket, new InfoServerSocketPacket(e.message))
       }
     }
   }

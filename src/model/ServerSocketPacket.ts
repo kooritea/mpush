@@ -57,3 +57,10 @@ export class RegisterFcmServerSocketPacket extends ServerSocketPacket {
     }
   }
 }
+export class InfoServerSocketPacket extends ServerSocketPacket {
+  public readonly data: string
+  constructor(info: string) {
+    super('INFO', info)
+    this.data = info
+  }
+}

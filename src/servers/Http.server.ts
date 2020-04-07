@@ -5,8 +5,7 @@ import { Context } from "../Context";
 import { Message } from "../model/Message.model";
 import { ClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket } from "../model/ClientSocketPacket";
 import * as Utils from '../Utils'
-import { MsgReplyServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
-import * as Jsonwebtoken from 'jsonwebtoken'
+import { MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 
 export class HttpServer {
 
@@ -71,7 +70,7 @@ export class HttpServer {
     } catch (e) {
       console.error(e)
       response.statusCode = 500
-      response.end(JSON.stringify(new ServerSocketPacket('INFO', e.message)))
+      response.end(JSON.stringify(new InfoServerSocketPacket(e.message)))
     }
   }
   private runCmdMessage(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
@@ -107,9 +106,9 @@ export class HttpServer {
         name,
         status: 'ok'
       })
-      response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
+      response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
     } else {
-      response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
+      response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
     }
   }
   /**
@@ -125,9 +124,9 @@ export class HttpServer {
   //       mid: packet.data.mid,
   //       name
   //     })
-  //     response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
+  //     response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
   //   } else {
-  //     response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
+  //     response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
   //   }
   // }
   private messageEndHandle(payload: {
