@@ -31,9 +31,15 @@ export abstract class Client<T> {
 
   /**
    * 上一条消息已送达确认  
-   * 移除队列中第一条消息
+   * 传入上一条消息的唯一键值,只有传入的键值对应当前正在发送的消息才会进行实际的comfirm操作  
+   * 移除队列中第一条消息  
    */
-  comfirm() {
+  comfirm(keys: Partial<T>) {
+    for (let key in keys) {
+      if (this.messages[0][key] !== keys[key]) {
+        return
+      }
+    }
     this.messages.shift()
     this.unlock()
   }

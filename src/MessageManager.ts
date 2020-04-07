@@ -77,7 +77,8 @@ export class MessageManager {
     }
   }
   /**
-   * 修改状态  
+   * 修改某条消息对应的target的状态  
+   * 一旦目标的推送状态变为ok则不可再改变  
    * 当全部为ok时发送message-end事件
    * @param name 
    * @param mid 
@@ -86,7 +87,12 @@ export class MessageManager {
   private onMessageClientStatus(name: string, mid: string, status: MessageStatus) {
     const midItem = this.midMap.get(mid)
     if (midItem && midItem.namesStaus.has(name)) {
-      midItem.namesStaus.set(name, status)
+      if (midItem.namesStaus.get(name) !== 'ok') {
+        // 像FCM这种不可靠推送会出现迟于webscoket推送返回状态的情况
+        // 所以一旦推送状态变为ok则不可再改变
+        midItem.namesStaus.set(name, status)
+      }
+      // 检查是否所有状态都为ok
       let statusObject: TypeObject<MessageStatus> = {}
       for (let state of midItem.namesStaus) {
         statusObject[state[0]] = state[1]

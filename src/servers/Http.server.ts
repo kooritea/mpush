@@ -61,9 +61,9 @@ export class HttpServer {
           case 'MESSAGE_CALLBACK':
             this.runCmdMgsCb(clientSocketPacket, response)
             break
-          case 'MESSAGE_FCM_CALLBACK':
-            this.runCmdMgsFcmCb(clientSocketPacket, response)
-            break
+          // case 'MESSAGE_FCM_CALLBACK':
+          //   this.runCmdMgsFcmCb(clientSocketPacket, response)
+          //   break
           default:
             throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
         }
@@ -94,31 +94,42 @@ export class HttpServer {
       })
     }, this.context.config.http.waitTimeout)
   }
+  /**
+   * 消息送达回调
+   * @param clientSocketPacket 
+   * @param response 
+   */
   private runCmdMgsCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
-    if (clientSocketPacket.auth) {
-      let packet = new MgsCbClientSocketPacket(clientSocketPacket)
-      this.context.ebus.emit('message-fcm-callback', {
-        mid: packet.data.mid,
-        name
-      })
-      response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
-    } else {
-      response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
-    }
-  }
-  private runCmdMgsFcmCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
     if (clientSocketPacket.auth) {
       let packet = new MgsCbClientSocketPacket(clientSocketPacket)
       this.context.ebus.emit('message-client-status', {
         mid: packet.data.mid,
         name,
-        status: 'fcm'
+        status: 'ok'
       })
       response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
     } else {
       response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
     }
   }
+  /**
+   * FCM送达回调
+   * @param clientSocketPacket 
+   * @param response 
+   */
+  // private runCmdMgsFcmCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+  //   if (clientSocketPacket.auth) {
+  //     let packet = new MgsCbClientSocketPacket(clientSocketPacket)
+
+  //     this.context.ebus.emit('message-fcm-callback', {
+  //       mid: packet.data.mid,
+  //       name
+  //     })
+  //     response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
+  //   } else {
+  //     response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
+  //   }
+  // }
   private messageEndHandle(payload: {
     message: Message,
     status: TypeObject<MessageStatus>

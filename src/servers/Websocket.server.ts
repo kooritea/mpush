@@ -215,7 +215,7 @@ export class WebsocketServer {
       name,
       status: 'ok'
     })
-    client.comfirm()
+    client.comfirm({ mid: packet.data.mid })
   }
 
   private sendMsg(socket: Socket, data: ServerSocketPacket) {
@@ -247,7 +247,7 @@ class SocketClient extends Client<Message> {
     this.unlock()
   }
 
-  send(message: Message) {
+  protected send(message: Message) {
     let data = new MessageServerSocketPacket(message)
     this.ebus.emit('message-client-status', {
       mid: message.mid,

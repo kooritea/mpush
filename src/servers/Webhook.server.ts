@@ -80,7 +80,7 @@ class WebhookClient extends Client<Message>{
         name: this.name,
         status: 'ok'
       })
-      this.comfirm()
+      this.comfirm({ mid: message.mid })
     }).catch((e) => {
       this.ebus.emit('message-client-status', {
         mid: message.mid,

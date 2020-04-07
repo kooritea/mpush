@@ -3,6 +3,7 @@ import * as WebPush from "web-push"
 import { RegisterFcmServerSocketPacket, ServerSocketPacket, MessageServerSocketPacket } from "../model/ServerSocketPacket";
 import { Client } from "../model/Client";
 import { Message } from "../model/Message.model";
+import { Ebus } from "../Ebus";
 export class FcmServer {
 
   private nameMap: Map<string, FcmClient> = new Map()
@@ -34,9 +35,9 @@ export class FcmServer {
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
-      this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
-        this.onMessageCallback(mid, name)
-      })
+      // this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
+      //   this.onMessageFcmCallback(mid, name)
+      // })
     }
   }
 
@@ -57,6 +58,7 @@ export class FcmServer {
       this.context.config.fcm.retryTimeout,
       client.name,
       client.group,
+      this.context.ebus,
       this.options
     ))
   }
@@ -65,40 +67,40 @@ export class FcmServer {
     if (message.sendType === 'personal') {
       const fcmClient = this.nameMap.get(message.target)
       if (fcmClient) {
-        // fcmClient.sendMessage(message)
-        this.context.ebus.emit('message-client-status', {
-          mid: message.mid,
-          name: fcmClient.name,
-          status: 'fcm-wait'
-        })
-        fcmClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
-          this.context.ebus.emit('message-client-status', {
-            mid: message.mid,
-            name: fcmClient.name,
-            status: 'fcm'
-          })
-        }).catch((e) => {
-          console.log(`[FCM Error]: ${e.message}`)
-        })
+        fcmClient.sendMessage(message)
+        // this.context.ebus.emit('message-client-status', {
+        //   mid: message.mid,
+        //   name: fcmClient.name,
+        //   status: 'fcm-wait'
+        // })
+        // fcmClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
+        //   this.context.ebus.emit('message-client-status', {
+        //     mid: message.mid,
+        //     name: fcmClient.name,
+        //     status: 'fcm'
+        //   })
+        // }).catch((e) => {
+        //   console.log(`[FCM Error]: ${e.message}`)
+        // })
       }
     } else if (message.sendType === 'group') {
       this.nameMap.forEach((fcmClient) => {
         if (fcmClient.group && fcmClient.group === message.target) {
-          // fcmClient.sendMessage(message)
-          this.context.ebus.emit('message-client-status', {
-            mid: message.mid,
-            name: fcmClient.name,
-            status: 'fcm-wait'
-          })
-          fcmClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
-            this.context.ebus.emit('message-client-status', {
-              mid: message.mid,
-              name: fcmClient.name,
-              status: 'fcm'
-            })
-          }).catch((e) => {
-            console.log(`[FCM Error]: ${e.message}`)
-          })
+          fcmClient.sendMessage(message)
+          // this.context.ebus.emit('message-client-status', {
+          //   mid: message.mid,
+          //   name: fcmClient.name,
+          //   status: 'fcm-wait'
+          // })
+          // fcmClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
+          //   this.context.ebus.emit('message-client-status', {
+          //     mid: message.mid,
+          //     name: fcmClient.name,
+          //     status: 'fcm'
+          //   })
+          // }).catch((e) => {
+          //   console.log(`[FCM Error]: ${e.message}`)
+          // })
         }
       })
     }
@@ -115,18 +117,27 @@ export class FcmServer {
       let fcmClient = this.nameMap.get(name)
       if (fcmClient) {
         console.log(`[FCM client comfirm]: ${name}`)
-        fcmClient.comfirm()
+        fcmClient.comfirm({ mid })
       }
     }
   }
-  onMessageCallback(mid: string, name: string) {
-    let fcmClient = this.nameMap.get(name)
-    if (fcmClient) {
-      console.log(`[FCM client comfirm]: ${name}`)
-      fcmClient.comfirm()
-    }
-  }
-
+  /**
+   * FCM送达回调指令事件
+   * @param mid 
+   * @param name 
+   */
+  // onMessageFcmCallback(mid: string, name: string) {
+  //   let fcmClient = this.nameMap.get(name)
+  //   if (fcmClient) {
+  //     console.log(`[FCM client comfirm]: ${name}`)
+  //     this.context.ebus.emit('message-client-status', {
+  //       mid,
+  //       name,
+  //       status: 'fcm-ok'
+  //     })
+  //     fcmClient.comfirm({ mid })
+  //   }
+  // }
 }
 
 class FcmClient extends Client<Message> {
@@ -136,24 +147,37 @@ class FcmClient extends Client<Message> {
     retryTimeout: number,
     name: string,
     group: string,
-    private options?: WebPush.RequestOptions
+    private ebus: Ebus,
+    private options?: WebPush.RequestOptions,
   ) {
     super(retryTimeout, name, group)
   }
-  send(message: Message) {
+  protected send(message: Message) {
     console.log(`[FCM loop send]: ${message.message.text}`)
+    this.ebus.emit('message-client-status', {
+      mid: message.mid,
+      name: this.name,
+      status: 'fcm-wait'
+    })
     let data = new MessageServerSocketPacket(message)
     this.sendPacket(data)
   }
-  sendPacket(packet: ServerSocketPacket) {
-    // if (!this.sendPacketLock) {
-    //   console.log(`[FCM send]: ${packet.data.message.text}`)
-    //   WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options).catch((e) => {
-    //     console.log(`[FCM Error]: ${e.message}`)
-    //   }).finally(() => {
-    //     this.sendPacketLock = true
-    //   })
-    // }
-    return WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options)
+  sendPacket(packet: MessageServerSocketPacket) {
+    if (!this.sendPacketLock) {
+      this.sendPacketLock = true
+      WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options).then(() => {
+        this.ebus.emit('message-client-status', {
+          mid: packet.data.mid,
+          name: this.name,
+          status: 'fcm-ok'
+        })
+        this.comfirm({ mid: packet.data.mid })
+      }).catch((e) => {
+        console.log(`[FCM send error]: ${e.message}`)
+      }).finally(() => {
+        this.sendPacketLock = false
+      })
+    }
+
   }
 }
