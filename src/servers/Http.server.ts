@@ -3,9 +3,10 @@ import * as Url from "url"
 import * as querystring from 'querystring';
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, MessageClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket } from "../model/ClientSocketPacket";
 import * as Utils from '../Utils'
-import { MsgReplyServerSocketPacket } from "../model/ServerSocketPacket";
+import { MsgReplyServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
+import * as Jsonwebtoken from 'jsonwebtoken'
 
 export class HttpServer {
 
@@ -20,6 +21,7 @@ export class HttpServer {
   }
   private async httpHandle(request: Http.IncomingMessage, response: Http.ServerResponse) {
     try {
+      response.setHeader('content-type', 'application/json; charset=utf-8')
       this.verifyToken(request)
       if (request.method === 'GET') {
         const { sendType, target } = this.verifyUrl(<string>request.url)
@@ -54,24 +56,13 @@ export class HttpServer {
         const clientSocketPacket = await this.verifyPost(request)
         switch (clientSocketPacket.cmd) {
           case 'MESSAGE':
-            const packet = new MessageClientSocketPacket(clientSocketPacket)
-            const message = new Message({
-              sendType: packet.data.sendType,
-              target: packet.data.target,
-              from: {
-                method: 'http',
-                name: '',
-              },
-              message: packet.data.message
-            })
-            this.messageMap.set(message, response)
-            this.context.ebus.emit('message-start', message)
-            setTimeout(() => {
-              this.messageEndHandle({
-                message,
-                status: this.context.messageManager.getMessageStatus(message.mid)
-              })
-            }, this.context.config.http.waitTimeout)
+            this.runCmdMessage(clientSocketPacket, response)
+            break
+          case 'MESSAGE_CALLBACK':
+            this.runCmdMgsCb(clientSocketPacket, response)
+            break
+          case 'MESSAGE_FCM_CALLBACK':
+            this.runCmdMgsFcmCb(clientSocketPacket, response)
             break
           default:
             throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
@@ -80,7 +71,52 @@ export class HttpServer {
     } catch (e) {
       console.error(e)
       response.statusCode = 500
-      response.end(e.message)
+      response.end(JSON.stringify(new ServerSocketPacket('INFO', e.message)))
+    }
+  }
+  private runCmdMessage(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+    const packet = new MessageClientSocketPacket(clientSocketPacket)
+    const message = new Message({
+      sendType: packet.data.sendType,
+      target: packet.data.target,
+      from: {
+        method: 'http',
+        name: '',
+      },
+      message: packet.data.message
+    })
+    this.messageMap.set(message, response)
+    this.context.ebus.emit('message-start', message)
+    setTimeout(() => {
+      this.messageEndHandle({
+        message,
+        status: this.context.messageManager.getMessageStatus(message.mid)
+      })
+    }, this.context.config.http.waitTimeout)
+  }
+  private runCmdMgsCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+    if (clientSocketPacket.auth) {
+      let packet = new MgsCbClientSocketPacket(clientSocketPacket)
+      this.context.ebus.emit('message-fcm-callback', {
+        mid: packet.data.mid,
+        name
+      })
+      response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
+    } else {
+      response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
+    }
+  }
+  private runCmdMgsFcmCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+    if (clientSocketPacket.auth) {
+      let packet = new MgsCbClientSocketPacket(clientSocketPacket)
+      this.context.ebus.emit('message-client-status', {
+        mid: packet.data.mid,
+        name,
+        status: 'fcm'
+      })
+      response.end(JSON.stringify(new ServerSocketPacket('INFO', "ok")))
+    } else {
+      response.end(JSON.stringify(new ServerSocketPacket('INFO', "The MESSAGE_CALLBACK cmd must need auth.")))
     }
   }
   private messageEndHandle(payload: {
@@ -89,7 +125,6 @@ export class HttpServer {
   }): void {
     try {
       const response = this.messageMap.get(payload.message)
-      response?.setHeader('content-type', 'application/json; charset=utf-8')
       response?.end(JSON.stringify(new MsgReplyServerSocketPacket(payload.message.mid, payload.status)))
     } catch (e) { }
     this.messageMap.delete(payload.message)
@@ -171,5 +206,12 @@ export class HttpServer {
       throw new Error(`Unsupported Content Type: ${contentType}`)
     }
     return result
+  }
+}
+
+class HttpClient {
+
+  constructor() {
+
   }
 }

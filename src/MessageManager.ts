@@ -76,9 +76,16 @@ export class MessageManager {
       }
     }
   }
+  /**
+   * 修改状态  
+   * 当全部为ok时发送message-end事件
+   * @param name 
+   * @param mid 
+   * @param status 
+   */
   private onMessageClientStatus(name: string, mid: string, status: MessageStatus) {
     const midItem = this.midMap.get(mid)
-    if (midItem) {
+    if (midItem && midItem.namesStaus.has(name)) {
       midItem.namesStaus.set(name, status)
       let statusObject: TypeObject<MessageStatus> = {}
       for (let state of midItem.namesStaus) {

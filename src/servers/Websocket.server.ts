@@ -4,6 +4,7 @@ import { Message } from "../model/Message.model";
 import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket } from "../model/ClientSocketPacket";
 import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
+import * as Jsonwebtoken from 'jsonwebtoken'
 import { Ebus } from "../Ebus";
 import { Client } from "../model/Client";
 type Socket = MessageEvent['target']
@@ -172,6 +173,10 @@ export class WebsocketServer {
       this.nameMap.set(packet.data.name, client)
       this.sendMsg(socket, new AuthServerSocketPacket({
         code: 200,
+        auth: Jsonwebtoken.sign({
+          name: packet.data.name,
+          group: packet.data.group
+        }, this.context.config.token),
         msg: 'Successful authentication'
       }))
       socket.emit('auth-success', packet.data)

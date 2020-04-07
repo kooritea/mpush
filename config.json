@@ -8,7 +8,7 @@
   "websocket": {
     "verifyToken": true,
     "port": 9094,
-    "authTimeout": 3000,
+    "authTimeout": 30000,
     "retryTimeout": 3000,
     "waitTimeout": 5000
   },
@@ -43,6 +43,7 @@
   },
   "fcm": {
     "serverKey": "",
-    "proxy": "http://127.0.0.1:12333"
+    "proxy": "http://127.0.0.1:12333",
+    "retryTimeout": 10000
   }
 }

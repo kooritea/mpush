@@ -1,15 +1,27 @@
+import { Config } from "../Config";
+import * as Jsonwebtoken from 'jsonwebtoken'
 /**
  * 客户端 -> 服务端  
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE' | 'REGISTER_FCM' | 'REGISTER_FCM_2'
+  public readonly cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE_FCM_CALLBACK' | 'MESSAGE' | 'REGISTER_FCM' | 'REGISTER_FCM_2'
   public readonly data: any
+  public readonly auth: {
+    name: string,
+    group: string
+  }
 
   constructor(json: any) {
     try {
       this.cmd = json.cmd
       this.data = json.data
+      if (json.auth) {
+        this.auth = <{
+          name: string,
+          group: string
+        }>Jsonwebtoken.verify(json.auth, Config.token)
+      }
     } catch (e) {
       throw new Error(`parse ClientSocketPacket error: ${e.message}`)
     }

@@ -62,8 +62,18 @@ export abstract class Client<T> {
   }
 
   /**
+   * 马上重试,重新计时
+   */
+  protected retrySend() {
+    clearTimeout(this.timer)
+    this.lock = false
+    this.next()
+  }
+
+  /**
    * 队列自动调用  
-   * 上一条消息确认或unlock时调用
+   * 上一条消息确认或unlock时调用  
+   * 当retryTimeout内没有comfirm会重新调用该方法
    * @param message 
    */
   protected abstract send(message: T): void

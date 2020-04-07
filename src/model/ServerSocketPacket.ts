@@ -13,10 +13,12 @@ export class ServerSocketPacket {
 export class AuthServerSocketPacket extends ServerSocketPacket {
   public readonly data: {
     code: number,
+    auth?: string,
     msg: string
   }
   constructor(data: {
     code: number,
+    auth?: string,
     msg: string
   }) {
     super('AUTH', data)

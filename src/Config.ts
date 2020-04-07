@@ -23,11 +23,12 @@ export const Config = {
       url: string,
       method: string,
       proxy: AxiosProxyConfig
-    }>>(Array.isArray(_Config.webhook.clients) ? _Config.webhook.clients : []),
-    proxy: <AxiosProxyConfig>_Config.webhook?.proxy
+    }>>(Array.isArray(_Config?.webhook?.clients) ? _Config?.webhook?.clients : []),
+    proxy: <AxiosProxyConfig>_Config?.webhook?.proxy
   },
   fcm: {
-    serverKey: _Config.fcm.serverKey,
-    proxy: _Config.fcm.proxy
+    serverKey: _Config?.fcm?.serverKey,
+    proxy: _Config?.fcm?.proxy,
+    retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000),
   }
 }

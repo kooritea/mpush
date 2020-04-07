@@ -44,6 +44,10 @@ export class Ebus {
     client: Client<Message>,
     pushSubscription: WebPush.PushSubscription
   }) => void): void;
+  on(event: 'message-fcm-callback', listener: (payload: {
+    mid: string,
+    name: string
+  }) => void): void;
   on(event: string, listener: (payload: any) => void): void {
     this.emitter.on(event, listener)
   }
@@ -62,6 +66,10 @@ export class Ebus {
   emit(event: 'register-fcm-2', payload: {
     client: Client<Message>,
     pushSubscription: WebPush.PushSubscription
+  }): void;
+  emit(event: 'message-fcm-callback', payload: {
+    mid: string,
+    name: string
   }): void;
   emit(event: string, payload: any): void {
     this.emitter.emit(event, payload)
