@@ -12,6 +12,13 @@ mpush 是一套致力于用最简单,最快速的方式把消息从任何地方�
 - 已经可以使用,功能正在完善中
 - 2.x 版本 mpush 需要配合使用 2.x 版本的 mpush-android-client
 
+## 通用客户端仓库
+
+[mpush-pwa-client](https://github.com/kooritea/mpush-pwa-client)
+
+- 支持 pwa
+- 支持在安卓手机上使用 FCM 推送
+
 ## 新特性
 
 - 使用 typescript 重新编写
@@ -231,6 +238,19 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 
 这部分会由客户端实现(具体实现方式可以看下面的开发文档),用户只需要选择目标和内容
 
+## 四、FCM 接入方式
+
+1. 登录 firebase 控制台  
+   [https://console.firebase.google.com/](https://console.firebase.google.com/)
+
+2. 创建一个项目
+
+3. 进入项目
+   点击左边的的[齿轮] -> 项目设置 -> 复制 server api key
+
+4. 填写到 mpush config.json 的 fcm.serverKey
+
 ## 五、客户端开发
 
-[通信方式](./CLIENT_DEV.md)
+[通信方式（2.0）](./CLIENT_DEV.md)  
+通信方式（2.1）[todo]
