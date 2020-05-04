@@ -253,4 +253,4 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 ## 五、客户端开发
 
 [通信方式（2.0）](./CLIENT_DEV.md)  
-通信方式（2.1）[todo]
+[通信方式（2.1）](./CLIENT_DEV_2.1.md)
