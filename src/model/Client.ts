@@ -36,7 +36,7 @@ export abstract class Client<T> {
    */
   comfirm(keys: Partial<T>) {
     for (let key in keys) {
-      if (this.messages[0][key] !== keys[key]) {
+      if (!this.messages[0] || this.messages[0][key] !== keys[key]) {
         return
       }
     }

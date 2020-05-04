@@ -6,20 +6,22 @@ import { Message } from "./Message.model"
  */
 export class ServerSocketPacket {
   constructor(
-    public readonly cmd: 'AUTH' | 'MESSAGE_REPLY' | 'MESSAGE' | 'INFO' | 'REGISTER_FCM' | 'PONG',
+    public readonly cmd: 'AUTH' | 'MESSAGE_REPLY' | 'MESSAGE' | 'INFO' | 'PONG',
     public readonly data: any
   ) { }
 }
 export class AuthServerSocketPacket extends ServerSocketPacket {
   public readonly data: {
-    code: number,
+    code: 200 | 401 | 403,
     auth?: string,
-    msg: string
+    msg: string,
+    fcmServerKey?: string
   }
   constructor(data: {
-    code: number,
+    code: 200 | 401 | 403,
     auth?: string,
-    msg: string
+    msg: string,
+    fcmServerKey?: string
   }) {
     super('AUTH', data)
     this.data = data
@@ -42,18 +44,6 @@ export class MsgReplyServerSocketPacket extends ServerSocketPacket {
     this.data = {
       mid,
       status
-    }
-  }
-}
-
-export class RegisterFcmServerSocketPacket extends ServerSocketPacket {
-  public readonly data: {
-    applicationServerKey: string
-  }
-  constructor(applicationServerKey: string) {
-    super('REGISTER_FCM', applicationServerKey)
-    this.data = {
-      applicationServerKey
     }
   }
 }

@@ -1,5 +1,6 @@
 import * as _Config from '../config.json'
 import { AxiosProxyConfig } from 'axios'
+import * as WebPush from "web-push"
 
 export const Config = {
   token: _Config?.token || "",
@@ -30,5 +31,6 @@ export const Config = {
     serverKey: _Config?.fcm?.serverKey,
     proxy: _Config?.fcm?.proxy,
     retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000),
+    vapidKeys: WebPush.generateVAPIDKeys()
   }
 }

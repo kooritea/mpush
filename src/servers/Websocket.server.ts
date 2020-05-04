@@ -1,7 +1,7 @@
 import { Context } from "src/Context";
 import { Server, MessageEvent, Data as SocketData } from "ws"
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket, RegisterFcmClientSocketPacket } from "../model/ClientSocketPacket";
 import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
@@ -126,12 +126,10 @@ export class WebsocketServer {
               this.runCmdMgsCb(client, name, new MgsCbClientSocketPacket(clientSocketPacket))
               break
             case 'REGISTER_FCM':
-              this.context.ebus.emit('register-fcm', client)
-              break
-            case 'REGISTER_FCM_2':
-              this.context.ebus.emit('register-fcm-2', {
+              const registerFcmClientSocketPacket = new RegisterFcmClientSocketPacket(clientSocketPacket)
+              this.context.ebus.emit('register-fcm', {
                 client: client,
-                pushSubscription: clientSocketPacket.data
+                pushSubscription: registerFcmClientSocketPacket.data
               })
               break
             case 'PING':
@@ -183,7 +181,8 @@ export class WebsocketServer {
           name: packet.data.name,
           group: packet.data.group
         }, this.context.config.token),
-        msg: 'Successful authentication'
+        msg: 'Successful authentication',
+        fcmServerKey: this.context.config.fcm.vapidKeys.publicKey
       }))
       socket.emit('auth-success', packet.data)
     }

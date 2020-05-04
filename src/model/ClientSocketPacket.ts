@@ -5,7 +5,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE_CALLBACK' | 'MESSAGE_FCM_CALLBACK' | 'MESSAGE' | 'REGISTER_FCM' | 'REGISTER_FCM_2' | 'PING'
+  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'REGISTER_FCM' | 'PING'
   public readonly data: any
   public readonly auth: {
     name: string,
@@ -88,4 +88,25 @@ export class MgsCbClientSocketPacket extends ClientSocketPacket {
     }
   }
 }
+export class RegisterFcmClientSocketPacket extends ClientSocketPacket {
+  public readonly data: {
+    endpoint: string
+    expirationTime: null
+    keys: {
+      auth: string
+      p256dh: string
+    }
+  }
+  constructor(packet: ClientSocketPacket) {
+    super(packet)
+    this.data = packet?.data
+    if (!this?.data?.endpoint) {
+      throw new Error("endpoint property is required")
+    }
+    if (!this?.data?.keys) {
+      throw new Error("keys property is required")
+    }
+  }
+}
+
 

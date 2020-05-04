@@ -2,7 +2,7 @@ export class Message {
   public readonly sendType: "personal" | "group"
   public readonly target: string
   public readonly from: {
-    method: string,
+    method: 'http' | 'websocket',
     name: string
   }
   public readonly mid: string
@@ -18,7 +18,7 @@ export class Message {
     sendType: "personal" | "group",
     target: string,
     from: {
-      method: string,
+      method: 'http' | 'websocket',
       name: string
     },
     message: {
