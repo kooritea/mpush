@@ -250,7 +250,42 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 
 4. 填写到 mpush config.json 的 fcm.serverKey
 
-## 五、客户端开发
+## 五、HTTPS
+
+请使用 nginx 等反代服务器  
+下面是 nginx 的示例配置
+
+```nginx
+http {
+  ...
+  server {
+    listen	     9094 ssl;
+    server_name      your.domain.com;
+
+    ssl_certificate "/etc/nginx/certs/your.domain.com.cer";
+    ssl_certificate_key "/etc/nginx/certs/your.domain.com.key";
+    ssl_session_cache shared:SSL:32768;
+    ssl_session_timeout  10m;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_protocols        TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    server_tokens off;
+
+    location /mpush {
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $host;
+      proxy_read_timeout 300;
+      #mpush websocket path and port
+      proxy_pass   http://127.0.0.1:9094;
+    }
+  }
+}
+
+```
+
+## 六、客户端开发
 
 [通信方式（2.0）](./CLIENT_DEV.md)  
 [通信方式（2.1）](./CLIENT_DEV_2.1.md)
