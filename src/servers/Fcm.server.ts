@@ -28,6 +28,7 @@ export class FcmServer {
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
+      console.log(`[FCM-Server] Init`)
       // this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
       //   this.onMessageFcmCallback(mid, name)
       // })

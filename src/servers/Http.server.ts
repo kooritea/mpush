@@ -17,6 +17,8 @@ export class HttpServer {
     this.httpServer = Http.createServer(this.httpHandle.bind(this))
     this.httpServer.listen(this.context.config.http.port)
     this.context.ebus.on('message-end', this.messageEndHandle.bind(this))
+    console.log(`[HTTP-Server] Init`)
+    console.log(`[HTTP-Server] Listen on ${this.context.config.http.port}`)
   }
   private async httpHandle(request: Http.IncomingMessage, response: Http.ServerResponse) {
     try {

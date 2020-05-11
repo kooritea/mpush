@@ -31,6 +31,8 @@ export class WebsocketServer {
     this.context.ebus.on('message-end', ({ message, status }) => {
       this.onMessageEnd(message, status)
     })
+    console.log(`[WebSocket-Server] Init`)
+    console.log(`[WebSocket-Server] Listen on ${this.context.config.websocket.port}`)
   }
 
   private createServer(): Server {

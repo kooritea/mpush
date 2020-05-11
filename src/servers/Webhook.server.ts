@@ -13,6 +13,7 @@ export class WebhookServer {
     this.context.ebus.on('message-start', (message) => {
       this.onMessageStart(message)
     })
+    console.log(`[WebHook-Server] Init`)
     this.context.config.webhook.clients.forEach((item) => {
       this.registerClient(
         item.url,
@@ -21,6 +22,7 @@ export class WebhookServer {
         item.group,
         item.proxy || this.context.config.webhook.proxy
       )
+      console.log(`[WebHook-Server] register client ${item.name}`)
     })
   }
 
