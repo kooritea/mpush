@@ -29,9 +29,9 @@ export class FcmServer {
         this.onMessageClientStatus(name, mid, status)
       })
       console.log(`[FCM-Server] Init`)
-      // this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
-      //   this.onMessageFcmCallback(mid, name)
-      // })
+      this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
+        this.onMessageFcmCallback(mid, name)
+      })
     } else {
       this.context.ebus.on('register-fcm', ({ client }) => {
         client.sendPacket(new InfoServerSocketPacket("服务端未提供fcm.serverKey"))
@@ -46,6 +46,7 @@ export class FcmServer {
     this.nameMap.set(client.name, new FcmClient(
       pushSubscription,
       this.context.config.fcm.retryTimeout,
+      this.context.config.fcm.comfirmMode,
       client.name,
       client.group,
       this.context.ebus,
@@ -106,7 +107,7 @@ export class FcmServer {
     if (status === 'ok') {
       let fcmClient = this.nameMap.get(name)
       if (fcmClient) {
-        console.log(`[FCM client comfirm]: ${name}`)
+        console.log(`[FCM client comfirm:Status change]: ${name}`)
         fcmClient.comfirm({ mid })
       }
     }
@@ -116,18 +117,18 @@ export class FcmServer {
    * @param mid 
    * @param name 
    */
-  // onMessageFcmCallback(mid: string, name: string) {
-  //   let fcmClient = this.nameMap.get(name)
-  //   if (fcmClient) {
-  //     console.log(`[FCM client comfirm]: ${name}`)
-  //     this.context.ebus.emit('message-client-status', {
-  //       mid,
-  //       name,
-  //       status: 'fcm-ok'
-  //     })
-  //     fcmClient.comfirm({ mid })
-  //   }
-  // }
+  onMessageFcmCallback(mid: string, name: string) {
+    let fcmClient = this.nameMap.get(name)
+    if (fcmClient) {
+      console.log(`[FCM client comfirm:message-fcm-callback]: ${name}`)
+      this.context.ebus.emit('message-client-status', {
+        mid,
+        name,
+        status: 'fcm-ok'
+      })
+      fcmClient.comfirm({ mid })
+    }
+  }
 }
 
 class FcmClient extends Client<Message> {
@@ -135,6 +136,7 @@ class FcmClient extends Client<Message> {
   constructor(
     private pushSubscription: WebPush.PushSubscription,
     retryTimeout: number,
+    private comfirmMode: boolean,
     name: string,
     group: string,
     private ebus: Ebus,
@@ -159,7 +161,9 @@ class FcmClient extends Client<Message> {
           name: this.name,
           status: 'fcm-ok'
         })
-        this.comfirm({ mid: packet.data.mid })
+        if (!this.comfirmMode) {
+          this.comfirm({ mid: packet.data.mid })
+        }
       }).catch((e) => {
         console.log(`[FCM send error]: ${e.message}`)
       }).finally(() => {
@@ -169,6 +173,11 @@ class FcmClient extends Client<Message> {
 
   }
   sendPacket(packet: ServerSocketPacket): Promise<WebPush.SendResult> {
-    return WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), this.options)
+    return WebPush.sendNotification(this.pushSubscription, JSON.stringify(packet), {
+      headers: {
+        "Urgency": 'high'
+      },
+      ...this.options
+    })
   }
 }

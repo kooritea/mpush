@@ -65,7 +65,8 @@ npm run dev
   "http": {
     "verifyToken": false, // 验证token,token位置为http头的authorization字段
     "port": 9093,
-    "waitTimeout": 5000 //等待客户端答复的最长时间,超时后会返回目标客户端的接受状态
+    "waitTimeout": 5000, //等待客户端答复的最长时间,超时后会返回目标客户端的接受状态
+    "cors": true, // 是否允许跨域请求
   },
   "websocket": {
     "verifyToken": true, // websocket连接起始阶段的AUTH指令是否验证token
@@ -104,6 +105,7 @@ npm run dev
     // }
   },
   "fcm": {
+    "comfirmMode": false, // 确认模式,当打开时,如果没有收到客户端的确认信息将会一直重发同一条消息直至客户端确认，一般不用打开，如果客户端支持可以打开。
     "serverKey": "", // FCMserverKey,获取方式下面补充
     "proxy": "http://127.0.0.1:12333",// http代理
     "retryTimeout": 10000 // 向FCM服务器发送请求等待时间,超时未成功会重试

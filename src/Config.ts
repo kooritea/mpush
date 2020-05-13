@@ -8,6 +8,7 @@ export const Config = {
     port: _Config?.http?.port || 9093,
     verifyToken: _Config?.http?.verifyToken === true || false,
     waitTimeout: Math.max(_Config?.http?.waitTimeout, 500),
+    cors: _Config?.http?.cors
   },
   websocket: {
     port: _Config?.websocket?.port || 9094,
@@ -28,6 +29,7 @@ export const Config = {
     proxy: <AxiosProxyConfig>_Config?.webhook?.proxy
   },
   fcm: {
+    comfirmMode: _Config?.fcm?.comfirmMode,
     serverKey: _Config?.fcm?.serverKey,
     proxy: _Config?.fcm?.proxy,
     retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000),

@@ -5,7 +5,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'REGISTER_FCM' | 'PING'
+  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_FCM_CALLBACK' | 'REGISTER_FCM' | 'PING'
   public readonly data: any
   public readonly auth: {
     name: string,
@@ -16,7 +16,7 @@ export class ClientSocketPacket {
     try {
       this.cmd = json.cmd
       this.data = json.data
-      if (json.auth) {
+      if (typeof json.auth === 'string') {
         this.auth = <{
           name: string,
           group: string
@@ -74,7 +74,21 @@ export class MessageClientSocketPacket extends ClientSocketPacket {
     }
   }
 }
-export class MgsCbClientSocketPacket extends ClientSocketPacket {
+export class MsgCbClientSocketPacket extends ClientSocketPacket {
+  public readonly data: {
+    mid: string
+  }
+  constructor(packet: ClientSocketPacket) {
+    super(packet)
+    this.data = {
+      mid: String(packet?.data?.mid || "")
+    }
+    if (!this?.data?.mid) {
+      throw new Error("mid property is required")
+    }
+  }
+}
+export class MsgFcmCbClientSocketPacket extends ClientSocketPacket {
   public readonly data: {
     mid: string
   }

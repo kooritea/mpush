@@ -1,7 +1,7 @@
 import { Context } from "src/Context";
 import { Server, MessageEvent, Data as SocketData } from "ws"
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket, RegisterFcmClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterFcmClientSocketPacket, MsgFcmCbClientSocketPacket } from "../model/ClientSocketPacket";
 import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
@@ -125,13 +125,20 @@ export class WebsocketServer {
               this.runCmdMessage(client, name, new MessageClientSocketPacket(clientSocketPacket))
               break
             case 'MESSAGE_CALLBACK':
-              this.runCmdMgsCb(client, name, new MgsCbClientSocketPacket(clientSocketPacket))
+              this.runCmdMgsCb(client, name, new MsgCbClientSocketPacket(clientSocketPacket))
               break
             case 'REGISTER_FCM':
               const registerFcmClientSocketPacket = new RegisterFcmClientSocketPacket(clientSocketPacket)
               this.context.ebus.emit('register-fcm', {
                 client: client,
                 pushSubscription: registerFcmClientSocketPacket.data
+              })
+              break
+            case 'MESSAGE_FCM_CALLBACK':
+              let packet = new MsgFcmCbClientSocketPacket(clientSocketPacket)
+              this.context.ebus.emit('message-fcm-callback', {
+                mid: packet.data.mid,
+                name: client.name
               })
               break
             case 'PING':
@@ -210,7 +217,7 @@ export class WebsocketServer {
     })
     this.context.ebus.emit('message-start', message)
   }
-  private runCmdMgsCb(client: SocketClient, name: string, packet: MgsCbClientSocketPacket) {
+  private runCmdMgsCb(client: SocketClient, name: string, packet: MsgCbClientSocketPacket) {
     this.context.ebus.emit('message-client-status', {
       mid: packet.data.mid,
       name,

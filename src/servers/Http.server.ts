@@ -3,7 +3,7 @@ import * as Url from "url"
 import * as querystring from 'querystring';
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, MessageClientSocketPacket, MgsCbClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgFcmCbClientSocketPacket } from "../model/ClientSocketPacket";
 import * as Utils from '../Utils'
 import { MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 
@@ -23,6 +23,21 @@ export class HttpServer {
   private async httpHandle(request: Http.IncomingMessage, response: Http.ServerResponse) {
     try {
       response.setHeader('content-type', 'application/json; charset=utf-8')
+      if (this.context.config.http.cors) {
+        response.setHeader('Access-Control-Allow-Origin', request.headers['origin'] || '');
+      }
+      if (request.method === 'OPTIONS') {
+        if (this.context.config.http.cors) {
+          response.setHeader('Access-Control-Allow-Headers', request.headers['access-control-request-headers'] || '');
+          response.setHeader('Access-Control-Allow-Methods', request.headers['access-control-request-method'] || '');
+          response.statusCode = 200
+          response.end()
+        } else {
+          response.statusCode = 403
+          response.end()
+        }
+        return
+      }
       this.verifyToken(request)
       if (request.method === 'GET') {
         const { sendType, target } = this.verifyUrl(<string>request.url)
@@ -62,12 +77,16 @@ export class HttpServer {
           case 'MESSAGE_CALLBACK':
             this.runCmdMgsCb(clientSocketPacket, response)
             break
-          // case 'MESSAGE_FCM_CALLBACK':
-          //   this.runCmdMgsFcmCb(clientSocketPacket, response)
-          //   break
+          case 'MESSAGE_FCM_CALLBACK':
+            this.runCmdMgsFcmCb(clientSocketPacket, response)
+            break
           default:
+            console.log(`Unknow cmd: ${clientSocketPacket.cmd}`)
             throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
         }
+      } else {
+        response.statusCode = 405
+        response.end()
       }
     } catch (e) {
       console.error(e)
@@ -102,15 +121,15 @@ export class HttpServer {
    */
   private runCmdMgsCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
     if (clientSocketPacket.auth) {
-      let packet = new MgsCbClientSocketPacket(clientSocketPacket)
+      let packet = new MsgCbClientSocketPacket(clientSocketPacket)
       this.context.ebus.emit('message-client-status', {
         mid: packet.data.mid,
-        name,
+        name: clientSocketPacket.auth.name,
         status: 'ok'
       })
       response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
     } else {
-      response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
+      response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_FCM_CALLBACK cmd must need auth.")))
     }
   }
   /**
@@ -118,19 +137,19 @@ export class HttpServer {
    * @param clientSocketPacket 
    * @param response 
    */
-  // private runCmdMgsFcmCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
-  //   if (clientSocketPacket.auth) {
-  //     let packet = new MgsCbClientSocketPacket(clientSocketPacket)
+  private runCmdMgsFcmCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+    if (clientSocketPacket.auth) {
+      let packet = new MsgFcmCbClientSocketPacket(clientSocketPacket)
 
-  //     this.context.ebus.emit('message-fcm-callback', {
-  //       mid: packet.data.mid,
-  //       name
-  //     })
-  //     response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
-  //   } else {
-  //     response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
-  //   }
-  // }
+      this.context.ebus.emit('message-fcm-callback', {
+        mid: packet.data.mid,
+        name: clientSocketPacket.auth.name
+      })
+      response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
+    } else {
+      response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
+    }
+  }
   private messageEndHandle(payload: {
     message: Message,
     status: TypeObject<MessageStatus>

@@ -2,6 +2,7 @@
   "token": "test",
   "http": {
     "verifyToken": false,
+    "cors": true,
     "port": 9093,
     "waitTimeout": 5000
   },
@@ -42,8 +43,9 @@
     }
   },
   "fcm": {
+    "comfirmMode": true,
     "serverKey": "",
-    "proxy": "http://127.0.0.1:12333",
+    "proxy": "http://127.0.0.1:62333",
     "retryTimeout": 10000
   }
 }
