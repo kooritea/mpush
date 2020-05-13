@@ -80,6 +80,9 @@ export class HttpServer {
           case 'MESSAGE_FCM_CALLBACK':
             this.runCmdMgsFcmCb(clientSocketPacket, response)
             break
+          case 'TEST_HTTP':
+            this.runCmdTestHttp(response)
+            break
           default:
             console.log(`Unknow cmd: ${clientSocketPacket.cmd}`)
             throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
@@ -149,6 +152,11 @@ export class HttpServer {
     } else {
       response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
     }
+  }
+
+  private runCmdTestHttp(response: Http.ServerResponse) {
+    response.statusCode = 200
+    response.end()
   }
   private messageEndHandle(payload: {
     message: Message,
