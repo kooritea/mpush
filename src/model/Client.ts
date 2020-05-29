@@ -1,11 +1,13 @@
 import { ServerSocketPacket } from "./ServerSocketPacket"
+import { Message } from "./Message.model"
 
 /**
  * 附带消息队列和重试机制的客户端基类  
  * 推送方式由子类实现
+ * 只有像websocket和webhook这种有有接收信息能力的client才会包装成Client类
  */
-export abstract class Client<T> {
-  private readonly messages: T[] = []
+export abstract class Client {
+  private readonly messages: Message[] = []
   private lock: boolean = false
   private timer: NodeJS.Timeout
   /**
@@ -24,7 +26,7 @@ export abstract class Client<T> {
    * 只有有回复的消息类型才可以进入队列发送,否则没有人调用comfirm
    * @param message 
    */
-  sendMessage(message: T): void {
+  sendMessage(message: Message): void {
     this.messages.push(message)
     this.next()
   }
@@ -34,7 +36,7 @@ export abstract class Client<T> {
    * 传入上一条消息的唯一键值,只有传入的键值对应当前正在发送的消息才会进行实际的comfirm操作  
    * 移除队列中第一条消息  
    */
-  comfirm(keys: Partial<T>) {
+  comfirm(keys: Partial<Message>) {
     for (let key in keys) {
       if (!this.messages[0] || this.messages[0][key] !== keys[key]) {
         return
@@ -82,15 +84,20 @@ export abstract class Client<T> {
    * 当retryTimeout内没有comfirm会重新调用该方法
    * @param message 
    */
-  protected abstract send(message: T): void
+  protected abstract send(message: Message): void
 
   /**
    * 直接发送数据包,忽略队列
    * @param packet 
    */
   public abstract sendPacket(packet: ServerSocketPacket): any
+
+  /**
+   * 被新的同name实例替换时调用
+   */
+  public abstract unregister(): void
 }
 
-interface ClientImp<T> {
-  send(message: T): void
+interface ClientImp {
+  send(message: Message): void
 }

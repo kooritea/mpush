@@ -6,13 +6,10 @@ import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSo
 import { Ebus } from "../Ebus";
 
 export class WebhookServer {
-  private nameMap: Map<string, WebhookClient> = new Map()
+
   constructor(
     private readonly context: Context
   ) {
-    this.context.ebus.on('message-start', (message) => {
-      this.onMessageStart(message)
-    })
     console.log(`[WebHook-Server] Init`)
     this.context.config.webhook.clients.forEach((item) => {
       this.registerClient(
@@ -26,26 +23,7 @@ export class WebhookServer {
     })
   }
 
-  private onMessageStart(message: Message) {
-    if (message.sendType === 'personal') {
-      const client = this.nameMap.get(message.target)
-      if (client) {
-        client.sendMessage(message)
-      }
-    } else if (message.sendType === 'group') {
-      this.nameMap.forEach((item) => {
-        if (item.group && item.group === message.target) {
-          item.sendMessage(message)
-        }
-      })
-    }
-  }
-
   private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string, proxy: AxiosProxyConfig) {
-    this.context.messageManager.registerUser(
-      name,
-      group
-    )
     const client = new WebhookClient(
       url,
       method,
@@ -56,11 +34,15 @@ export class WebhookServer {
       this.context.config.webhook.retryTimeout,
       this.context.ebus
     )
-    this.nameMap.set(name, client)
+    this.context.clientManager.registerClient(
+      name,
+      group,
+      client
+    )
   }
 }
 
-class WebhookClient extends Client<Message>{
+class WebhookClient extends Client {
   private axios: AxiosInstance
   constructor(
     private url: string,
@@ -116,4 +98,5 @@ class WebhookClient extends Client<Message>{
       })
     }
   }
+  unregister() { }
 }

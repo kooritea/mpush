@@ -39,7 +39,7 @@ export class FcmServer {
     }
   }
 
-  registerFcm(client: Client<Message>, pushSubscription: WebPush.PushSubscription) {
+  registerFcm(client: Client, pushSubscription: WebPush.PushSubscription) {
     if (!this.nameMap.has(client.name)) {
       console.log(`[register-FCM]: ${client.name}`)
     }
@@ -131,7 +131,7 @@ export class FcmServer {
   }
 }
 
-class FcmClient extends Client<Message> {
+class FcmClient extends Client {
   private sendPacketLock: boolean = false
   constructor(
     private pushSubscription: WebPush.PushSubscription,
@@ -180,4 +180,5 @@ class FcmClient extends Client<Message> {
       ...this.options
     })
   }
+  unregister() { }
 }

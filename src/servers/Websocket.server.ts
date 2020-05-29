@@ -12,7 +12,6 @@ type Socket = MessageEvent['target']
 export class WebsocketServer {
 
   private server: Server
-  private nameMap: Map<string, SocketClient> = new Map()
   /**
    * 记录发送消息的Client和Message的对应关系  
    * 用于message-end事件订阅中查找消息来源并发送反馈
@@ -25,9 +24,6 @@ export class WebsocketServer {
     private readonly context: Context
   ) {
     this.server = this.createServer()
-    this.context.ebus.on('message-start', (message) => {
-      this.onMessageStart(message)
-    })
     this.context.ebus.on('message-end', ({ message, status }) => {
       this.onMessageEnd(message, status)
     })
@@ -67,26 +63,6 @@ export class WebsocketServer {
   }
 
   /**
-   * 判断该消息的目标是否是通过websocket接入  
-   * 如是则推送消息
-   * @param message 
-   */
-  private onMessageStart(message: Message): void {
-    if (message.sendType === 'personal') {
-      const client = this.nameMap.get(message.target)
-      if (client) {
-        client.sendMessage(message)
-      }
-    } else if (message.sendType === 'group') {
-      this.nameMap.forEach((item) => {
-        if (item.group && item.group === message.target) {
-          item.sendMessage(message)
-        }
-      })
-    }
-  }
-
-  /**
    * 判断该message是否由socket客户端发出  
    * 如是则发送message接收状态
    * @param message 
@@ -118,14 +94,14 @@ export class WebsocketServer {
       if (clientSocketPacket.cmd === 'AUTH') {
         this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
       } else {
-        const client = this.nameMap.get(name)
-        if (client) {
+        const client = this.context.clientManager.getClient(name)
+        if (client && client.constructor === SocketClient) {
           switch (clientSocketPacket.cmd) {
             case 'MESSAGE':
-              this.runCmdMessage(client, name, new MessageClientSocketPacket(clientSocketPacket))
+              this.runCmdMessage(<SocketClient>client, name, new MessageClientSocketPacket(clientSocketPacket))
               break
             case 'MESSAGE_CALLBACK':
-              this.runCmdMgsCb(client, name, new MsgCbClientSocketPacket(clientSocketPacket))
+              this.runCmdMgsCb(<SocketClient>client, name, new MsgCbClientSocketPacket(clientSocketPacket))
               break
             case 'REGISTER_FCM':
               const registerFcmClientSocketPacket = new RegisterFcmClientSocketPacket(clientSocketPacket)
@@ -167,14 +143,10 @@ export class WebsocketServer {
         msg: 'Token invalid'
       })
     } else {
-      let client = this.nameMap.get(packet.data.name)
-      if (client) {
+      let client = <SocketClient>this.context.clientManager.getClient(packet.data.name)
+      if (client?.constructor === SocketClient) {
         client.updateSocket(socket)
       } else {
-        this.context.messageManager.registerUser(
-          packet.data.name,
-          packet.data.group
-        )
         client = new SocketClient(
           socket,
           this.context.config.websocket.retryTimeout,
@@ -182,9 +154,13 @@ export class WebsocketServer {
           packet.data.name,
           packet.data.group
         )
+        this.context.clientManager.registerClient(
+          packet.data.name,
+          packet.data.group,
+          client
+        )
       }
-      this.nameMap.set(packet.data.name, client)
-      this.sendMsg(socket, new AuthServerSocketPacket({
+      client.sendPacket(new AuthServerSocketPacket({
         code: 200,
         auth: Jsonwebtoken.sign({
           name: packet.data.name,
@@ -236,7 +212,7 @@ export class WebsocketServer {
  * 把socket包装成client  
  * client里面控制消息顺序
  */
-class SocketClient extends Client<Message> {
+class SocketClient extends Client {
   constructor(
     private socket: Socket,
     retryTimeout: number,
@@ -249,8 +225,10 @@ class SocketClient extends Client<Message> {
 
   close() {
     this.socket.close()
+    this.socket.removeAllListeners()
   }
   updateSocket(socket: Socket) {
+    this.close()
     this.socket = socket
     this.unlock()
   }
@@ -266,5 +244,8 @@ class SocketClient extends Client<Message> {
   }
   sendPacket(packet: ServerSocketPacket) {
     this.socket.send(Utils.encodeSocketData(packet))
+  }
+  unregister() {
+    this.close()
   }
 }

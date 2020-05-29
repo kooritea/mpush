@@ -3,9 +3,10 @@ import * as Url from "url"
 import * as querystring from 'querystring';
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgFcmCbClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgFcmCbClientSocketPacket, AuthClientSocketPacket } from "../model/ClientSocketPacket";
 import * as Utils from '../Utils'
-import { MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
+import * as Jsonwebtoken from 'jsonwebtoken'
+import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
 
 export class HttpServer {
 
@@ -71,6 +72,9 @@ export class HttpServer {
       } else if (request.method === 'POST') {
         const clientSocketPacket = await this.verifyPost(request)
         switch (clientSocketPacket.cmd) {
+          case 'AUTH':
+            this.runCmdAuth(clientSocketPacket, response)
+            break
           case 'MESSAGE':
             this.runCmdMessage(clientSocketPacket, response)
             break
@@ -95,6 +99,25 @@ export class HttpServer {
       console.error(e)
       response.statusCode = 500
       response.end(JSON.stringify(new InfoServerSocketPacket(e.message)))
+    }
+  }
+  private runCmdAuth(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+    const packet = new AuthClientSocketPacket(clientSocketPacket)
+    if(packet.data.token !== this.context.config.token){
+      response.end(JSON.stringify(new AuthServerSocketPacket({
+        code: 403,
+        msg: 'Token invalid'
+      })))
+    }else{
+      response.end(JSON.stringify(new AuthServerSocketPacket({
+        code: 200,
+        auth: Jsonwebtoken.sign({
+          name: packet.data.name,
+          group: packet.data.group
+        }, this.context.config.token),
+        msg: 'Successful authentication',
+        fcmServerKey: this.context.config.fcm.vapidKeys.publicKey
+      })))
     }
   }
   private runCmdMessage(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {

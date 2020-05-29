@@ -1,6 +1,7 @@
 import { Ebus } from "./Ebus";
 import { Message } from "./model/Message.model";
 import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
+import { Context } from "./Context";
 
 /**
  * 负责管理一对一消息和多对一消息  
@@ -17,12 +18,9 @@ export class MessageManager {
     message: Message,
     namesStaus: Map<string, MessageStatus>
   }> = new Map()
-  /**
-   * group name -> Set<name>
-   */
-  private readonly groupMap: Map<string, Set<string>> = new Map()
-  private readonly nameSet: Set<string> = new Set()
+
   constructor(
+    private readonly context: Context,
     private readonly ebus: Ebus
   ) {
     this.ebus.on('message-start', (message) => {
@@ -40,7 +38,7 @@ export class MessageManager {
     if (message?.sendType === 'personal') {
       // 当target未通过user-register注册时
       // 立即抛出message-end事件结束message生命周期
-      if (this.nameSet.has(message.target)) {
+      if (this.context.clientManager.hasClient(message.target)) {
         let namesStaus = new Map()
         namesStaus.set(message.target, 'ready')
         this.midMap.set(message.mid, {
@@ -57,12 +55,12 @@ export class MessageManager {
       }
     }
     if (message?.sendType === 'group') {
-      let names = this.groupMap.get(message.target)
-      if (names) {
+      let clients = this.context.clientManager.getClientByGroup(message.target)
+      if (clients.length) {
         let namesStaus = new Map<string, MessageStatus>()
         // 初始化该消息的目标的状态,储存在midMap
-        for (let name of names) {
-          namesStaus.set(name, 'ready')
+        for (let client of clients) {
+          namesStaus.set(client.name, 'ready')
         }
         this.midMap.set(message.mid, {
           message,
@@ -108,35 +106,6 @@ export class MessageManager {
   }
   private onMessageEnd(message: Message) {
     this.midMap.delete(message.mid)
-  }
-  /**
-   * 重复注册或name为空会抛出AuthServerSocketPacket
-   * @param name 
-   * @param group 
-   */
-  public registerUser(name: string, group: string) {
-    if (this.nameSet.has(name)) {
-      throw new AuthServerSocketPacket({
-        code: 403,
-        msg: `The name [${name}] is already used`
-      })
-    } else if (!name) {
-      throw new AuthServerSocketPacket({
-        code: 403,
-        msg: `name is required`
-      })
-    } else {
-      console.log(`[user-register]: name: ${name}${group ? ',group: ' + group : ''}`)
-      if (group !== "") {
-        let groupSet = this.groupMap.get(group)
-        if (groupSet) {
-          groupSet.add(name)
-        } else {
-          this.groupMap.set(group, new Set<string>([name]))
-        }
-      }
-      this.nameSet.add(name)
-    }
   }
 
   /**
