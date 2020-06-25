@@ -46,7 +46,6 @@ export class FcmServer {
     this.nameMap.set(client.name, new FcmClient(
       pushSubscription,
       this.context.config.fcm.retryTimeout,
-      this.context.config.fcm.comfirmMode,
       client.name,
       client.group,
       this.context.ebus,
@@ -136,7 +135,6 @@ class FcmClient extends Client {
   constructor(
     private pushSubscription: WebPush.PushSubscription,
     retryTimeout: number,
-    private comfirmMode: boolean,
     name: string,
     group: string,
     private ebus: Ebus,
@@ -161,9 +159,7 @@ class FcmClient extends Client {
           name: this.name,
           status: 'fcm-ok'
         })
-        if (!this.comfirmMode) {
-          this.comfirm({ mid: packet.data.mid })
-        }
+        this.comfirm({ mid: packet.data.mid })
       }).catch((e) => {
         console.log(`[FCM send error]: ${e.message}`)
       }).finally(() => {

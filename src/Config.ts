@@ -29,7 +29,6 @@ export const Config = {
     proxy: <AxiosProxyConfig>_Config?.webhook?.proxy
   },
   fcm: {
-    comfirmMode: _Config?.fcm?.comfirmMode,
     serverKey: _Config?.fcm?.serverKey,
     proxy: _Config?.fcm?.proxy,
     retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000),
