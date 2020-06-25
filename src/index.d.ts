@@ -9,4 +9,4 @@ interface TypeObject<T> {
  * fcm-ok 对端已确认fcm消息送达(不代表消息送达)
  * no 未找到该消息要发送的目标
  */
-type MessageStatus = 'ready' | 'ok' | 'wait' | 'fcm-wait' | 'fcm-ok' | 'no'
+type MessageStatus = 'ready' | 'ok' | 'wait' | 'fcm-wait' | 'fcm-ok' | 'fcm-ok-comfirm' | 'no'

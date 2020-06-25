@@ -150,7 +150,7 @@ client 根据[server AUTH packet]判断认证是否成功
   data: {
     mid: string,
     status: {
-      [target name]: "ready" | "ok" | "wait" | "fcm-wait" | "fcm-ok" | "no"
+      [target name]: "ready" | "ok" | "wait" | "fcm-wait" | "fcm-ok" | "fcm-ok-comfirm" | "no"
     }
   }
 }

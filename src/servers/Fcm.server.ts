@@ -123,9 +123,8 @@ export class FcmServer {
       this.context.ebus.emit('message-client-status', {
         mid,
         name,
-        status: 'fcm-ok'
+        status: 'fcm-ok-comfirm'
       })
-      fcmClient.comfirm({ mid })
     }
   }
 }
