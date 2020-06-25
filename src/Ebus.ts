@@ -39,7 +39,7 @@ export class Ebus {
     status: TypeObject<MessageStatus>
   }) => void): void;
   on(event: 'register-fcm', listener: (payload: {
-    client: Client<Message>,
+    client: Client,
     pushSubscription: WebPush.PushSubscription
   }) => void): void;
   on(event: 'message-fcm-callback', listener: (payload: {
@@ -62,7 +62,7 @@ export class Ebus {
   }): void;
   // emit(event: 'register-fcm', client: Client<Message>): void;
   emit(event: 'register-fcm', payload: {
-    client: Client<Message>,
+    client: Client,
     pushSubscription: WebPush.PushSubscription
   }): void;
   emit(event: 'message-fcm-callback', payload: {
