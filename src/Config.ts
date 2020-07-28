@@ -1,5 +1,29 @@
 import * as _Config from '../config.json'
+import * as FS from "fs"
+import * as Path from "path"
+import * as WebPush from "web-push"
 import { AxiosProxyConfig } from 'axios'
+
+const getVAPIDKeys = function (): {
+  publicKey: string,
+  privateKey: string
+} {
+  const keypath = Path.resolve(__dirname, '../keys')
+  try {
+    const keys = JSON.parse(FS.readFileSync(keypath).toString())
+    return keys
+  } catch (e) {
+    console.warn(`读取本地FCM秘钥对失败，重新生成到${keypath}`)
+    const keys = WebPush.generateVAPIDKeys()
+    try {
+      FS.writeFileSync(keypath, JSON.stringify(keys))
+    } catch (e) {
+      console.warn(`保存FCM秘钥对到${keypath}失败，下次启动将重新生成`)
+    }
+    return keys
+  }
+
+}
 
 export const Config = {
   token: _Config?.token || "",
@@ -30,6 +54,7 @@ export const Config = {
   fcm: {
     serverKey: _Config?.fcm?.serverKey,
     proxy: _Config?.fcm?.proxy,
-    retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000)
+    retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000),
+    vapidKeys: getVAPIDKeys()
   }
 }
