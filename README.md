@@ -1,9 +1,26 @@
-# Mpush 2.1
+# Mpush 2.2
 
 ## 功能
 
 mpush 是一套致力于用最简单,最快速的方式把消息从任何地方推送到指定的人的终端的系统,就像[server 酱](http://sc.ftqq.com/3.version)一样  
 只不过接收消息的不是微信而是任何可以建立 websocket 的客户端,就像下一点提到的安卓客户端,又或者是 http 服务器(webhook 方式),亦或者 WebPush
+
+## 更新日志
+
+### 2.0
+
+- 使用 typescript 重新编写
+- 新增一对多按组推送
+- 新增 webhook 的接入方式
+- 新增 websocket 客户端双向传递消息
+
+### 2.1
+
+- 新增 FCM 接入方式(2.1)
+
+### 2.2
+
+- 2.1 的 FCM 接入改名为 WebPush socket 通信的 cmd 有所变化
 
 ## 安卓客户端仓库
 
@@ -18,14 +35,6 @@ mpush 是一套致力于用最简单,最快速的方式把消息从任何地方�
 
 - 支持 pwa
 - 支持在安卓手机上使用 WebPush 推送（在安卓上为 fcm）
-
-## 新特性
-
-- 使用 typescript 重新编写
-- 新增一对多按组推送
-- 新增 webhook 的接入方式
-- 新增 websocket 客户端双向传递消息
-- 新增 WebPush 接入方式(2.1)
 
 ## 一、安装
 
