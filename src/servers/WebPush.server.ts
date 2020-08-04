@@ -123,7 +123,7 @@ export class WebPushServer {
       this.context.ebus.emit('message-client-status', {
         mid,
         name,
-        status: 'webpush-ok-comfirm'
+        status: 'webpush-ok'
       })
     }
   }
@@ -156,7 +156,7 @@ class WebPushClient extends Client {
         this.ebus.emit('message-client-status', {
           mid: packet.data.mid,
           name: this.name,
-          status: 'webpush-ok'
+          status: 'webpush-send'
         })
         this.comfirm({ mid: packet.data.mid })
       }).catch((e) => {

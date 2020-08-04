@@ -235,15 +235,15 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 }
 ```
 
-| status             | 意义                                            |
-| ------------------ | ----------------------------------------------- |
-| ready              | 正在送信队列排队                                |
-| ok                 | 送达,对端已确认                                 |
-| no                 | 推送失败,没有找到该客户端(只会出现在一对一推送) |
-| wait               | 已发送,等待对端确认                             |
-| webpush-wait       | 已通过 WebPush 发送,等待对端确认                |
-| webpush-ok         | 已发送 WebPush 消息到 Google(不代表消息送达)    |
-| webpush-ok-comfirm | 客户端确认 WebPush 消息送达                     |
+| status       | 意义                                            |
+| ------------ | ----------------------------------------------- |
+| ready        | 正在送信队列排队                                |
+| ok           | 送达,对端已确认                                 |
+| no           | 推送失败,没有找到该客户端(只会出现在一对一推送) |
+| wait         | 已发送,等待对端确认                             |
+| webpush-wait | 已通过 WebPush 发送,等待对端确认                |
+| webpush-send | 已发送 WebPush 消息到 Google(不代表消息送达)    |
+| webpush-ok   | 客户端确认 WebPush 消息送达                     |
 
 #### (2) 通过 websocket 客户端发送推送消息请求
 

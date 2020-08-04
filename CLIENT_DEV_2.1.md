@@ -150,7 +150,7 @@ client 根据[server AUTH packet]判断认证是否成功
   data: {
     mid: string,
     status: {
-      [target name]: "ready" | "ok" | "wait" | "webpush-wait" | "webpush-ok" | "webpush-ok-comfirm" | "no"
+      [target name]: "ready" | "ok" | "wait" | "webpush-wait" | "webpush-send" | "webpush-ok" | "no"
     }
   }
 }
