@@ -95,7 +95,7 @@ export class WebsocketServer {
         this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
       } else {
         const client = this.context.clientManager.getClient(name)
-        if (client && client.constructor === SocketClient) {
+        if (client && client instanceof SocketClient) {
           switch (clientSocketPacket.cmd) {
             case 'MESSAGE':
               this.runCmdMessage(<SocketClient>client, name, new MessageClientSocketPacket(clientSocketPacket))
