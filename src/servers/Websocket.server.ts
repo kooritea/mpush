@@ -1,7 +1,7 @@
 import { Context } from "src/Context";
 import { Server, MessageEvent, Data as SocketData } from "ws"
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterFcmClientSocketPacket, MsgFcmCbClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterWebPushClientSocketPacket, MsgWebPushCbClientSocketPacket } from "../model/ClientSocketPacket";
 import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
@@ -103,16 +103,16 @@ export class WebsocketServer {
             case 'MESSAGE_CALLBACK':
               this.runCmdMgsCb(<SocketClient>client, name, new MsgCbClientSocketPacket(clientSocketPacket))
               break
-            case 'REGISTER_FCM':
-              const registerFcmClientSocketPacket = new RegisterFcmClientSocketPacket(clientSocketPacket)
-              this.context.ebus.emit('register-fcm', {
+            case 'REGISTER_WEBPUSH':
+              const registerWebPushClientSocketPacket = new RegisterWebPushClientSocketPacket(clientSocketPacket)
+              this.context.ebus.emit('register-webpush', {
                 client: client,
-                pushSubscription: registerFcmClientSocketPacket.data
+                pushSubscription: registerWebPushClientSocketPacket.data
               })
               break
-            case 'MESSAGE_FCM_CALLBACK':
-              let packet = new MsgFcmCbClientSocketPacket(clientSocketPacket)
-              this.context.ebus.emit('message-fcm-callback', {
+            case 'MESSAGE_WEBPUSH_CALLBACK':
+              let packet = new MsgWebPushCbClientSocketPacket(clientSocketPacket)
+              this.context.ebus.emit('message-webpush-callback', {
                 mid: packet.data.mid,
                 name: client.name
               })
@@ -167,7 +167,7 @@ export class WebsocketServer {
           group: packet.data.group
         }, this.context.config.token),
         msg: 'Successful authentication',
-        fcmServerKey: this.context.config.fcm.vapidKeys.publicKey
+        webpushServerKey: this.context.config.webpush.vapidKeys.publicKey
       }))
       socket.emit('auth-success', packet.data)
     }

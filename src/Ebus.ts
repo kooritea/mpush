@@ -38,11 +38,11 @@ export class Ebus {
     message: Message,
     status: TypeObject<MessageStatus>
   }) => void): void;
-  on(event: 'register-fcm', listener: (payload: {
+  on(event: 'register-webpush', listener: (payload: {
     client: Client,
     pushSubscription: WebPush.PushSubscription
   }) => void): void;
-  on(event: 'message-fcm-callback', listener: (payload: {
+  on(event: 'message-webpush-callback', listener: (payload: {
     mid: string,
     name: string
   }) => void): void;
@@ -60,12 +60,12 @@ export class Ebus {
     message: Message,
     status: TypeObject<MessageStatus>
   }): void;
-  // emit(event: 'register-fcm', client: Client<Message>): void;
-  emit(event: 'register-fcm', payload: {
+  // emit(event: 'register-webpush', client: Client<Message>): void;
+  emit(event: 'register-webpush', payload: {
     client: Client,
     pushSubscription: WebPush.PushSubscription
   }): void;
-  emit(event: 'message-fcm-callback', payload: {
+  emit(event: 'message-webpush-callback', payload: {
     mid: string,
     name: string
   }): void;

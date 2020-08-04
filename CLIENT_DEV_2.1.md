@@ -68,13 +68,13 @@ client 根据[server AUTH packet]判断认证是否成功
 }
 ```
 
-### 4、REGISTER_FCM
+### 4、REGISTER_WEBPUSH
 
-注册 FCM
+注册 WebPush
 
 ```javascript
 {
-  cmd: "REGISTER_FCM",
+  cmd: "REGISTER_WEBPUSH",
   data: { // 这个对象在chrome可以通过pushManager.subscribe获得
     endpoint: string
     expirationTime: null
@@ -111,7 +111,7 @@ client 根据[server AUTH packet]判断认证是否成功
     code: 200|401|403,// 认证成功|尚未认证|认证失败
     auth?: string,// 一个token,在某些包或post请求可能会用到
     msg: string,// 提示信息
-    fcmServerKey?: string// 用于注册FCM的服务端公钥,base64编码,pushManager.subscribe的第二个参数
+    webpushServerKey?: string// 用于注册webpush的服务端公钥,base64编码,pushManager.subscribe的第二个参数
   }
 }
 ```
@@ -150,7 +150,7 @@ client 根据[server AUTH packet]判断认证是否成功
   data: {
     mid: string,
     status: {
-      [target name]: "ready" | "ok" | "wait" | "fcm-wait" | "fcm-ok" | "fcm-ok-comfirm" | "no"
+      [target name]: "ready" | "ok" | "wait" | "webpush-wait" | "webpush-ok" | "webpush-ok-comfirm" | "no"
     }
   }
 }
@@ -158,7 +158,7 @@ client 根据[server AUTH packet]判断认证是否成功
 
 ### 4、INFO
 
-普通的提示消息,如当服务端未提供 fcm 服务时会返回改消息提示客户端
+普通的提示消息,如当服务端未提供 webpush 服务时会返回改消息提示客户端
 
 ```javascript
 {

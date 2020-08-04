@@ -42,8 +42,7 @@
       "protocol": "http"
     }
   },
-  "fcm": {
-    "comfirmMode": false,
+  "webpush": {
     "serverKey": "",
     "proxy": "http://127.0.0.1:62333",
     "retryTimeout": 10000

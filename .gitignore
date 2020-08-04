@@ -1,5 +1,6 @@
 node_modules/
 *.js
 *.map
+*.zip
 dist/
 keys

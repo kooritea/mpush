@@ -86,7 +86,7 @@ export class MessageManager {
     const midItem = this.midMap.get(mid)
     if (midItem && midItem.namesStaus.has(name)) {
       if (midItem.namesStaus.get(name) !== 'ok') {
-        // 像FCM这种不可靠推送会出现迟于webscoket推送返回状态的情况
+        // 像WebPush这种不可靠推送会出现迟于webscoket推送返回状态的情况
         // 所以一旦推送状态变为ok则不可再改变
         midItem.namesStaus.set(name, status)
       }

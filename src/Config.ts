@@ -13,12 +13,12 @@ const getVAPIDKeys = function (): {
     const keys = JSON.parse(FS.readFileSync(keypath).toString())
     return keys
   } catch (e) {
-    console.warn(`读取本地FCM秘钥对失败，重新生成到${keypath}`)
+    console.warn(`读取本地WebPush秘钥对失败，重新生成到${keypath}`)
     const keys = WebPush.generateVAPIDKeys()
     try {
       FS.writeFileSync(keypath, JSON.stringify(keys))
     } catch (e) {
-      console.warn(`保存FCM秘钥对到${keypath}失败，下次启动将重新生成`)
+      console.warn(`保存WebPush秘钥对到${keypath}失败，下次启动将重新生成`)
     }
     return keys
   }
@@ -51,10 +51,10 @@ export const Config = {
     }>>(Array.isArray(_Config?.webhook?.clients) ? _Config?.webhook?.clients : []),
     proxy: <AxiosProxyConfig>_Config?.webhook?.proxy
   },
-  fcm: {
-    serverKey: _Config?.fcm?.serverKey,
-    proxy: _Config?.fcm?.proxy,
-    retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000),
+  webpush: {
+    serverKey: _Config?.webpush?.serverKey,
+    proxy: _Config?.webpush?.proxy,
+    retryTimeout: Math.max(_Config?.webpush?.retryTimeout, 5000),
     vapidKeys: getVAPIDKeys()
   }
 }

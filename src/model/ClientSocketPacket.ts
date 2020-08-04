@@ -5,7 +5,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_FCM_CALLBACK' | 'REGISTER_FCM' | 'TEST_HTTP' | 'PING'
+  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_WEBPUSH_CALLBACK' | 'REGISTER_WEBPUSH' | 'TEST_HTTP' | 'PING'
   public readonly data: any
   public readonly auth: {
     name: string,
@@ -88,7 +88,7 @@ export class MsgCbClientSocketPacket extends ClientSocketPacket {
     }
   }
 }
-export class MsgFcmCbClientSocketPacket extends ClientSocketPacket {
+export class MsgWebPushCbClientSocketPacket extends ClientSocketPacket {
   public readonly data: {
     mid: string
   }
@@ -102,7 +102,7 @@ export class MsgFcmCbClientSocketPacket extends ClientSocketPacket {
     }
   }
 }
-export class RegisterFcmClientSocketPacket extends ClientSocketPacket {
+export class RegisterWebPushClientSocketPacket extends ClientSocketPacket {
   public readonly data: {
     endpoint: string
     expirationTime: null

@@ -3,7 +3,7 @@ import * as Url from "url"
 import * as querystring from 'querystring';
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgFcmCbClientSocketPacket, AuthClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgWebPushCbClientSocketPacket, AuthClientSocketPacket } from "../model/ClientSocketPacket";
 import * as Utils from '../Utils'
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
@@ -81,8 +81,8 @@ export class HttpServer {
           case 'MESSAGE_CALLBACK':
             this.runCmdMgsCb(clientSocketPacket, response)
             break
-          case 'MESSAGE_FCM_CALLBACK':
-            this.runCmdMgsFcmCb(clientSocketPacket, response)
+          case 'MESSAGE_WEBPUSH_CALLBACK':
+            this.runCmdMgsWebPushCb(clientSocketPacket, response)
             break
           case 'TEST_HTTP':
             this.runCmdTestHttp(response)
@@ -103,12 +103,12 @@ export class HttpServer {
   }
   private runCmdAuth(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
     const packet = new AuthClientSocketPacket(clientSocketPacket)
-    if(packet.data.token !== this.context.config.token){
+    if (packet.data.token !== this.context.config.token) {
       response.end(JSON.stringify(new AuthServerSocketPacket({
         code: 403,
         msg: 'Token invalid'
       })))
-    }else{
+    } else {
       response.end(JSON.stringify(new AuthServerSocketPacket({
         code: 200,
         auth: Jsonwebtoken.sign({
@@ -116,7 +116,7 @@ export class HttpServer {
           group: packet.data.group
         }, this.context.config.token),
         msg: 'Successful authentication',
-        fcmServerKey: this.context.config.fcm.vapidKeys.publicKey
+        webpushServerKey: this.context.config.webpush.vapidKeys.publicKey
       })))
     }
   }
@@ -155,19 +155,19 @@ export class HttpServer {
       })
       response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
     } else {
-      response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_FCM_CALLBACK cmd must need auth.")))
+      response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_WEBPUSH_CALLBACK cmd must need auth.")))
     }
   }
   /**
-   * FCM送达回调
+   * WEBPUSH送达回调
    * @param clientSocketPacket 
    * @param response 
    */
-  private runCmdMgsFcmCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+  private runCmdMgsWebPushCb(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
     if (clientSocketPacket.auth) {
-      let packet = new MsgFcmCbClientSocketPacket(clientSocketPacket)
+      let packet = new MsgWebPushCbClientSocketPacket(clientSocketPacket)
 
-      this.context.ebus.emit('message-fcm-callback', {
+      this.context.ebus.emit('message-webpush-callback', {
         mid: packet.data.mid,
         name: clientSocketPacket.auth.name
       })
