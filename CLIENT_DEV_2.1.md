@@ -111,7 +111,7 @@ client 根据[server AUTH packet]判断认证是否成功
     code: 200|401|403,// 认证成功|尚未认证|认证失败
     auth?: string,// 一个token,在某些包或post请求可能会用到
     msg: string,// 提示信息
-    webpushServerKey?: string// 用于注册webpush的服务端公钥,base64编码,pushManager.subscribe的第二个参数
+    webpushPublicKey?: string// 用于注册webpush的服务端公钥,base64编码,pushManager.subscribe的第二个参数
   }
 }
 ```

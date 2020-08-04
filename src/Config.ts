@@ -52,7 +52,7 @@ export const Config = {
     proxy: <AxiosProxyConfig>_Config?.webhook?.proxy
   },
   webpush: {
-    serverKey: _Config?.webpush?.serverKey,
+    apiKey: _Config?.webpush?.apiKey,
     proxy: _Config?.webpush?.proxy,
     retryTimeout: Math.max(_Config?.webpush?.retryTimeout, 5000),
     vapidKeys: getVAPIDKeys()

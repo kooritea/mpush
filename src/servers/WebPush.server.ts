@@ -12,13 +12,13 @@ export class WebPushServer {
   constructor(
     private readonly context: Context
   ) {
-    if (this.context.config.webpush.serverKey) {
+    if (this.context.config.webpush.apiKey) {
       WebPush.setVapidDetails(
         'mailto:your-email@gmail.com',
         this.context.config.webpush.vapidKeys.publicKey,
         this.context.config.webpush.vapidKeys.privateKey
       )
-      WebPush.setGCMAPIKey(this.context.config.webpush.serverKey)
+      WebPush.setGCMAPIKey(this.context.config.webpush.apiKey)
       this.context.ebus.on('register-webpush', ({ client, pushSubscription }) => {
         this.registerWebPush(client, pushSubscription)
       })
@@ -34,7 +34,7 @@ export class WebPushServer {
       })
     } else {
       this.context.ebus.on('register-webpush', ({ client }) => {
-        client.sendPacket(new InfoServerSocketPacket("服务端未提供webpush.serverKey"))
+        client.sendPacket(new InfoServerSocketPacket("服务端未提供webpush.apiKey"))
       })
     }
   }

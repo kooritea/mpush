@@ -116,7 +116,7 @@ export class HttpServer {
           group: packet.data.group
         }, this.context.config.token),
         msg: 'Successful authentication',
-        webpushServerKey: this.context.config.webpush.vapidKeys.publicKey
+        webpushPublicKey: this.context.config.webpush.vapidKeys.publicKey
       })))
     }
   }

@@ -114,7 +114,7 @@ npm run dev
     // }
   },
   "webpush": {
-    "serverKey": "", // WebPushserverKey,获取方式下面补充
+    "apiKey": "", // FCM apiKey,获取方式下面补充
     "proxy": "http://127.0.0.1:12333",// http代理
     "retryTimeout": 10000 // 向WebPush服务器发送请求等待时间,超时未成功会重试
   }
@@ -259,7 +259,7 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 3. 进入项目
    点击左边的的[齿轮] -> 项目设置 -> 复制 server api key
 
-4. 填写到 mpush config.json 的 webpush.serverKey
+4. 填写到 mpush config.json 的 webpush.apiKey
 
 ## 五、HTTPS
 
