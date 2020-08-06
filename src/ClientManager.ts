@@ -19,6 +19,8 @@ export class ClientManager {
 
   /**
    * 重复注册或name为空会抛出AuthServerSocketPacket
+   * 只有websocket这些与其他客户端互斥的才会使用这个管理器
+   * FCM、WebPush这些不可靠推送由server里自己管理客户端
    * @param name 
    * @param group 
    */

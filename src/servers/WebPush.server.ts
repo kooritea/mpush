@@ -40,17 +40,20 @@ export class WebPushServer {
   }
 
   registerWebPush(client: Client, pushSubscription: WebPush.PushSubscription) {
-    if (!this.nameMap.has(client.name)) {
+    if (this.nameMap.has(client.name)) {
+      this.nameMap.get(client.name)?.update(pushSubscription)
+    } else {
       console.log(`[register-WebPush]: ${client.name}`)
+      this.nameMap.set(client.name, new WebPushClient(
+        pushSubscription,
+        this.context.config.webpush.retryTimeout,
+        client.name,
+        client.group,
+        this.context.ebus,
+        this.options
+      ))
     }
-    this.nameMap.set(client.name, new WebPushClient(
-      pushSubscription,
-      this.context.config.webpush.retryTimeout,
-      client.name,
-      client.group,
-      this.context.ebus,
-      this.options
-    ))
+
   }
 
   onMessageStart(message: Message) {
@@ -176,4 +179,8 @@ class WebPushClient extends Client {
     })
   }
   unregister() { }
+
+  update(pushSubscription: WebPush.PushSubscription) {
+    this.pushSubscription = pushSubscription
+  }
 }
