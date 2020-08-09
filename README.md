@@ -117,6 +117,14 @@ npm run dev
     "apiKey": "", // FCM apiKey,获取方式下面补充
     "proxy": "http://127.0.0.1:12333",// http代理
     "retryTimeout": 10000 // 向WebPush服务器发送请求等待时间,超时未成功会重试
+  },
+  "fcm": {
+    "projectId": "",// firebase SDK的项目参数，获取方式见下面第四大点
+    "applicationId": "",// firebase SDK的项目参数，获取方式见下面第四大点
+    "apiKey": "",// 同webpush的apiKey，firebase SDK的项目参数，获取方式见下面第四大点
+    "serverKey": "",// firebase SDK的项目参数，获取方式见下面第四大点
+    "proxy": "http://127.0.0.1:62333",
+    "retryTimeout": 10000
   }
 }
 ```
@@ -249,7 +257,7 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 
 这部分会由客户端实现(具体实现方式可以看下面的开发文档),用户只需要选择目标和内容
 
-## 四、WebPush 接入方式
+## 四、WebPush 和 FCM 接入方式各个参数获取方式(免费)
 
 1. 登录 firebase 控制台  
    [https://console.firebase.google.com/](https://console.firebase.google.com/)
@@ -257,9 +265,12 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 2. 创建一个项目
 
 3. 进入项目
-   点击左边的的[齿轮] -> 项目设置 -> 复制 server api key
+   点击左边的的[齿轮] -> 项目设置 -> 上面的 tab 分有常规、云消息传递等栏目
 
-4. 填写到 mpush config.json 的 webpush.apiKey
+常规.项目编号 -> projectId
+常规.应用 ID -> applicationId
+常规.网络 API 密钥 -> apiKey
+云消息传递.服务器密钥 -> serverKey
 
 ## 五、HTTPS
 
@@ -299,4 +310,4 @@ http {
 ## 六、客户端开发
 
 [通信方式（2.0）](./CLIENT_DEV.md)  
-[通信方式（2.1）](./CLIENT_DEV_2.1.md)
+[通信方式（2.1、2.2）](./CLIENT_DEV_2.1.md)

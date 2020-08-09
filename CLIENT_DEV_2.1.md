@@ -1,5 +1,7 @@
 # 本文主要写 websocket 协议下数据包的类型及作用
 
+适用于 2.1 以上版本
+
 全部使用 json 字符串方式传送，发送前先格式化成 json 字符串（JSON.stringify()），收到服务器的包先格式化为对象（JSON.parse()）
 
 ## 认证流程
@@ -86,6 +88,19 @@ client 根据[server AUTH packet]判断认证是否成功
 }
 ```
 
+### 4、REGISTER_FCM
+
+注册 FCM,这个 token 是客户端向系统注册 fcm 获得的 token，因为 token 可能发生改变，改变时直接重新发送一次这个指令即可
+
+```javascript
+{
+  cmd: "REGISTER_FCM",
+  data: {
+    token: string
+  }
+}
+```
+
 ### 5、PING
 
 如果是像浏览器这种自带 websocket 客户端却不支持 ping 方法的环境，可以使用这个包代替 websocket 协议中的 ping，服务端会返回 PONG 包
@@ -111,7 +126,10 @@ client 根据[server AUTH packet]判断认证是否成功
     code: 200|401|403,// 认证成功|尚未认证|认证失败
     auth?: string,// 一个token,在某些包或post请求可能会用到
     msg: string,// 提示信息
-    webpushPublicKey?: string// 用于注册webpush的服务端公钥,base64编码,pushManager.subscribe的第二个参数
+    webpushPublicKey?: string,// 用于注册webpush的服务端公钥,base64编码,pushManager.subscribe的第二个参数
+    fcmProjectId?: string,// 这三个参数用于客户端使用Firebase SDK注册fcm
+    fcmApplicationId?: string,
+    fcmApiKey?: string
   }
 }
 ```
