@@ -15,13 +15,19 @@ export class AuthServerSocketPacket extends ServerSocketPacket {
     code: 200 | 401 | 403,
     auth?: string,
     msg: string,
-    webpushPublicKey?: string
+    webpushPublicKey?: string,
+    fcmProjectId?: string,
+    fcmApplicationId?: string,
+    fcmApiKey?: string
   }
   constructor(data: {
     code: 200 | 401 | 403,
     auth?: string,
     msg: string,
-    webpushPublicKey?: string
+    webpushPublicKey?: string,
+    fcmProjectId?: string,
+    fcmApplicationId?: string,
+    fcmApiKey?: string
   }) {
     super('AUTH', data)
     this.data = data

@@ -42,7 +42,15 @@ export class Ebus {
     client: Client,
     pushSubscription: WebPush.PushSubscription
   }) => void): void;
+  on(event: 'register-fcm', listener: (payload: {
+    client: Client,
+    token: string
+  }) => void): void;
   on(event: 'message-webpush-callback', listener: (payload: {
+    mid: string,
+    name: string
+  }) => void): void;
+  on(event: 'message-fcm-callback', listener: (payload: {
     mid: string,
     name: string
   }) => void): void;
@@ -65,7 +73,15 @@ export class Ebus {
     client: Client,
     pushSubscription: WebPush.PushSubscription
   }): void;
+  emit(event: 'register-fcm', payload: {
+    client: Client,
+    token: string
+  }): void;
   emit(event: 'message-webpush-callback', payload: {
+    mid: string,
+    name: string
+  }): void;
+  emit(event: 'message-fcm-callback', payload: {
     mid: string,
     name: string
   }): void;

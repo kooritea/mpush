@@ -5,7 +5,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_WEBPUSH_CALLBACK' | 'REGISTER_WEBPUSH' | 'TEST_HTTP' | 'PING'
+  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_WEBPUSH_CALLBACK' | 'REGISTER_WEBPUSH' | 'REGISTER_FCM' | 'TEST_HTTP' | 'PING'
   public readonly data: any
   public readonly auth: {
     name: string,
@@ -119,6 +119,19 @@ export class RegisterWebPushClientSocketPacket extends ClientSocketPacket {
     }
     if (!this?.data?.keys) {
       throw new Error("keys property is required")
+    }
+  }
+}
+
+export class RegisterFCMClientSocketPacket extends ClientSocketPacket {
+  public readonly data: {
+    token: string
+  }
+  constructor(packet: ClientSocketPacket) {
+    super(packet)
+    this.data = packet?.data
+    if (!this?.data?.token) {
+      throw new Error("token property is required")
     }
   }
 }

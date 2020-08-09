@@ -11,4 +11,4 @@ interface TypeObject<T> {
  * no 未找到该消息要发送的目标
  * 
  */
-type MessageStatus = 'ready' | 'ok' | 'wait' | 'webpush-wait' | 'webpush-send' | 'webpush-ok' | 'no'
+type MessageStatus = 'ready' | 'ok' | 'wait' | 'webpush-wait' | 'webpush-send' | 'webpush-ok' | 'fcm-wait' | 'fcm-send' | 'fcm-ok' | 'no'

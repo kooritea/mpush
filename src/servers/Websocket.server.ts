@@ -1,12 +1,13 @@
 import { Context } from "src/Context";
 import { Server, MessageEvent, Data as SocketData } from "ws"
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterWebPushClientSocketPacket, MsgWebPushCbClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterWebPushClientSocketPacket, MsgWebPushCbClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket";
 import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
 import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { Ebus } from "../Ebus";
 import { Client } from "../model/Client";
+import { setInterval } from "timers";
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
@@ -95,19 +96,26 @@ export class WebsocketServer {
         this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
       } else {
         const client = this.context.clientManager.getClient(name)
-        if (client && client instanceof SocketClient) {
+        if (client instanceof SocketClient) {
           switch (clientSocketPacket.cmd) {
             case 'MESSAGE':
-              this.runCmdMessage(<SocketClient>client, name, new MessageClientSocketPacket(clientSocketPacket))
+              this.runCmdMessage(client, name, new MessageClientSocketPacket(clientSocketPacket))
               break
             case 'MESSAGE_CALLBACK':
-              this.runCmdMgsCb(<SocketClient>client, name, new MsgCbClientSocketPacket(clientSocketPacket))
+              this.runCmdMgsCb(client, name, new MsgCbClientSocketPacket(clientSocketPacket))
               break
             case 'REGISTER_WEBPUSH':
               const registerWebPushClientSocketPacket = new RegisterWebPushClientSocketPacket(clientSocketPacket)
               this.context.ebus.emit('register-webpush', {
                 client: client,
                 pushSubscription: registerWebPushClientSocketPacket.data
+              })
+              break
+            case 'REGISTER_FCM':
+              const registerFCMClientSocketPacket = new RegisterFCMClientSocketPacket(clientSocketPacket)
+              this.context.ebus.emit('register-fcm', {
+                client: client,
+                token: registerFCMClientSocketPacket.data.token
               })
               break
             case 'MESSAGE_WEBPUSH_CALLBACK':
@@ -121,7 +129,8 @@ export class WebsocketServer {
               client.sendPacket(new ServerSocketPacket('PONG', ""))
               break
             default:
-              throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
+              // throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
+              client.sendPacket(new InfoServerSocketPacket(`Unknow cmd: ${clientSocketPacket.cmd}`))
           }
         }
       }
@@ -144,7 +153,7 @@ export class WebsocketServer {
       })
     } else {
       let client = <SocketClient>this.context.clientManager.getClient(packet.data.name)
-      if (client?.constructor === SocketClient) {
+      if (client instanceof SocketClient) {
         client.updateSocket(socket)
       } else {
         client = new SocketClient(
@@ -167,7 +176,10 @@ export class WebsocketServer {
           group: packet.data.group
         }, this.context.config.token),
         msg: 'Successful authentication',
-        webpushPublicKey: this.context.config.webpush.vapidKeys.publicKey
+        webpushPublicKey: this.context.config.webpush.vapidKeys.publicKey,
+        fcmProjectId: this.context.config.fcm.projectId,
+        fcmApplicationId: this.context.config.fcm.applicationId,
+        fcmApiKey: this.context.config.fcm.apiKey
       }))
       socket.emit('auth-success', packet.data)
     }

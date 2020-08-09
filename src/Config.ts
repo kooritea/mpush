@@ -56,5 +56,13 @@ export const Config = {
     proxy: _Config?.webpush?.proxy,
     retryTimeout: Math.max(_Config?.webpush?.retryTimeout, 5000),
     vapidKeys: getVAPIDKeys()
+  },
+  fcm: {
+    projectId: _Config?.fcm?.projectId,
+    applicationId: _Config?.fcm?.applicationId,
+    apiKey: _Config?.fcm?.apiKey,
+    serverKey: _Config?.fcm?.serverKey,
+    proxy: _Config?.fcm?.proxy,
+    retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000)
   }
 }

@@ -3,7 +3,7 @@ import * as Url from "url"
 import * as querystring from 'querystring';
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
-import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgWebPushCbClientSocketPacket, AuthClientSocketPacket } from "../model/ClientSocketPacket";
+import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgWebPushCbClientSocketPacket, AuthClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket";
 import * as Utils from '../Utils'
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
@@ -83,6 +83,9 @@ export class HttpServer {
             break
           case 'MESSAGE_WEBPUSH_CALLBACK':
             this.runCmdMgsWebPushCb(clientSocketPacket, response)
+            break
+          case 'REGISTER_FCM':
+            this.runCmdRegisterFCM(clientSocketPacket, response)
             break
           case 'TEST_HTTP':
             this.runCmdTestHttp(response)
@@ -174,6 +177,24 @@ export class HttpServer {
       response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
     } else {
       response.end(JSON.stringify(new InfoServerSocketPacket("The MESSAGE_CALLBACK cmd must need auth.")))
+    }
+  }
+
+  private runCmdRegisterFCM(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
+    if (clientSocketPacket.auth) {
+      const registerFCMClientSocketPacket = new RegisterFCMClientSocketPacket(clientSocketPacket)
+      const client = this.context.clientManager.getClient(registerFCMClientSocketPacket.auth.name)
+      if (client) {
+        this.context.ebus.emit('register-fcm', {
+          client: client,
+          token: registerFCMClientSocketPacket.data.token
+        })
+        response.end(JSON.stringify(new InfoServerSocketPacket("ok")))
+      } else {
+        response.end(JSON.stringify(new InfoServerSocketPacket(`The Client ${registerFCMClientSocketPacket.auth.name} is not register`)))
+      }
+    } else {
+      response.end(JSON.stringify(new InfoServerSocketPacket("The REGISTER_FCM cmd must need auth.")))
     }
   }
 
