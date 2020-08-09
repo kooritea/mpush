@@ -139,7 +139,7 @@ class FCMClient extends Client {
       })
 
       let packet = new MessageServerSocketPacket(message)
-      this.sendPacket(packet).then(() => {
+      this.sendPacket(packet).then((res) => {
         this.ebus.emit('message-client-status', {
           mid: packet.data.mid,
           name: this.name,
@@ -157,7 +157,8 @@ class FCMClient extends Client {
   sendPacket(packet: ServerSocketPacket): Promise<void> {
     return axios.post('https://fcm.googleapis.com/fcm/send', {
       "data": packet,
-      to: this.token
+      to: this.token,
+      priority: 'high'
     }, {
       headers: {
         Authorization: `key=${this.options.serverKey}`
