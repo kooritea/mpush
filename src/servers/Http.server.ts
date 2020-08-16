@@ -217,7 +217,7 @@ export class HttpServer {
   }
   private verifyToken(request: Http.IncomingMessage): void {
     if (this.context.config.http.verifyToken) {
-      if (request.headers['authorization:'] !== this.context.config.token) {
+      if (request.headers['authorization'] !== this.context.config.token) {
         throw new Error(`Authorization verify error: ${request.headers['authorization']}`)
       }
     }

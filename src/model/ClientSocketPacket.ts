@@ -22,6 +22,9 @@ export class ClientSocketPacket {
           group: string
         }>Jsonwebtoken.verify(json.auth, Config.token)
       }
+      if (typeof json.auth === 'object') {
+        this.auth = json.auth
+      }
     } catch (e) {
       throw new Error(`parse ClientSocketPacket error: ${e.message}`)
     }
