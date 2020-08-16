@@ -10,7 +10,7 @@ import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPac
 
 export class HttpServer {
 
-  private httpServer: Http.Server
+  public httpServer: Http.Server
   private messageMap: Map<Message, Http.ServerResponse> = new Map()
   constructor(
     private readonly context: Context

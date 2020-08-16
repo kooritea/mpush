@@ -1,4 +1,5 @@
 import { Context } from "src/Context";
+import * as Http from "http"
 import { Server, MessageEvent, Data as SocketData } from "ws"
 import { Message } from "../model/Message.model";
 import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterWebPushClientSocketPacket, MsgWebPushCbClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket";
@@ -22,9 +23,10 @@ export class WebsocketServer {
     timer: NodeJS.Timeout
   }> = new Map()
   constructor(
-    private readonly context: Context
+    private readonly context: Context,
+    httpServer: Http.Server
   ) {
-    this.server = this.createServer()
+    this.server = this.createServer(httpServer)
     this.context.ebus.on('message-end', ({ message, status }) => {
       this.onMessageEnd(message, status)
     })
@@ -32,8 +34,13 @@ export class WebsocketServer {
     console.log(`[WebSocket-Server] Listen on ${this.context.config.websocket.port}`)
   }
 
-  private createServer(): Server {
-    const server = new Server({ port: this.context.config.websocket.port })
+  private createServer(httpServer: Http.Server): Server {
+    let server
+    if (this.context.config.websocket.port === this.context.config.http.port) {
+      server = new Server({ server: httpServer })
+    } else {
+      server = new Server({ port: this.context.config.websocket.port })
+    }
     server.on('connection', (socket) => {
       let name: string = ""
       let timer = setTimeout(() => {

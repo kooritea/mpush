@@ -15,7 +15,7 @@ export class App {
   private fcmServer: FCMServer
   constructor() {
     this.httpServer = new HttpServer(this.context)
-    this.websocketServer = new WebsocketServer(this.context)
+    this.websocketServer = new WebsocketServer(this.context, this.httpServer.httpServer)
     this.webhookServer = new WebhookServer(this.context)
     this.webpushServer = new WebPushServer(this.context)
     this.fcmServer = new FCMServer(this.context)

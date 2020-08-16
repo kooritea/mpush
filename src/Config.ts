@@ -34,7 +34,7 @@ export const Config = {
     cors: _Config?.http?.cors
   },
   websocket: {
-    port: _Config?.websocket?.port || 9094,
+    port: _Config?.websocket?.port || 9093,
     verifyToken: _Config?.websocket?.verifyToken === true || false,
     authTimeout: Math.max(_Config?.websocket?.authTimeout, 100),
     retryTimeout: Math.max(_Config?.websocket?.retryTimeout, 100),
