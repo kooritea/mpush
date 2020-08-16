@@ -3,6 +3,9 @@ import * as FS from "fs"
 import * as Path from "path"
 import * as WebPush from "web-push"
 import { AxiosProxyConfig } from 'axios'
+import { Logger } from './Logger'
+
+const logger: Logger = new Logger('Config')
 
 const getVAPIDKeys = function (): {
   publicKey: string,
@@ -13,12 +16,12 @@ const getVAPIDKeys = function (): {
     const keys = JSON.parse(FS.readFileSync(keypath).toString())
     return keys
   } catch (e) {
-    console.warn(`读取本地WebPush秘钥对失败，重新生成到${keypath}`)
+    logger.warn(`读取本地WebPush秘钥对失败，重新生成到${keypath}`)
     const keys = WebPush.generateVAPIDKeys()
     try {
       FS.writeFileSync(keypath, JSON.stringify(keys))
     } catch (e) {
-      console.warn(`保存WebPush秘钥对到${keypath}失败，下次启动将重新生成`)
+      logger.warn(`保存WebPush秘钥对到${keypath}失败，下次启动将重新生成`)
     }
     return keys
   }

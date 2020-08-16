@@ -8,12 +8,13 @@ import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { Ebus } from "../Ebus";
 import { Client } from "../model/Client";
-import { setInterval } from "timers";
+import { Logger } from "../Logger";
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
 
   private server: Server
+  private logger: Logger = new Logger('WebsocketServer')
   /**
    * 记录发送消息的Client和Message的对应关系  
    * 用于message-end事件订阅中查找消息来源并发送反馈
@@ -30,8 +31,8 @@ export class WebsocketServer {
     this.context.ebus.on('message-end', ({ message, status }) => {
       this.onMessageEnd(message, status)
     })
-    console.log(`[WebSocket-Server] Init`)
-    console.log(`[WebSocket-Server] Listen on ${this.context.config.websocket.port}`)
+    this.logger.info(`Init`)
+    this.logger.info(`Listen on ${this.context.config.websocket.port}`)
   }
 
   private createServer(httpServer: Http.Server): Server {
@@ -62,7 +63,7 @@ export class WebsocketServer {
         socket.close()
       })
       socket.on('error', () => {
-        console.log(`[${name}]: error`)
+        this.logger.error(`${name}`, 'error-close')
         socket.removeAllListeners()
         socket.close()
       })
@@ -143,7 +144,7 @@ export class WebsocketServer {
       }
 
     } catch (e) {
-      console.error(e)
+      this.logger.error(e)
       if (e instanceof ServerSocketPacket) {
         this.sendMsg(socket, e)
       } else {

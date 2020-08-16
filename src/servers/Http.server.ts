@@ -7,19 +7,22 @@ import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket,
 import * as Utils from '../Utils'
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
+import { Logger } from "../Logger";
 
 export class HttpServer {
 
   public httpServer: Http.Server
   private messageMap: Map<Message, Http.ServerResponse> = new Map()
+  private logger: Logger = new Logger('HttpServer')
+
   constructor(
     private readonly context: Context
   ) {
     this.httpServer = Http.createServer(this.httpHandle.bind(this))
     this.httpServer.listen(this.context.config.http.port)
     this.context.ebus.on('message-end', this.messageEndHandle.bind(this))
-    console.log(`[HTTP-Server] Init`)
-    console.log(`[HTTP-Server] Listen on ${this.context.config.http.port}`)
+    this.logger.info(`Init`)
+    this.logger.info(`Listen on ${this.context.config.http.port}`)
   }
   private async httpHandle(request: Http.IncomingMessage, response: Http.ServerResponse) {
     try {
@@ -91,7 +94,7 @@ export class HttpServer {
             this.runCmdTestHttp(response)
             break
           default:
-            console.log(`Unknow cmd: ${clientSocketPacket.cmd}`)
+            this.logger.warn(`${clientSocketPacket.cmd}`, 'unknow-cmd')
             throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
         }
       } else {
@@ -99,7 +102,7 @@ export class HttpServer {
         response.end()
       }
     } catch (e) {
-      console.error(e)
+      this.logger.error(e)
       response.statusCode = 500
       response.end(JSON.stringify(new InfoServerSocketPacket(e.message)))
     }

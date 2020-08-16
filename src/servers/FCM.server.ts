@@ -5,6 +5,7 @@ import { Message } from "../model/Message.model";
 import { Ebus } from "../Ebus";
 import * as HttpsProxyAgent from 'https-proxy-agent'
 import Axios from 'axios'
+import { Logger } from "../Logger";
 const axios = Axios.create()
 
 export class FCMServer {
@@ -14,6 +15,7 @@ export class FCMServer {
     serverKey: string,
     proxy: HttpsProxyAgent | undefined
   }
+  private logger: Logger = new Logger('FCMServer')
 
   constructor(
     private readonly context: Context
@@ -37,7 +39,7 @@ export class FCMServer {
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
-      console.log(`[FCM-Server] Init`)
+      this.logger.info(`Init`)
       this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
         this.onMessageFCMCallback(mid, name)
       })
@@ -50,17 +52,18 @@ export class FCMServer {
 
   registerFCM(client: Client, token: string) {
     if (this.nameMap.has(client.name)) {
-      console.log(`[register-FCM-update]: ${client.name}`)
+      this.logger.info(`${client.name}`, 'register-FCM-update')
       this.nameMap.get(client.name)?.update(token)
     } else {
-      console.log(`[register-FCM]: ${client.name}`)
+      this.logger.info(`${client.name}`, 'register-FCM')
       this.nameMap.set(client.name, new FCMClient(
         token,
         this.context.config.fcm.retryTimeout,
         client.name,
         client.group,
         this.context.ebus,
-        this.options
+        this.options,
+        this.logger
       ))
     }
   }
@@ -90,7 +93,7 @@ export class FCMServer {
     if (status === 'ok') {
       let fcmClient = this.nameMap.get(name)
       if (fcmClient) {
-        console.log(`[FCM client comfirm:Status change]: ${name}`)
+        this.logger.info(`${name}`, 'message-status-change')
         fcmClient.comfirm({ mid })
       }
     }
@@ -103,7 +106,7 @@ export class FCMServer {
   onMessageFCMCallback(mid: string, name: string) {
     let fcmClient = this.nameMap.get(name)
     if (fcmClient) {
-      console.log(`[FCM client comfirm:message-fcm-callback]: ${name}`)
+      this.logger.info(`${name}`, 'message-fcm-callback')
       this.context.ebus.emit('message-client-status', {
         mid,
         name,
@@ -125,13 +128,14 @@ class FCMClient extends Client {
       serverKey: string,
       proxy: HttpsProxyAgent | undefined
     },
+    private logger: Logger
   ) {
     super(retryTimeout, name, group)
   }
   protected send(message: Message) {
     if (!this.sendPacketLock) {
       this.sendPacketLock = true
-      console.log(`[FCM loop send]: ${message.message.text}`)
+      this.logger.info(`${message.message.text}`, 'loop-send')
       this.ebus.emit('message-client-status', {
         mid: message.mid,
         name: this.name,
@@ -147,7 +151,7 @@ class FCMClient extends Client {
         })
         this.comfirm({ mid: packet.data.mid })
       }).catch((e) => {
-        console.log(`[FCM send error]: ${e.message}`)
+        this.logger.error(`${e.message}`, 'send-error')
       }).finally(() => {
         this.sendPacketLock = false
       })

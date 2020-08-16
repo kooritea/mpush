@@ -4,13 +4,16 @@ import { Client } from "../model/Client";
 import Axios, { AxiosInstance, AxiosPromise, AxiosProxyConfig } from 'axios'
 import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
 import { Ebus } from "../Ebus";
+import { Logger } from "../Logger";
 
 export class WebhookServer {
+
+  private logger: Logger = new Logger('WebhookServer')
 
   constructor(
     private readonly context: Context
   ) {
-    console.log(`[WebHook-Server] Init`)
+    this.logger.info(`Init`)
     this.context.config.webhook.clients.forEach((item) => {
       this.registerClient(
         item.url,
@@ -19,7 +22,7 @@ export class WebhookServer {
         item.group,
         item.proxy || this.context.config.webhook.proxy
       )
-      console.log(`[WebHook-Server] register client ${item.name}`)
+      this.logger.info(`${item.name}`, 'register-client')
     })
   }
 

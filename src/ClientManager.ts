@@ -3,10 +3,12 @@ import { Client } from "./model/Client";
 import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
 import { Context } from "./Context";
 import { Message } from "./model/Message.model";
+import { Logger } from "./Logger";
 
 export class ClientManager {
 
   private clientMap: Map<string, Client> = new Map()
+  private logger: Logger = new Logger('ClientManager')
 
   constructor(
     private readonly context: Context,
@@ -26,7 +28,7 @@ export class ClientManager {
    */
   public registerClient(name: string, group: string, client: Client): void {
     if (name && (!this.clientMap.has(name) || this.clientMap.get(name)?.constructor === client.constructor)) {
-      console.log(`[user-register]: name: ${name}${group ? ',group: ' + group : ''}`)
+      this.logger.info(`name: ${name}${group ? ',group: ' + group : ''}`, 'user-register')
       this.clientMap.get(name)?.unregister()
       this.clientMap.set(name, client)
     } else {

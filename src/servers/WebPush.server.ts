@@ -4,10 +4,12 @@ import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket }
 import { Client } from "../model/Client";
 import { Message } from "../model/Message.model";
 import { Ebus } from "../Ebus";
+import { Logger } from "../Logger";
 export class WebPushServer {
 
   private nameMap: Map<string, WebPushClient> = new Map()
   private options: WebPush.RequestOptions | undefined = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
+  private logger: Logger = new Logger('WebPushServer')
 
   constructor(
     private readonly context: Context
@@ -28,7 +30,7 @@ export class WebPushServer {
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
-      console.log(`[WebPush-Server] Init`)
+      this.logger.info(`Init`)
       this.context.ebus.on('message-webpush-callback', ({ mid, name }) => {
         this.onMessageWebPushCallback(mid, name)
       })
@@ -43,13 +45,14 @@ export class WebPushServer {
     if (this.nameMap.has(client.name)) {
       this.nameMap.get(client.name)?.update(pushSubscription)
     } else {
-      console.log(`[register-WebPush]: ${client.name}`)
+      this.logger.info(`${client.name}`, 'register-WebPush')
       this.nameMap.set(client.name, new WebPushClient(
         pushSubscription,
         this.context.config.webpush.retryTimeout,
         client.name,
         client.group,
         this.context.ebus,
+        this.logger,
         this.options
       ))
     }
@@ -109,7 +112,7 @@ export class WebPushServer {
     if (status === 'ok') {
       let webpushClient = this.nameMap.get(name)
       if (webpushClient) {
-        console.log(`[WebPush client comfirm:Status change]: ${name}`)
+        this.logger.info(`${name}`, 'message-status-change')
         webpushClient.comfirm({ mid })
       }
     }
@@ -122,7 +125,7 @@ export class WebPushServer {
   onMessageWebPushCallback(mid: string, name: string) {
     let webpushClient = this.nameMap.get(name)
     if (webpushClient) {
-      console.log(`[WebPush client comfirm:message-webpush-callback]: ${name}`)
+      this.logger.info(`${name}`, 'message-webpush-callback')
       this.context.ebus.emit('message-client-status', {
         mid,
         name,
@@ -140,6 +143,7 @@ class WebPushClient extends Client {
     name: string,
     group: string,
     private ebus: Ebus,
+    private logger: Logger,
     private options?: WebPush.RequestOptions,
   ) {
     super(retryTimeout, name, group)
@@ -147,7 +151,7 @@ class WebPushClient extends Client {
   protected send(message: Message) {
     if (!this.sendPacketLock) {
       this.sendPacketLock = true
-      console.log(`[WebPush loop send]: ${message.message.text}`)
+      this.logger.info(`${message.message.text}`, 'loop-send')
       this.ebus.emit('message-client-status', {
         mid: message.mid,
         name: this.name,
@@ -163,7 +167,7 @@ class WebPushClient extends Client {
         })
         this.comfirm({ mid: packet.data.mid })
       }).catch((e) => {
-        console.log(`[WebPush send error]: ${e.message}`)
+        this.logger.error(`${e.message}`, 'send-error')
       }).finally(() => {
         this.sendPacketLock = false
       })
