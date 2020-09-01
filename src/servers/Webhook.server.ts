@@ -2,6 +2,7 @@ import { Context } from "../Context";
 import { Message } from "../model/Message.model";
 import { Client } from "../model/Client";
 import Axios, { AxiosInstance, AxiosPromise, AxiosProxyConfig } from 'axios'
+import * as HttpsProxyAgent from 'https-proxy-agent'
 import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
 import { Ebus } from "../Ebus";
 import { Logger } from "../Logger";
@@ -20,13 +21,13 @@ export class WebhookServer {
         <'GET' | 'POST'>item.method,
         item.name,
         item.group,
-        item.proxy || this.context.config.webhook.proxy
+        new HttpsProxyAgent(item.proxy || this.context.config.webhook.proxy)
       )
       this.logger.info(`${item.name}`, 'register-client')
     })
   }
 
-  private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string, proxy: AxiosProxyConfig) {
+  private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string, proxy: HttpsProxyAgent | undefined) {
     const client = new WebhookClient(
       url,
       method,
@@ -52,13 +53,13 @@ class WebhookClient extends Client {
     private method: 'GET' | 'POST',
     name: string,
     group: string,
-    proxy: AxiosProxyConfig,
+    proxy: HttpsProxyAgent | undefined,
     private token: string,
     retryTimeout: number,
     private ebus: Ebus
   ) {
     super(retryTimeout, name, group)
-    this.axios = proxy.host && proxy.port ? Axios.create({ proxy }) : Axios.create()
+    this.axios = Axios.create({ httpsAgent: proxy })
   }
   protected send(message: Message) {
     this.sendPacket(new MessageServerSocketPacket(message)).then((response) => {

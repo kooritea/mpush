@@ -45,14 +45,8 @@ export const Config = {
   },
   webhook: {
     retryTimeout: Math.max(_Config?.webhook?.retryTimeout, 100),
-    clients: <Array<{
-      name: string,
-      group: string,
-      url: string,
-      method: string,
-      proxy: AxiosProxyConfig
-    }>>(Array.isArray(_Config?.webhook?.clients) ? _Config?.webhook?.clients : []),
-    proxy: <AxiosProxyConfig>_Config?.webhook?.proxy
+    clients: Array.isArray(_Config?.webhook?.clients) ? _Config?.webhook?.clients : [],
+    proxy: _Config?.webhook?.proxy
   },
   webpush: {
     apiKey: _Config?.webpush?.apiKey,

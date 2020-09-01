@@ -79,7 +79,7 @@ npm run dev
   },
   "websocket": {
     "verifyToken": true, // websocket连接起始阶段的AUTH指令是否验证token
-    "port": 9094, // 可以和上面的http使用同一个端口，建议使用同一个端口
+    "port": 9093, // 可以和上面的http使用同一个端口，建议使用同一个端口
     "authTimeout": 30000, // 时间内未验证成功将会断开socket
     "retryTimeout": 3000, // 时间内未收到socket客户端的消息确认会重新发送
     "waitTimeout": 5000  // 使用socket客户端向其他客户端发送消息时,等待其他客户端答复的最长时间,超时后会返回目标客户端的接受状态
@@ -92,26 +92,10 @@ npm run dev
         "group": "group2",
         "url": "http://127.0.0.1:8089/",
         "method": "GET", // 请求体下面补充
-        // "proxy": { // 代理设置,可以在clients内对单个客户端设置,也可以在webhook.proxy统一设置
-        //   "host": "127.0.0.1",
-        //   "port": 12333,
-        //   "auth": {
-        //     "username": "string",
-        //     "password": "string"
-        //   },
-        //   "protocol": "http"
-        // }
+        "proxy": "http://127.0.0.1:12333"// 代理设置,可以在clients内对单个客户端设置,也可以在webhook.proxy统一设置
       }
     ],
-    // "proxy": {
-    //   "host": "127.0.0.1",
-    //   "port": 12333,
-    //   "auth": {
-    //     "username": "string",
-    //     "password": "string"
-    //   },
-    //   "protocol": "http"
-    // }
+    "proxy": "http://127.0.0.1:12333"// 代理设置
   },
   "webpush": {
     "apiKey": "", // FCM apiKey,获取方式下面补充

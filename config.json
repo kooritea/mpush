@@ -8,7 +8,7 @@
   },
   "websocket": {
     "verifyToken": true,
-    "port": 9094,
+    "port": 9093,
     "authTimeout": 30000,
     "retryTimeout": 3000,
     "waitTimeout": 5000
@@ -21,30 +21,14 @@
         "group": "group2",
         "url": "http://127.0.0.1:8089/",
         "method": "GET",
-        "proxy": {
-          "host": "127.0.0.1",
-          "port": 12333,
-          "auth": {
-            "username": "string",
-            "password": "string"
-          },
-          "protocol": "http"
-        }
+        "proxy": "http://192.168.1.2:62333"
       }
     ],
-    "proxy": {
-      "host": "127.0.0.1",
-      "port": 12333,
-      "auth": {
-        "username": "string",
-        "password": "string"
-      },
-      "protocol": "http"
-    }
+    "proxy": "http://192.168.1.2:62333"
   },
   "webpush": {
     "apiKey": "",
-    "proxy": "http://127.0.0.1:62333",
+    "proxy": "http://127.0.0.1:62233",
     "retryTimeout": 10000
   },
   "fcm": {
@@ -52,7 +36,7 @@
     "applicationId": "",
     "apiKey": "",
     "serverKey": "",
-    "proxy": "http://127.0.0.1:62333",
+    "proxy": "http://127.0.0.1:62233",
     "retryTimeout": 10000
   }
 }
