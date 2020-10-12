@@ -95,6 +95,7 @@ export class FCMServer {
       if (fcmClient) {
         this.logger.info(`${name}`, 'message-status-change')
         fcmClient.comfirm({ mid })
+        fcmClient.deleteMessage({ mid })
       }
     }
   }

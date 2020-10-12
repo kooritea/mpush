@@ -26,7 +26,7 @@ export abstract class Client {
    * 只有有回复的消息类型才可以进入队列发送,否则没有人调用comfirm
    * @param message 
    */
-  sendMessage(message: Message): void {
+  public sendMessage(message: Message): void {
     this.messages.push(message)
     this.next()
   }
@@ -36,7 +36,7 @@ export abstract class Client {
    * 传入上一条消息的唯一键值,只有传入的键值对应当前正在发送的消息才会进行实际的comfirm操作  
    * 移除队列中第一条消息  
    */
-  comfirm(keys: Partial<Message>) {
+  public comfirm(keys: Partial<Message>) {
     for (let key in keys) {
       if (!this.messages[0] || this.messages[0][key] !== keys[key]) {
         return
@@ -44,6 +44,27 @@ export abstract class Client {
     }
     this.messages.shift()
     this.unlock()
+  }
+
+  /**
+   * 从队列中删除一条消息
+   * @param keys 
+   */
+  public deleteMessage(keys: Partial<Message>): void {
+    for (let i = 0; i < this.messages.length; i++) {
+      const message = this.messages[i]
+      let next = false
+      for (let key in keys) {
+        if (message[key] !== keys[key]) {
+          next = true
+        }
+      }
+      if (next) {
+        continue
+      }
+      this.messages.splice(i, 1)
+      return
+    }
   }
 
   /**
