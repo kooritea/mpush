@@ -34,6 +34,9 @@ export class WebPushServer {
       this.context.ebus.on('message-webpush-callback', ({ mid, name }) => {
         this.onMessageWebPushCallback(mid, name)
       })
+      this.context.ebus.on('unregister-client', ({ client }) => {
+        this.nameMap.delete(client.name)
+      })
     } else {
       this.context.ebus.on('register-webpush', ({ client }) => {
         client.sendPacket(new InfoServerSocketPacket("服务端未提供webpush.apiKey"))
@@ -42,21 +45,23 @@ export class WebPushServer {
   }
 
   registerWebPush(client: Client, pushSubscription: WebPush.PushSubscription) {
-    if (this.nameMap.has(client.name)) {
-      this.nameMap.get(client.name)?.update(pushSubscription)
+    const newInstance = new WebPushClient(
+      pushSubscription,
+      this.context.config.webpush.retryTimeout,
+      client.name,
+      client.group,
+      this.context.ebus,
+      this.logger,
+      this.options
+    )
+    const oldInstance = this.nameMap.get(client.name)
+    if (oldInstance) {
+      this.logger.info(`${client.name}`, 'register-WebPush-update')
+      this.nameMap.set(client.name, oldInstance.reRegister(newInstance))
     } else {
       this.logger.info(`${client.name}`, 'register-WebPush')
-      this.nameMap.set(client.name, new WebPushClient(
-        pushSubscription,
-        this.context.config.webpush.retryTimeout,
-        client.name,
-        client.group,
-        this.context.ebus,
-        this.logger,
-        this.options
-      ))
+      this.nameMap.set(client.name, newInstance)
     }
-
   }
 
   onMessageStart(message: Message) {
@@ -138,7 +143,7 @@ export class WebPushServer {
 class WebPushClient extends Client {
   private sendPacketLock: boolean = false
   constructor(
-    private pushSubscription: WebPush.PushSubscription,
+    public pushSubscription: WebPush.PushSubscription,
     retryTimeout: number,
     name: string,
     group: string,
@@ -182,9 +187,13 @@ class WebPushClient extends Client {
       ...this.options
     })
   }
-  unregister() { }
 
   update(pushSubscription: WebPush.PushSubscription) {
     this.pushSubscription = pushSubscription
+  }
+
+  reRegister(newInstance: WebPushClient): WebPushClient {
+    this.pushSubscription = newInstance.pushSubscription
+    return <WebPushClient>super.reRegister(newInstance)
   }
 }

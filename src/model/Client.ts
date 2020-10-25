@@ -114,11 +114,31 @@ export abstract class Client {
   public abstract sendPacket(packet: ServerSocketPacket): any
 
   /**
-   * 被新的同name实例替换时调用
+   * 注销客户端  
+   * 必须调用super.unRegister()  
+   * 清空消息队列，关闭计时器  
    */
-  public abstract unregister(): void
-}
+  public unRegister(): void {
+    clearTimeout(this.timer)
+    while (this.messages.length > 0) {
+      this.messages.pop()
+    }
+  }
 
-interface ClientImp {
-  send(message: Message): void
+  /**
+   * 重新注册该客户端，需要调用newInstance的unRegister方法，返回自身
+   * @param newInstance 
+   */
+  public reRegister(newInstance: Client): Client {
+    newInstance.supportReRegister()
+    this.unlock()
+    return this
+  }
+
+  /**
+   * 重注册时调用的方法，默认为直接调用unRegister反注册
+   */
+  public supportReRegister(): void {
+    this.unRegister()
+  }
 }

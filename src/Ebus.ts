@@ -54,6 +54,9 @@ export class Ebus {
     mid: string,
     name: string
   }) => void): void;
+  on(event: 'unregister-client', listener: (payload: {
+    client: Client
+  }) => void): void;
   on(event: string, listener: (payload: any) => void): void {
     this.emitter.on(event, listener)
   }
@@ -84,6 +87,9 @@ export class Ebus {
   emit(event: 'message-fcm-callback', payload: {
     mid: string,
     name: string
+  }): void;
+  emit(event: 'unregister-client', payload: {
+    client: Client
   }): void;
   emit(event: string, payload: any): void {
     this.emitter.emit(event, payload)

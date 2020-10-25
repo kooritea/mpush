@@ -5,7 +5,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
  * 数据包基本结构类
  */
 export class ClientSocketPacket {
-  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_WEBPUSH_CALLBACK' | 'REGISTER_WEBPUSH' | 'REGISTER_FCM' | 'TEST_HTTP' | 'PING'
+  public readonly cmd: 'AUTH' | 'MESSAGE' | 'MESSAGE_CALLBACK' | 'MESSAGE_WEBPUSH_CALLBACK' | 'REGISTER_WEBPUSH' | 'REGISTER_FCM' | 'TEST_HTTP' | 'PING' | "UNREGISTER"
   public readonly data: any
   public readonly auth: {
     name: string,

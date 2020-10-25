@@ -136,6 +136,9 @@ export class WebsocketServer {
             case 'PING':
               client.sendPacket(new ServerSocketPacket('PONG', ""))
               break
+            case 'UNREGISTER':
+              this.context.clientManager.unRegisterClient({ name })
+              break
             default:
               // throw new Error(`Unknow cmd: ${clientSocketPacket.cmd}`)
               client.sendPacket(new InfoServerSocketPacket(`Unknow cmd: ${clientSocketPacket.cmd}`))
@@ -160,23 +163,17 @@ export class WebsocketServer {
         msg: 'Token invalid'
       })
     } else {
-      let client = <SocketClient>this.context.clientManager.getClient(packet.data.name)
-      if (client instanceof SocketClient) {
-        client.updateSocket(socket)
-      } else {
-        client = new SocketClient(
+      let client = this.context.clientManager.registerClient(
+        packet.data.name,
+        packet.data.group,
+        new SocketClient(
           socket,
           this.context.config.websocket.retryTimeout,
           this.context.ebus,
           packet.data.name,
           packet.data.group
         )
-        this.context.clientManager.registerClient(
-          packet.data.name,
-          packet.data.group,
-          client
-        )
-      }
+      )
       client.sendPacket(new AuthServerSocketPacket({
         code: 200,
         auth: Jsonwebtoken.sign({
@@ -247,11 +244,6 @@ class SocketClient extends Client {
     this.socket.close()
     this.socket.removeAllListeners()
   }
-  updateSocket(socket: Socket) {
-    this.close()
-    this.socket = socket
-    this.unlock()
-  }
 
   protected send(message: Message) {
     let data = new MessageServerSocketPacket(message)
@@ -265,7 +257,16 @@ class SocketClient extends Client {
   sendPacket(packet: ServerSocketPacket) {
     this.socket.send(Utils.encodeSocketData(packet))
   }
-  unregister() {
+
+  unRegister() {
+    super.unRegister()
     this.close()
+  }
+  supportReRegister() {
+    super.unRegister()
+  }
+  reRegister(newInstance: SocketClient): SocketClient {
+    this.socket = newInstance.socket
+    return <SocketClient>super.reRegister(newInstance)
   }
 }

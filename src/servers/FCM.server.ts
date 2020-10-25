@@ -43,6 +43,9 @@ export class FCMServer {
       this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
         this.onMessageFCMCallback(mid, name)
       })
+      this.context.ebus.on('unregister-client', ({ client }) => {
+        this.nameMap.delete(client.name)
+      })
     } else {
       this.context.ebus.on('register-fcm', ({ client }) => {
         client.sendPacket(new InfoServerSocketPacket("fcm.projectId或fcm.applicationId或fcm.apiKey或fcm.serverKey"))
@@ -51,20 +54,22 @@ export class FCMServer {
   }
 
   registerFCM(client: Client, token: string) {
-    if (this.nameMap.has(client.name)) {
+    const newInstance = new FCMClient(
+      token,
+      this.context.config.fcm.retryTimeout,
+      client.name,
+      client.group,
+      this.context.ebus,
+      this.options,
+      this.logger
+    )
+    const oldInstance = this.nameMap.get(client.name)
+    if (oldInstance) {
       this.logger.info(`${client.name}`, 'register-FCM-update')
-      this.nameMap.get(client.name)?.update(token)
+      this.nameMap.set(client.name, oldInstance.reRegister(newInstance))
     } else {
       this.logger.info(`${client.name}`, 'register-FCM')
-      this.nameMap.set(client.name, new FCMClient(
-        token,
-        this.context.config.fcm.retryTimeout,
-        client.name,
-        client.group,
-        this.context.ebus,
-        this.options,
-        this.logger
-      ))
+      this.nameMap.set(client.name, newInstance)
     }
   }
 
@@ -171,9 +176,9 @@ class FCMClient extends Client {
       httpsAgent: this.options.proxy
     })
   }
-  unregister() { }
 
-  update(token: string) {
-    this.token = token
+  reRegister(newInstance: FCMClient): FCMClient {
+    this.token = newInstance.token
+    return <FCMClient>super.reRegister(newInstance)
   }
 }
