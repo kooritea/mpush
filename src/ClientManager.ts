@@ -20,31 +20,26 @@ export class ClientManager {
   }
 
   /**
-   * name已被其他互斥类型的客户端使用或name为空会抛出AuthServerSocketPacket
+   * name为空会抛出AuthServerSocketPacket
    * 只有websocket这些与其他客户端互斥的才会使用这个管理器
    * FCM、WebPush这些不可靠推送由server里自己管理客户端  
-   * 注意不要储存传入的client，请使用改方法返回的client或通过getClient方法获取
    * @param name 
    * @param group 
    */
   public registerClient(name: string, group: string, client: Client): Client {
-    if (name && (!this.clientMap.has(name) || this.clientMap.get(name)?.constructor === client.constructor)) {
+    if (name) {
       this.logger.info(`name: ${name}${group ? ',group: ' + group : ''}`, `user-${this.clientMap.has(name) ? 'login' : 'register'}`)
-      const targetClient = this.clientMap.get(name)?.reRegister(client) || client
-      this.clientMap.set(name, targetClient)
-      return targetClient
-    } else {
-      if (name) {
-        throw new AuthServerSocketPacket({
-          code: 403,
-          msg: `The name [${name}] is already used`
-        })
-      } else {
-        throw new AuthServerSocketPacket({
-          code: 403,
-          msg: `The name is required`
-        })
+      if (this.clientMap.has(name)) {
+        const oldClient = <Client>this.clientMap.get(name)
+        client.inherit(oldClient)
       }
+      this.clientMap.set(name, client)
+      return client
+    } else {
+      throw new AuthServerSocketPacket({
+        code: 403,
+        msg: `The name is required`
+      })
     }
   }
 

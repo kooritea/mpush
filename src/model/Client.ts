@@ -115,7 +115,7 @@ export abstract class Client {
 
   /**
    * 注销客户端  
-   * 必须调用super.unRegister()  
+   * 重写时必须调用super.unRegister()  
    * 清空消息队列，关闭计时器  
    */
   public unRegister(): void {
@@ -124,21 +124,17 @@ export abstract class Client {
       this.messages.pop()
     }
   }
-
-  /**
-   * 重新注册该客户端，需要调用newInstance的unRegister方法，返回自身
-   * @param newInstance 
-   */
-  public reRegister(newInstance: Client): Client {
-    newInstance.supportReRegister()
-    this.unlock()
-    return this
+  public exportMessages(): Message[] {
+    return this.messages
   }
 
   /**
-   * 重注册时调用的方法，默认为直接调用unRegister反注册
-   */
-  public supportReRegister(): void {
-    this.unRegister()
+   * 继承后自动注销传入的client
+  */
+  public inherit(client: Client): void {
+    for (let message of client.exportMessages()) {
+      this.sendMessage(message)
+    }
+    client.unRegister()
   }
 }

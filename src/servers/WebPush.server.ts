@@ -57,7 +57,8 @@ export class WebPushServer {
     const oldInstance = this.nameMap.get(client.name)
     if (oldInstance) {
       this.logger.info(`${client.name}`, 'register-WebPush-update')
-      this.nameMap.set(client.name, oldInstance.reRegister(newInstance))
+      newInstance.inherit(oldInstance)
+      this.nameMap.set(client.name, newInstance)
     } else {
       this.logger.info(`${client.name}`, 'register-WebPush')
       this.nameMap.set(client.name, newInstance)
@@ -190,10 +191,5 @@ class WebPushClient extends Client {
 
   update(pushSubscription: WebPush.PushSubscription) {
     this.pushSubscription = pushSubscription
-  }
-
-  reRegister(newInstance: WebPushClient): WebPushClient {
-    this.pushSubscription = newInstance.pushSubscription
-    return <WebPushClient>super.reRegister(newInstance)
   }
 }

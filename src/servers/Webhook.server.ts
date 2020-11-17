@@ -102,8 +102,4 @@ class WebhookClient extends Client {
       })
     }
   }
-  reRegister(newInstance: WebhookClient): WebhookClient {
-    this.url = newInstance.url
-    return <WebhookClient>super.reRegister(newInstance)
-  }
 }

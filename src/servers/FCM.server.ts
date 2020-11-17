@@ -66,7 +66,8 @@ export class FCMServer {
     const oldInstance = this.nameMap.get(client.name)
     if (oldInstance) {
       this.logger.info(`${client.name}`, 'register-FCM-update')
-      this.nameMap.set(client.name, oldInstance.reRegister(newInstance))
+      newInstance.inherit(oldInstance)
+      this.nameMap.set(client.name, newInstance)
     } else {
       this.logger.info(`${client.name}`, 'register-FCM')
       this.nameMap.set(client.name, newInstance)
@@ -175,10 +176,5 @@ class FCMClient extends Client {
       },
       httpsAgent: this.options.proxy
     })
-  }
-
-  reRegister(newInstance: FCMClient): FCMClient {
-    this.token = newInstance.token
-    return <FCMClient>super.reRegister(newInstance)
   }
 }

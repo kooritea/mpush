@@ -262,11 +262,5 @@ class SocketClient extends Client {
     super.unRegister()
     this.close()
   }
-  supportReRegister() {
-    super.unRegister()
-  }
-  reRegister(newInstance: SocketClient): SocketClient {
-    this.socket = newInstance.socket
-    return <SocketClient>super.reRegister(newInstance)
-  }
+
 }
