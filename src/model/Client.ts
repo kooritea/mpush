@@ -6,29 +6,20 @@ import { Message } from "./Message.model"
  * 推送方式由子类实现
  * 只有像websocket和webhook这种有有接收信息能力的client才会包装成Client类
  */
-export abstract class Client {
-  private readonly messages: Message[] = []
-  private lock: boolean = false
-  private timer: NodeJS.Timeout
-  /**
-   * 
-   * @param retryTimeout 重试等待时间,-1时不重试
-   */
+export class EmptyClient {
+  protected readonly messages: Message[] = []
+
   constructor(
-    private retryTimeout: number,
     public readonly name: string,
     public readonly group: string
   ) { }
 
   /**
-   * 发送message  
-   * 会进入消息队列排队  
-   * 只有有回复的消息类型才可以进入队列发送,否则没有人调用comfirm
+   * message进入消息队列排队  
    * @param message 
    */
   public sendMessage(message: Message): void {
     this.messages.push(message)
-    this.next()
   }
 
   /**
@@ -43,7 +34,6 @@ export abstract class Client {
       }
     }
     this.messages.shift()
-    this.unlock()
   }
 
   /**
@@ -65,6 +55,66 @@ export abstract class Client {
       this.messages.splice(i, 1)
       return
     }
+  }
+
+  /**
+   * 注销客户端  
+   * 重写时必须调用super.unRegister()  
+   * 清空消息队列，关闭计时器  
+   */
+  public unRegister(): void {
+    while (this.messages.length > 0) {
+      this.messages.pop()
+    }
+  }
+  public exportMessages(): Message[] {
+    return this.messages
+  }
+
+  /**
+   * 继承后自动注销传入的client
+  */
+  public inherit(client: Client): void {
+    for (let message of client.exportMessages()) {
+      this.sendMessage(message)
+    }
+    client.unRegister()
+  }
+}
+
+
+export abstract class Client extends EmptyClient {
+
+  private lock: boolean = false
+  private timer: NodeJS.Timeout
+
+  constructor(
+    private retryTimeout: number,
+    public readonly name: string,
+    public readonly group: string
+  ) {
+    super(name, group)
+  }
+
+  /**
+   * 发送message  
+   * 会进入消息队列排队  
+   * 只有有回复的消息类型才可以进入队列发送,否则没有人调用comfirm
+   * @param message 
+   */
+  public sendMessage(message: Message): void {
+    super.sendMessage(message)
+    this.next()
+  }
+
+  /**
+   * 上一条消息已送达确认  
+   * 传入上一条消息的唯一键值,只有传入的键值对应当前正在发送的消息才会进行实际的comfirm操作  
+   * 移除队列中第一条消息  
+   */
+  public comfirm(keys: Partial<Message>) {
+    super.comfirm(keys)
+    this.unlock()
   }
 
   /**
@@ -100,11 +150,11 @@ export abstract class Client {
   }
 
   /**
-   * 队列自动调用  
-   * 上一条消息确认或unlock时调用  
-   * 当retryTimeout内没有comfirm会重新调用该方法
-   * @param message 
-   */
+  * 队列自动调用  
+  * 上一条消息确认或unlock时调用  
+  * 当retryTimeout内没有comfirm会重新调用该方法
+  * @param message 
+  */
   protected abstract send(message: Message): void
 
   /**
@@ -119,22 +169,7 @@ export abstract class Client {
    * 清空消息队列，关闭计时器  
    */
   public unRegister(): void {
+    super.unRegister()
     clearTimeout(this.timer)
-    while (this.messages.length > 0) {
-      this.messages.pop()
-    }
-  }
-  public exportMessages(): Message[] {
-    return this.messages
-  }
-
-  /**
-   * 继承后自动注销传入的client
-  */
-  public inherit(client: Client): void {
-    for (let message of client.exportMessages()) {
-      this.sendMessage(message)
-    }
-    client.unRegister()
   }
 }
