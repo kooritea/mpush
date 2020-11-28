@@ -7,18 +7,20 @@ import { Ebus } from "../Ebus";
 import { Logger } from "../Logger";
 export class WebPushServer {
 
+  public static LOCALSTORAGE_SCOPE: string = 'WebPushServer'
+
   private nameMap: Map<string, WebPushClient> = new Map()
   private options: WebPush.RequestOptions | undefined = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
   private logger: Logger = new Logger('WebPushServer')
-
   constructor(
     private readonly context: Context
   ) {
     if (this.context.config.webpush.apiKey) {
+      const { publicKey, privateKey } = this.getVAPIDKeys()
       WebPush.setVapidDetails(
         'mailto:your-email@gmail.com',
-        this.context.config.webpush.vapidKeys.publicKey,
-        this.context.config.webpush.vapidKeys.privateKey
+        publicKey,
+        privateKey
       )
       WebPush.setGCMAPIKey(this.context.config.webpush.apiKey)
       this.context.ebus.on('register-webpush', ({ client, pushSubscription }) => {
@@ -42,6 +44,13 @@ export class WebPushServer {
         client.sendPacket(new InfoServerSocketPacket("服务端未提供webpush.apiKey"))
       })
     }
+  }
+
+  private getVAPIDKeys(): {
+    publicKey: string,
+    privateKey: string
+  } {
+    return this.context.localStorageManager.get(WebPushServer.LOCALSTORAGE_SCOPE, 'VAPIDKeys', WebPush.generateVAPIDKeys(), true)
   }
 
   registerWebPush(client: Client, pushSubscription: WebPush.PushSubscription) {

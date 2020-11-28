@@ -9,6 +9,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
 import { Ebus } from "../Ebus";
 import { Client } from "../model/Client";
 import { Logger } from "../Logger";
+import { WebPushServer } from "./WebPush.server";
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
@@ -181,7 +182,7 @@ export class WebsocketServer {
           group: packet.data.group
         }, this.context.config.token),
         msg: 'Successful authentication',
-        webpushPublicKey: this.context.config.webpush.vapidKeys.publicKey,
+        webpushPublicKey: this.context.localStorageManager.get<{ publicKey: string, privateKey: string }>(WebPushServer.LOCALSTORAGE_SCOPE, 'VAPIDKeys')?.publicKey,
         fcmProjectId: this.context.config.fcm.projectId,
         fcmApplicationId: this.context.config.fcm.applicationId,
         fcmApiKey: this.context.config.fcm.apiKey

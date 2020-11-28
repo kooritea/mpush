@@ -1,32 +1,4 @@
 import * as _Config from '../config.json'
-import * as FS from "fs"
-import * as Path from "path"
-import * as WebPush from "web-push"
-import { AxiosProxyConfig } from 'axios'
-import { Logger } from './Logger'
-
-const logger: Logger = new Logger('Config')
-
-const getVAPIDKeys = function (): {
-  publicKey: string,
-  privateKey: string
-} {
-  const keypath = Path.resolve(__dirname, '../keys')
-  try {
-    const keys = JSON.parse(FS.readFileSync(keypath).toString())
-    return keys
-  } catch (e) {
-    logger.warn(`读取本地WebPush秘钥对失败，重新生成到${keypath}`)
-    const keys = WebPush.generateVAPIDKeys()
-    try {
-      FS.writeFileSync(keypath, JSON.stringify(keys))
-    } catch (e) {
-      logger.warn(`保存WebPush秘钥对到${keypath}失败，下次启动将重新生成`)
-    }
-    return keys
-  }
-
-}
 
 export const Config = {
   token: _Config?.token || "",
@@ -51,8 +23,7 @@ export const Config = {
   webpush: {
     apiKey: _Config?.webpush?.apiKey,
     proxy: _Config?.webpush?.proxy,
-    retryTimeout: Math.max(_Config?.webpush?.retryTimeout, 5000),
-    vapidKeys: getVAPIDKeys()
+    retryTimeout: Math.max(_Config?.webpush?.retryTimeout, 5000)
   },
   fcm: {
     projectId: _Config?.fcm?.projectId,

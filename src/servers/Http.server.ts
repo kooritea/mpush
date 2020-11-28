@@ -8,6 +8,7 @@ import * as Utils from '../Utils'
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
 import { Logger } from "../Logger";
+import { WebPushServer } from "./WebPush.server";
 
 export class HttpServer {
 
@@ -122,7 +123,7 @@ export class HttpServer {
           group: packet.data.group
         }, this.context.config.token),
         msg: 'Successful authentication',
-        webpushPublicKey: this.context.config.webpush.vapidKeys.publicKey
+        webpushPublicKey: this.context.localStorageManager.get<{ publicKey: string, privateKey: string }>(WebPushServer.LOCALSTORAGE_SCOPE, 'VAPIDKeys')?.publicKey
       })))
     }
   }
