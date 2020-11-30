@@ -1,5 +1,6 @@
 import * as FS from "fs"
 import * as PATH from "path"
+import * as Crypto from "crypto"
 import { Logger } from "./Logger"
 
 export class LocalStorageManager {
@@ -9,6 +10,9 @@ export class LocalStorageManager {
     [scope: string]: {
       [key: string]: any
     }
+  } = {}
+  private DataHash: {
+    [scope: string]: string
   } = {}
   private saveTimer: {
     [scope: string]: NodeJS.Timeout | null
@@ -34,6 +38,7 @@ export class LocalStorageManager {
       const dataString = FS.readFileSync(scopePath)
       try {
         this.DataCache[scope] = JSON.parse(dataString.toString())
+        this.DataHash[scope] = Crypto.createHash('md5').update(dataString.toString()).digest('hex')
       } catch (e) {
         throw new Error(`持久化储存文件格式化失败: ${scopePath}\n请检查该文件修复或手动删除`)
       }
@@ -43,8 +48,13 @@ export class LocalStorageManager {
   private save(scope: string) {
     if (!this.saveTimer[scope]) {
       this.saveTimer[scope] = setTimeout(() => {
+        const dataString = JSON.stringify(this.DataCache[scope], null, 2)
+        const dataHash = Crypto.createHash('md5').update(dataString).digest('hex')
         this.saveTimer[scope] = null
-        FS.writeFileSync(PATH.join(this.StorageDirPath, scope), JSON.stringify(this.DataCache[scope], null, 2))
+        if (dataHash !== this.DataHash[scope]) {
+          this.DataHash[scope] = dataHash
+          FS.writeFileSync(PATH.join(this.StorageDirPath, scope), JSON.stringify(this.DataCache[scope], null, 2))
+        }
       }, 5000)
     }
   }
