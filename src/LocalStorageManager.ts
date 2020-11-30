@@ -2,6 +2,7 @@ import * as FS from "fs"
 import * as PATH from "path"
 import * as Crypto from "crypto"
 import { Logger } from "./Logger"
+import { Throttle } from "./decorator/Throttle"
 
 export class LocalStorageManager {
 
@@ -45,17 +46,16 @@ export class LocalStorageManager {
     }
   }
 
+  @Throttle(5000, (scope) => {
+    return scope
+  })
   private save(scope: string) {
-    if (!this.saveTimer[scope]) {
-      this.saveTimer[scope] = setTimeout(() => {
-        const dataString = JSON.stringify(this.DataCache[scope], null, 2)
-        const dataHash = Crypto.createHash('md5').update(dataString).digest('hex')
-        this.saveTimer[scope] = null
-        if (dataHash !== this.DataHash[scope]) {
-          this.DataHash[scope] = dataHash
-          FS.writeFileSync(PATH.join(this.StorageDirPath, scope), JSON.stringify(this.DataCache[scope], null, 2))
-        }
-      }, 5000)
+    const dataString = JSON.stringify(this.DataCache[scope], null, 2)
+    const dataHash = Crypto.createHash('md5').update(dataString).digest('hex')
+    this.saveTimer[scope] = null
+    if (dataHash !== this.DataHash[scope]) {
+      this.DataHash[scope] = dataHash
+      FS.writeFileSync(PATH.join(this.StorageDirPath, scope), JSON.stringify(this.DataCache[scope], null, 2))
     }
   }
 
