@@ -23,7 +23,6 @@ export class WebhookServer {
         item.group,
         new HttpsProxyAgent(item.proxy || this.context.config.webhook.proxy)
       )
-      this.logger.info(`${item.name}`, 'register-client')
     })
   }
 

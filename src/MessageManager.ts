@@ -2,6 +2,7 @@ import { Ebus } from "./Ebus";
 import { Message } from "./model/Message.model";
 import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
 import { Context } from "./Context";
+import { Throttle } from "./decorator/Throttle";
 
 /**
  * 负责管理一对一消息和多对一消息  
@@ -12,6 +13,7 @@ import { Context } from "./Context";
  * 保存消息副本
  */
 export class MessageManager {
+
   /**
    * mid -> {Message,Map<namesStaus>}
    */
@@ -20,19 +22,30 @@ export class MessageManager {
     namesStaus: Map<string, MessageStatus>
   }> = new Map()
 
+  public static LOCAL_STORAGE_SCOPE = 'MessageManager'
+
   constructor(
     private readonly context: Context,
     private readonly ebus: Ebus
   ) {
     this.ebus.on('message-start', (message) => {
       this.onMessageStart(message)
+      this.onMessageChange()
     })
     this.ebus.on('message-client-status', ({ name, mid, status }) => {
       this.onMessageClientStatus(name, mid, status)
     })
     this.ebus.on('message-end', ({ message }) => {
       this.onMessageEnd(message)
+      this.onMessageChange()
     })
+    this.recoveryLocalMessage()
+  }
+
+  private recoveryLocalMessage(): void {
+    for (let message of this.context.localStorageManager.get<Array<Message>>(MessageManager.LOCAL_STORAGE_SCOPE, 'messages', [], true)) {
+      this.ebus.emit('message-start', message)
+    }
   }
 
   private onMessageStart(message: Message) {
@@ -107,6 +120,19 @@ export class MessageManager {
   }
   private onMessageEnd(message: Message) {
     this.midMap.delete(message.mid)
+  }
+
+  @Throttle(5000)
+  private onMessageChange() {
+    this.messageLocalSave()
+  }
+
+  public messageLocalSave(sync = false) {
+    let data: Array<Message> = []
+    for (let { message } of this.midMap.values()) {
+      data.push(message)
+    }
+    this.context.localStorageManager.set(MessageManager.LOCAL_STORAGE_SCOPE, 'messages', data, sync)
   }
 
   /**

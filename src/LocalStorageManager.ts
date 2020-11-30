@@ -15,9 +15,6 @@ export class LocalStorageManager {
   private DataHash: {
     [scope: string]: string
   } = {}
-  private saveTimer: {
-    [scope: string]: NodeJS.Timeout | null
-  } = {}
   private StorageDirPath: string = PATH.join(__dirname, '../storage')
 
   constructor() {
@@ -50,21 +47,28 @@ export class LocalStorageManager {
     return scope
   })
   private save(scope: string) {
+    this.saveSync(scope)
+  }
+
+  private saveSync(scope: string) {
     const dataString = JSON.stringify(this.DataCache[scope], null, 2)
     const dataHash = Crypto.createHash('md5').update(dataString).digest('hex')
-    this.saveTimer[scope] = null
     if (dataHash !== this.DataHash[scope]) {
       this.DataHash[scope] = dataHash
       FS.writeFileSync(PATH.join(this.StorageDirPath, scope), JSON.stringify(this.DataCache[scope], null, 2))
     }
   }
 
-  public set(scope: string, key: string, value: any): void {
+  public set(scope: string, key: string, value: any, sync = false): void {
     if (!this.DataCache[scope]) {
       this.DataCache[scope] = {}
     }
     this.DataCache[scope][key] = value
-    this.save(scope)
+    if (sync) {
+      this.saveSync(scope)
+    } else {
+      this.save(scope)
+    }
   }
 
   public get<T>(scope: string, key: string): T | undefined

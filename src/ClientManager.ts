@@ -121,6 +121,10 @@ export class ClientManager {
 
   @Throttle(5000)
   private onClientChange(): void {
+    this.clientLocalSave()
+  }
+
+  public clientLocalSave(sync = false): void {
     let data: Array<{
       name: string | undefined,
       group: string | undefined
@@ -132,6 +136,6 @@ export class ClientManager {
         group: client?.group
       })
     }
-    this.context.localStorageManager.set(ClientManager.LOCAL_STORAGE_SCOPE, 'clients', data)
+    this.context.localStorageManager.set(ClientManager.LOCAL_STORAGE_SCOPE, 'clients', data, sync)
   }
 }
