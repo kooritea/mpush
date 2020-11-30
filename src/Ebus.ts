@@ -71,7 +71,6 @@ export class Ebus {
     message: Message,
     status: TypeObject<MessageStatus>
   }): void;
-  // emit(event: 'register-webpush', client: Client<Message>): void;
   emit(event: 'register-webpush', payload: {
     client: Client,
     pushSubscription: WebPush.PushSubscription

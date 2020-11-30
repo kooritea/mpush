@@ -1,6 +1,6 @@
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
-import { Client } from "../model/Client";
+import { QueueClient } from "../model/Client";
 import Axios, { AxiosInstance, AxiosPromise, AxiosProxyConfig } from 'axios'
 import * as HttpsProxyAgent from 'https-proxy-agent'
 import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
@@ -46,7 +46,7 @@ export class WebhookServer {
   }
 }
 
-class WebhookClient extends Client {
+class WebhookClient extends QueueClient {
   private axios: AxiosInstance
   constructor(
     private url: string,

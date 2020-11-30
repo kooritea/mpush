@@ -1,6 +1,6 @@
 import { Context } from "../Context";
 import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
-import { Client } from "../model/Client";
+import { Client, QueueClient } from "../model/Client";
 import { Message } from "../model/Message.model";
 import { Ebus } from "../Ebus";
 import * as HttpsProxyAgent from 'https-proxy-agent'
@@ -21,7 +21,7 @@ export class FCMServer {
     private readonly context: Context
   ) {
     if (this.context.config.fcm.projectId && this.context.config.fcm.applicationId && this.context.config.fcm.apiKey && this.context.config.fcm.serverKey) {
-
+      this.logger.info(`Init`)
       this.options = {
         serverKey: this.context.config.fcm.serverKey,
         proxy: undefined
@@ -29,7 +29,6 @@ export class FCMServer {
       if (this.context.config.fcm.proxy) {
         this.options.proxy = new HttpsProxyAgent(this.context.config.fcm.proxy);
       }
-
       this.context.ebus.on('register-fcm', ({ client, token }) => {
         this.registerFCM(client, token)
       })
@@ -39,7 +38,7 @@ export class FCMServer {
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
-      this.logger.info(`Init`)
+
       this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
         this.onMessageFCMCallback(mid, name)
       })
@@ -123,7 +122,7 @@ export class FCMServer {
   }
 }
 
-class FCMClient extends Client {
+class FCMClient extends QueueClient {
   private sendPacketLock: boolean = false
   constructor(
     private token: string,

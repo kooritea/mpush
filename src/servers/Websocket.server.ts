@@ -7,7 +7,7 @@ import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, 
 import * as Utils from "../Utils";
 import * as Jsonwebtoken from 'jsonwebtoken'
 import { Ebus } from "../Ebus";
-import { Client } from "../model/Client";
+import { QueueClient } from "../model/Client";
 import { Logger } from "../Logger";
 import { WebPushServer } from "./WebPush.server";
 type Socket = MessageEvent['target']
@@ -230,7 +230,7 @@ export class WebsocketServer {
  * 把socket包装成client  
  * client里面控制消息顺序
  */
-class SocketClient extends Client {
+class SocketClient extends QueueClient {
   constructor(
     private socket: Socket,
     retryTimeout: number,

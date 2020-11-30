@@ -6,7 +6,7 @@ import { Message } from "./Message.model"
  * 推送方式由子类实现
  * 只有像websocket和webhook这种有有接收信息能力的client才会包装成Client类
  */
-export class EmptyClient {
+export class Client {
   protected readonly messages: Message[] = []
 
   constructor(
@@ -80,10 +80,16 @@ export class EmptyClient {
     }
     client.unRegister()
   }
+
+  /**
+ * 直接发送数据包,忽略队列
+ * @param packet 
+ */
+  public sendPacket(packet: ServerSocketPacket): any { }
 }
 
 
-export abstract class Client extends EmptyClient {
+export abstract class QueueClient extends Client {
 
   private lock: boolean = false
   private timer: NodeJS.Timeout
@@ -150,11 +156,11 @@ export abstract class Client extends EmptyClient {
   }
 
   /**
-  * 队列自动调用  
-  * 上一条消息确认或unlock时调用  
-  * 当retryTimeout内没有comfirm会重新调用该方法
-  * @param message 
-  */
+   * 队列自动调用  
+   * 上一条消息确认或unlock时调用  
+   * 当retryTimeout内没有comfirm会重新调用该方法
+   * @param message 
+   */
   protected abstract send(message: Message): void
 
   /**

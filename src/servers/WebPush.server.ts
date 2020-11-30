@@ -1,7 +1,7 @@
 import { Context } from "../Context";
 import * as WebPush from "web-push"
 import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
-import { Client } from "../model/Client";
+import { Client, QueueClient } from "../model/Client";
 import { Message } from "../model/Message.model";
 import { Ebus } from "../Ebus";
 import { Logger } from "../Logger";
@@ -150,7 +150,7 @@ export class WebPushServer {
   }
 }
 
-class WebPushClient extends Client {
+class WebPushClient extends QueueClient {
   private sendPacketLock: boolean = false
   constructor(
     public pushSubscription: WebPush.PushSubscription,
