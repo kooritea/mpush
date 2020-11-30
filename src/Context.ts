@@ -11,8 +11,8 @@ export class Context {
   public readonly localStorageManager: LocalStorageManager
   public readonly config = Config
   constructor() {
+    this.localStorageManager = new LocalStorageManager()
     this.messageManager = new MessageManager(this, this.ebus)
     this.clientManager = new ClientManager(this, this.ebus)
-    this.localStorageManager = new LocalStorageManager()
   }
 }
