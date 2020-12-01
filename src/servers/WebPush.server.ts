@@ -151,7 +151,7 @@ export class WebPushServer {
 }
 
 class WebPushClient extends QueueClient {
-  private sendPacketLock: boolean = false
+
   constructor(
     public pushSubscription: WebPush.PushSubscription,
     retryTimeout: number,
@@ -164,29 +164,24 @@ class WebPushClient extends QueueClient {
     super(retryTimeout, name, group)
   }
   protected send(message: Message) {
-    if (!this.sendPacketLock) {
-      this.sendPacketLock = true
-      this.logger.info(`${message.message.text}`, 'loop-send')
-      this.ebus.emit('message-client-status', {
-        mid: message.mid,
-        name: this.name,
-        status: 'webpush-wait'
-      })
+    this.logger.info(`${message.message.text}`, 'loop-send')
+    this.ebus.emit('message-client-status', {
+      mid: message.mid,
+      name: this.name,
+      status: 'webpush-wait'
+    })
 
-      let packet = new MessageServerSocketPacket(message)
-      this.sendPacket(packet).then(() => {
-        this.ebus.emit('message-client-status', {
-          mid: packet.data.mid,
-          name: this.name,
-          status: 'webpush-send'
-        })
-        this.comfirm({ mid: packet.data.mid })
-      }).catch((e) => {
-        this.logger.error(`${e.message}`, 'send-error')
-      }).finally(() => {
-        this.sendPacketLock = false
+    let packet = new MessageServerSocketPacket(message)
+    this.sendPacket(packet).then(() => {
+      this.ebus.emit('message-client-status', {
+        mid: packet.data.mid,
+        name: this.name,
+        status: 'webpush-send'
       })
-    }
+      this.comfirm({ mid: packet.data.mid })
+    }).catch((e) => {
+      this.logger.error(`${e.message}`, 'send-error')
+    })
 
   }
   sendPacket(packet: ServerSocketPacket): Promise<WebPush.SendResult> {

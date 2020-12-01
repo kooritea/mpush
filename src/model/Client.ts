@@ -126,7 +126,7 @@ export abstract class QueueClient extends Client {
   /**
    * 解除锁定并尝试发送队列中第一条消息
    */
-  protected unlock() {
+  private unlock() {
     clearTimeout(this.timer)
     this.lock = false
     this.next()
@@ -157,7 +157,7 @@ export abstract class QueueClient extends Client {
 
   /**
    * 队列自动调用  
-   * 上一条消息确认或unlock时调用  
+   * 上一条消息确认时调用  
    * 当retryTimeout内没有comfirm会重新调用该方法
    * @param message 
    */

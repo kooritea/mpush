@@ -123,7 +123,7 @@ export class FCMServer {
 }
 
 class FCMClient extends QueueClient {
-  private sendPacketLock: boolean = false
+
   constructor(
     private token: string,
     retryTimeout: number,
@@ -139,29 +139,24 @@ class FCMClient extends QueueClient {
     super(retryTimeout, name, group)
   }
   protected send(message: Message) {
-    if (!this.sendPacketLock) {
-      this.sendPacketLock = true
-      this.logger.info(`${message.message.text}`, 'loop-send')
-      this.ebus.emit('message-client-status', {
-        mid: message.mid,
-        name: this.name,
-        status: 'fcm-wait'
-      })
+    this.logger.info(`${message.message.text}`, 'loop-send')
+    this.ebus.emit('message-client-status', {
+      mid: message.mid,
+      name: this.name,
+      status: 'fcm-wait'
+    })
 
-      let packet = new MessageServerSocketPacket(message)
-      this.sendPacket(packet).then((res) => {
-        this.ebus.emit('message-client-status', {
-          mid: packet.data.mid,
-          name: this.name,
-          status: 'fcm-send'
-        })
-        this.comfirm({ mid: packet.data.mid })
-      }).catch((e) => {
-        this.logger.error(`${e.message}`, 'send-error')
-      }).finally(() => {
-        this.sendPacketLock = false
+    let packet = new MessageServerSocketPacket(message)
+    this.sendPacket(packet).then((res) => {
+      this.ebus.emit('message-client-status', {
+        mid: packet.data.mid,
+        name: this.name,
+        status: 'fcm-send'
       })
-    }
+      this.comfirm({ mid: packet.data.mid })
+    }).catch((e) => {
+      this.logger.error(`${e.message}`, 'send-error')
+    })
 
   }
   sendPacket(packet: ServerSocketPacket): Promise<void> {
