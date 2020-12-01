@@ -3,6 +3,7 @@ import { Message } from "./model/Message.model";
 import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
 import { Context } from "./Context";
 import { Throttle } from "./decorator/Throttle";
+import { Logger } from "./Logger";
 
 /**
  * 负责管理一对一消息和多对一消息  
@@ -21,6 +22,7 @@ export class MessageManager {
     message: Message,
     namesStaus: Map<string, MessageStatus>
   }> = new Map()
+  private logger: Logger = new Logger('MessageManager')
 
   public static LOCAL_STORAGE_SCOPE = 'MessageManager'
 
@@ -28,6 +30,9 @@ export class MessageManager {
     private readonly context: Context,
     private readonly ebus: Ebus
   ) {
+    this.ebus.on('server-ready', () => {
+      this.recoveryLocalMessage()
+    })
     this.ebus.on('message-start', (message) => {
       this.onMessageStart(message)
       this.onMessageChange()
@@ -39,7 +44,7 @@ export class MessageManager {
       this.onMessageEnd(message)
       this.onMessageChange()
     })
-    this.recoveryLocalMessage()
+
   }
 
   private recoveryLocalMessage(): void {

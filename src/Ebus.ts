@@ -7,6 +7,9 @@ export class Ebus {
 
   private emitter: EventEmitter = new EventEmitter()
 
+
+  on(event: 'server-ready', listener: () => void): void;
+
   /**
    * 接收到客户端想要发送的消息  
    * 拥有发送Message机能的server订阅(on)  
@@ -17,7 +20,7 @@ export class Ebus {
   on(event: 'message-start', listener: (message: Message) => void): void;
 
   /**
-   * 收到接收方的接收确认  
+   * 收到接收方的接收确认,只代表某个接受方的状态  
    * MessageManager订阅(on),server发布(emit)
    * @param event 
    * @param listener 
@@ -29,7 +32,8 @@ export class Ebus {
   }) => void): void;
 
   /**
-   * 推送完成，所有目标已接收消息  
+   * 推送完成，所有接受方已接收消息或未找到接收方消息结束  
+   * 一般只有发送方监听该事件  
    * server订阅(on),MessageManager发布(emit)
    * @param event 
    * @param listener 
@@ -61,6 +65,7 @@ export class Ebus {
     this.emitter.on(event, listener)
   }
 
+  emit(event: 'server-ready'): void;
   emit(event: 'message-start', message: Message): void;
   emit(event: 'message-client-status', payload: {
     mid: string,
@@ -90,7 +95,7 @@ export class Ebus {
   emit(event: 'unregister-client', payload: {
     client: Client
   }): void;
-  emit(event: string, payload: any): void {
+  emit(event: string, payload?: any): void {
     this.emitter.emit(event, payload)
   }
 }

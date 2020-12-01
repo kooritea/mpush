@@ -21,6 +21,8 @@ export class App {
     this.webhookServer = new WebhookServer(this.context)
     this.webpushServer = new WebPushServer(this.context)
     this.fcmServer = new FCMServer(this.context)
+    this.context.ebus.emit('server-ready')
+    this.logger.info('App ready')
     process.on("SIGINT", (code) => {
       this.logger.info("exit:等待持久化客户端信息")
       setTimeout(() => {
