@@ -13,25 +13,19 @@ export class Logger {
     this.context = context
   }
 
-  public info(message: any, context?: string) {
+  public info(message: any, ...argContexts: string[]) {
     const contexts = [this.context]
-    if (context) {
-      contexts.push(context)
-    }
+    contexts.push(...(argContexts.filter(a => a)))
     Logger.print('info', contexts, message)
   }
-  public warn(message: any, context?: string) {
+  public warn(message: any, ...argContexts: string[]) {
     const contexts = [this.context]
-    if (context) {
-      contexts.push(context)
-    }
+    contexts.push(...(argContexts.filter(a => a)))
     Logger.print('warn', contexts, message)
   }
-  public error(message: any, context?: string) {
+  public error(message: any, ...argContexts: string[]) {
     const contexts = [this.context]
-    if (context) {
-      contexts.push(context)
-    }
+    contexts.push(...(argContexts.filter(a => a)))
     Logger.print('error', contexts, message)
   }
 

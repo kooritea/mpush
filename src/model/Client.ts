@@ -8,7 +8,7 @@ import { Message } from "./Message.model"
  */
 export class Client {
   protected readonly messages: Message[] = []
-
+  private clientScope: string
   constructor(
     public readonly name: string,
     public readonly group: string
@@ -86,6 +86,13 @@ export class Client {
  * @param packet 
  */
   public sendPacket(packet: ServerSocketPacket): any { }
+
+  public setClientScope(name: string): void {
+    this.clientScope = name
+  }
+  public getClientScope(): string {
+    return this.clientScope
+  }
 }
 
 

@@ -6,6 +6,7 @@ import * as HttpsProxyAgent from 'https-proxy-agent'
 import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
 import { Ebus } from "../Ebus";
 import { Logger } from "../Logger";
+import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "../Define";
 
 export class WebhookServer {
 
@@ -40,7 +41,8 @@ export class WebhookServer {
     this.context.clientManager.registerClient(
       name,
       group,
-      client
+      client,
+      CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE
     )
   }
 }

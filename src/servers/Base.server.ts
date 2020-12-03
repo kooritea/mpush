@@ -1,3 +1,7 @@
+import { Context } from "src/Context";
+import { Logger } from "src/Logger";
+import { QueueClient } from "src/model/Client";
+
 export abstract class BaseServer {
 
   /**
@@ -9,3 +13,14 @@ export abstract class BaseServer {
 
 }
 
+export abstract class UncertainServer<T extends QueueClient> {
+
+  protected clientMap: Map<string, T> = new Map()
+  protected abstract logger: Logger
+
+  constructor(
+    protected readonly context: Context
+  ) {
+
+  }
+}

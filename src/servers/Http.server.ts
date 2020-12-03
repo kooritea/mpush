@@ -187,7 +187,7 @@ export class HttpServer {
   private runCmdRegisterFCM(clientSocketPacket: ClientSocketPacket, response: Http.ServerResponse) {
     if (clientSocketPacket.auth) {
       const registerFCMClientSocketPacket = new RegisterFCMClientSocketPacket(clientSocketPacket)
-      const client = this.context.clientManager.getClient(registerFCMClientSocketPacket.auth.name)
+      const client = this.context.clientManager.getClient(registerFCMClientSocketPacket.auth.name, 'UncertainClient')
       if (client) {
         this.context.ebus.emit('register-fcm', {
           client: client,

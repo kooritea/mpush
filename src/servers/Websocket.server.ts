@@ -104,7 +104,7 @@ export class WebsocketServer {
       if (clientSocketPacket.cmd === 'AUTH') {
         this.runCmdAuth(socket, new AuthClientSocketPacket(clientSocketPacket))
       } else {
-        const client = this.context.clientManager.getClient(name)
+        const client = this.context.clientManager.getClient(name, CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)
         if (client instanceof SocketClient) {
           switch (clientSocketPacket.cmd) {
             case 'MESSAGE':
@@ -173,7 +173,8 @@ export class WebsocketServer {
           this.context.ebus,
           packet.data.name,
           packet.data.group
-        )
+        ),
+        CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE
       )
       client.sendPacket(new AuthServerSocketPacket({
         code: 200,

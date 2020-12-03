@@ -1,0 +1,1 @@
+export const CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE = "UncertainClient"
