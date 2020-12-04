@@ -1,4 +1,3 @@
-import { Ebus } from "./Ebus";
 import { Client } from "./model/Client";
 import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
 import { Context } from "./Context";
@@ -7,9 +6,13 @@ import { Logger } from "./Logger";
 import { Throttle } from "./decorator/Throttle";
 import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "./Define";
 
+/**todo
+ * 非互斥客户端的持久化与恢复
+ */
+
 
 /**
- * 负责Client的注册注销、持久化、监听新消息并分配
+ * 负责Client的注册注销、持久化、监听新消息并分发
  */
 export class ClientManager {
 
@@ -18,8 +21,7 @@ export class ClientManager {
   public static LOCAL_STORAGE_SCOPE = 'ClientManager'
 
   constructor(
-    private readonly context: Context,
-    private readonly ebus: Ebus
+    private readonly context: Context
   ) {
 
     this.context.ebus.on('message-start', (message) => {
@@ -35,7 +37,7 @@ export class ClientManager {
   private recoveryLocalClient(): void {
     for (let { name, group } of this.context.localStorageManager.get<Array<{ name: string, group: string }>>(ClientManager.LOCAL_STORAGE_SCOPE, 'clients', [], true)) {
       const client = new Client(name, group)
-      this._registerClient(name, group, client, CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)
+      this._registerClient(client, CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)
       this.logger.info(`name: ${name}${group ? ',group: ' + group : ''}`, 'user-recovery')
     }
   }
@@ -47,11 +49,11 @@ export class ClientManager {
    * @param client 
    * @param clientScope 可以传入自己的作用域，也可以使用ClientManager.UNCERTAIN_CLIENT_SCOPE这个互斥作用域
    */
-  public registerClient<T extends Client>(name: string, group: string, client: T, clientScopeName: string): T {
-    if (name) {
-      const isLogin = this.clientScopeMap.get(clientScopeName ?? CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)?.has(name)
-      this.logger.info(`name: ${name}${group ? ',group: ' + group : ''}`, clientScopeName ?? "", `user-${isLogin ? 'login' : 'register'}`)
-      client = this._registerClient(name, group, client, clientScopeName)
+  public registerClient<T extends Client>(client: T, clientScopeName: string): T {
+    if (client.name) {
+      const isLogin = this.clientScopeMap.get(clientScopeName ?? CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)?.has(client.name)
+      this.logger.info(`name: ${client.name}${client.group ? ',group: ' + client.group : ''}`, clientScopeName ?? "", `user-${isLogin ? 'login' : 'register'}`)
+      client = this._registerClient(client, clientScopeName)
       this.onClientChange()
       return client
     } else {
@@ -61,13 +63,13 @@ export class ClientManager {
       })
     }
   }
-  private _registerClient<T extends Client>(name: string, group: string, client: T, clientScopeName: string): T {
+  private _registerClient<T extends Client>(client: T, clientScopeName: string): T {
 
     if (!this.clientScopeMap.has(clientScopeName)) {
       this.clientScopeMap.set(clientScopeName, new Map())
     }
-    if (this.clientScopeMap.get(clientScopeName)?.has(name)) {
-      const oldClient = <Client>this.clientScopeMap.get(clientScopeName)?.get(name)
+    if (this.clientScopeMap.get(clientScopeName)?.has(client.name)) {
+      const oldClient = <Client>this.clientScopeMap.get(clientScopeName)?.get(client.name)
       client.inherit(oldClient)
     }
     this.clientScopeMap.get(clientScopeName)?.set(clientScopeName, client)
@@ -82,12 +84,19 @@ export class ClientManager {
   public unRegisterClient(target: {
     name?: string,
     group?: string
-  }): void {
-    let clients: Array<Client>
+  }, clientScopeName?: string): void {
+    let clients: Array<Client> = []
     if (target.group) {
-      clients = this.getClientByGroup(target.group)
-    } else {
-      clients = this.getClient(name)
+      clients = this.getClientByGroup(target.group, clientScopeName)
+    } else if (target.name) {
+      if (clientScopeName) {
+        const client = this.getClient(target.name, clientScopeName)
+        if (client) {
+          clients.push(client)
+        }
+      } else {
+        clients = this.getClient(target.name)
+      }
     }
     clients.forEach((client) => {
       client.unRegister()

@@ -15,7 +15,6 @@ export abstract class BaseServer {
 
 export abstract class UncertainServer<T extends QueueClient> {
 
-  protected clientMap: Map<string, T> = new Map()
   protected abstract logger: Logger
 
   constructor(

@@ -8,8 +8,8 @@ import { Logger } from "../Logger";
 export class WebPushServer {
 
   public static LOCALSTORAGE_SCOPE: string = 'WebPushServer'
+  public static CLIENT_SCOPE = "WebPushServer"
 
-  private nameMap: Map<string, WebPushClient> = new Map()
   private options: WebPush.RequestOptions | undefined = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
   private logger: Logger = new Logger('WebPushServer')
   constructor(
@@ -26,9 +26,6 @@ export class WebPushServer {
       this.context.ebus.on('register-webpush', ({ client, pushSubscription }) => {
         this.registerWebPush(client, pushSubscription)
       })
-      this.context.ebus.on('message-start', (message) => {
-        this.onMessageStart(message)
-      })
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
@@ -36,9 +33,9 @@ export class WebPushServer {
       this.context.ebus.on('message-webpush-callback', ({ mid, name }) => {
         this.onMessageWebPushCallback(mid, name)
       })
-      this.context.ebus.on('unregister-client', ({ client }) => {
-        this.nameMap.delete(client.name)
-      })
+      // this.context.ebus.on('unregister-webpush', ({ client }) => {
+      //   this.context.clientManager.unRegisterClient({ name: client.name }, WebPushServer.CLIENT_SCOPE)
+      // })
     } else {
       this.context.ebus.on('register-webpush', ({ client }) => {
         client.sendPacket(new InfoServerSocketPacket("服务端未提供webpush.apiKey"))
@@ -54,7 +51,7 @@ export class WebPushServer {
   }
 
   registerWebPush(client: Client, pushSubscription: WebPush.PushSubscription) {
-    const newInstance = new WebPushClient(
+    const webpushClient = new WebPushClient(
       pushSubscription,
       this.context.config.webpush.retryTimeout,
       client.name,
@@ -63,58 +60,7 @@ export class WebPushServer {
       this.logger,
       this.options
     )
-    const oldInstance = this.nameMap.get(client.name)
-    if (oldInstance) {
-      this.logger.info(`${client.name}`, 'register-WebPush-update')
-      newInstance.inherit(oldInstance)
-      this.nameMap.set(client.name, newInstance)
-    } else {
-      this.logger.info(`${client.name}`, 'register-WebPush')
-      this.nameMap.set(client.name, newInstance)
-    }
-  }
-
-  onMessageStart(message: Message) {
-    if (message.sendType === 'personal') {
-      const webpushClient = this.nameMap.get(message.target)
-      if (webpushClient) {
-        webpushClient.sendMessage(message)
-        // this.context.ebus.emit('message-client-status', {
-        //   mid: message.mid,
-        //   name: webpushClient.name,
-        //   status: 'webpush-wait'
-        // })
-        // webpushClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
-        //   this.context.ebus.emit('message-client-status', {
-        //     mid: message.mid,
-        //     name: webpushClient.name,
-        //     status: 'webpush'
-        //   })
-        // }).catch((e) => {
-        //   console.log(`[WebPush Error]: ${e.message}`)
-        // })
-      }
-    } else if (message.sendType === 'group') {
-      this.nameMap.forEach((webpushClient) => {
-        if (webpushClient.group && webpushClient.group === message.target) {
-          webpushClient.sendMessage(message)
-          // this.context.ebus.emit('message-client-status', {
-          //   mid: message.mid,
-          //   name: webpushClient.name,
-          //   status: 'webpush-wait'
-          // })
-          // webpushClient.sendPacket(new MessageServerSocketPacket(message)).then(() => {
-          //   this.context.ebus.emit('message-client-status', {
-          //     mid: message.mid,
-          //     name: webpushClient.name,
-          //     status: 'webpush'
-          //   })
-          // }).catch((e) => {
-          //   console.log(`[WebPush Error]: ${e.message}`)
-          // })
-        }
-      })
-    }
+    this.context.clientManager.registerClient(webpushClient, WebPushServer.CLIENT_SCOPE)
   }
 
   /**
@@ -125,7 +71,7 @@ export class WebPushServer {
    */
   private onMessageClientStatus(name: string, mid: string, status: MessageStatus): void {
     if (status === 'ok') {
-      let webpushClient = this.nameMap.get(name)
+      let webpushClient = this.context.clientManager.getClient(name, WebPushServer.CLIENT_SCOPE)
       if (webpushClient) {
         this.logger.info(`${name}`, 'message-status-change')
         webpushClient.comfirm({ mid })
@@ -138,7 +84,7 @@ export class WebPushServer {
    * @param name 
    */
   onMessageWebPushCallback(mid: string, name: string) {
-    let webpushClient = this.nameMap.get(name)
+    let webpushClient = this.context.clientManager.getClient(name, WebPushServer.CLIENT_SCOPE)
     if (webpushClient) {
       this.logger.info(`${name}`, 'message-webpush-callback')
       this.context.ebus.emit('message-client-status', {

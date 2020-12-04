@@ -6,12 +6,7 @@ import { Throttle } from "./decorator/Throttle";
 import { Logger } from "./Logger";
 
 /**
- * 负责管理一对一消息和多对一消息  
- * 所有需要发送的消息都由此处中转和改变状态
- * 监听到一对一消息的message-client-status事件马上发布message-end  
- * 监听到一对多消息的message-client-status事件  
- * 管理所有客户端的接收状态,适当时机发送message-end事件
- * 保存消息副本
+ * 负责管理消息的状态及未发送的消息的持久化
  */
 export class MessageManager {
 

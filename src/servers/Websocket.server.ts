@@ -10,6 +10,7 @@ import { Ebus } from "../Ebus";
 import { QueueClient } from "../model/Client";
 import { Logger } from "../Logger";
 import { WebPushServer } from "./WebPush.server";
+import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "../Define";
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
@@ -165,8 +166,6 @@ export class WebsocketServer {
       })
     } else {
       let client = this.context.clientManager.registerClient(
-        packet.data.name,
-        packet.data.group,
         new SocketClient(
           socket,
           this.context.config.websocket.retryTimeout,

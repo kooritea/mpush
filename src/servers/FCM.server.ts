@@ -14,6 +14,8 @@ const axios = Axios.create()
 
 export class FCMServer extends UncertainServer<FCMClient> {
 
+  public static CLIENT_SCOPE = "FCMServer"
+
   private readonly options: {
     serverKey: string,
     proxy: HttpsProxyAgent | undefined
@@ -34,19 +36,15 @@ export class FCMServer extends UncertainServer<FCMClient> {
       this.context.ebus.on('register-fcm', ({ client, token }) => {
         this.registerFCM(client, token)
       })
-      this.context.ebus.on('message-start', (message) => {
-        this.onMessageStart(message)
-      })
       this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
         this.onMessageClientStatus(name, mid, status)
       })
-
       this.context.ebus.on('message-fcm-callback', ({ mid, name }) => {
         this.onMessageFCMCallback(mid, name)
       })
-      this.context.ebus.on('unregister-client', ({ client }) => {
-        this.clientMap.delete(client.name)
-      })
+      // this.context.ebus.on('unregister-fcm', ({ client }) => {
+      //   this.context.clientManager.unRegisterClient({ name: client.name }, FCMServer.CLIENT_SCOPE)
+      // })
     } else {
       this.context.ebus.on('register-fcm', ({ client }) => {
         client.sendPacket(new InfoServerSocketPacket("fcm.projectId或fcm.applicationId或fcm.apiKey或fcm.serverKey"))
@@ -55,7 +53,7 @@ export class FCMServer extends UncertainServer<FCMClient> {
   }
 
   registerFCM(client: Client, token: string) {
-    const newInstance = new FCMClient(
+    const fcmClient = new FCMClient(
       token,
       this.context.config.fcm.retryTimeout,
       client.name,
@@ -64,30 +62,7 @@ export class FCMServer extends UncertainServer<FCMClient> {
       this.options,
       this.logger
     )
-    const oldInstance = this.clientMap.get(client.name)
-    if (oldInstance) {
-      this.logger.info(`${client.name}`, 'register-FCM-update')
-      newInstance.inherit(oldInstance)
-      this.clientMap.set(client.name, newInstance)
-    } else {
-      this.logger.info(`${client.name}`, 'register-FCM')
-      this.clientMap.set(client.name, newInstance)
-    }
-  }
-
-  onMessageStart(message: Message) {
-    if (message.sendType === 'personal') {
-      const fcmClient = this.clientMap.get(message.target)
-      if (fcmClient) {
-        fcmClient.sendMessage(message)
-      }
-    } else if (message.sendType === 'group') {
-      this.clientMap.forEach((fcmClient) => {
-        if (fcmClient.group && fcmClient.group === message.target) {
-          fcmClient.sendMessage(message)
-        }
-      })
-    }
+    this.context.clientManager.registerClient(fcmClient, FCMServer.CLIENT_SCOPE)
   }
 
   /**
@@ -98,7 +73,7 @@ export class FCMServer extends UncertainServer<FCMClient> {
    */
   private onMessageClientStatus(name: string, mid: string, status: MessageStatus): void {
     if (status === 'ok') {
-      let fcmClient = this.clientMap.get(name)
+      let fcmClient = this.context.clientManager.getClient(name, FCMServer.CLIENT_SCOPE)
       if (fcmClient) {
         this.logger.info(`${name}`, 'message-status-change')
         fcmClient.comfirm({ mid })
@@ -112,7 +87,7 @@ export class FCMServer extends UncertainServer<FCMClient> {
    * @param name 
    */
   onMessageFCMCallback(mid: string, name: string) {
-    let fcmClient = this.clientMap.get(name)
+    let fcmClient = this.context.clientManager.getClient(name, FCMServer.CLIENT_SCOPE)
     if (fcmClient) {
       this.logger.info(`${name}`, 'message-fcm-callback')
       this.context.ebus.emit('message-client-status', {

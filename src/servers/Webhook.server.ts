@@ -39,8 +39,6 @@ export class WebhookServer {
       this.context.ebus
     )
     this.context.clientManager.registerClient(
-      name,
-      group,
       client,
       CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE
     )
