@@ -33,9 +33,9 @@ export class LocalStorageManager {
     const scopes = FS.readdirSync(this.StorageDirPath)
     for (let scope of scopes) {
       const scopePath = PATH.join(this.StorageDirPath, scope)
-      const dataString = FS.readFileSync(scopePath)
+      const dataString = FS.readFileSync(scopePath).toString()
       try {
-        this.DataCache[scope] = JSON.parse(dataString.toString())
+        this.DataCache[scope] = JSON.parse(dataString || '{}')
         this.DataHash[scope] = Crypto.createHash('md5').update(dataString.toString()).digest('hex')
       } catch (e) {
         throw new Error(`持久化储存文件格式化失败: ${scopePath}\n请检查该文件修复或手动删除`)

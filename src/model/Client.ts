@@ -12,7 +12,11 @@ export class Client {
   constructor(
     public readonly name: string,
     public readonly group: string
-  ) { }
+  ) {
+    if (!name) {
+      throw new Error("Name cannot be empty")
+    }
+  }
 
   /**
    * message进入消息队列排队  
@@ -92,6 +96,12 @@ export class Client {
   }
   public getClientScope(): string {
     return this.clientScope
+  }
+  public serialization(): TypeObject<any> {
+    return {
+      name: this.name,
+      group: this.group
+    }
   }
 }
 

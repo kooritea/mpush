@@ -6,11 +6,6 @@ import { Logger } from "./Logger";
 import { Throttle } from "./decorator/Throttle";
 import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "./Define";
 
-/**todo
- * 非互斥客户端的持久化与恢复
- */
-
-
 /**
  * 负责Client的注册注销、持久化、监听新消息并分发
  */
@@ -32,13 +27,25 @@ export class ClientManager {
 
   /**
    * 服务启动时尝试从本地恢复注册过的客户端  
-   * 仅恢复互斥作用域中的客户端，其他作用域由server主动恢复
+   * 非互斥的非通用客户端的server自行传入调用进行恢复
    */
-  private recoveryLocalClient(): void {
-    for (let { name, group } of this.context.localStorageManager.get<Array<{ name: string, group: string }>>(ClientManager.LOCAL_STORAGE_SCOPE, 'clients', [], true)) {
-      const client = new Client(name, group)
-      this._registerClient(client, CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)
-      this.logger.info(`name: ${name}${group ? ',group: ' + group : ''}`, 'user-recovery')
+  public recoveryLocalClient(): void
+  public recoveryLocalClient(scopeName: string, deserializationHandle: (data: TypeObject<any>) => Client): void
+  public recoveryLocalClient(scopeName: string = CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE, deserializationHandle: (data: TypeObject<any>) => Client = (data) => {
+    return new Client(data.name, data.group)
+  }): void {
+    try {
+      let data = this.context.localStorageManager.get<{
+        [clientScopeName: string]: Array<TypeObject<any>>
+      }>(ClientManager.LOCAL_STORAGE_SCOPE, 'clients', {}, true)[scopeName] || []
+      for (let item of data) {
+        const client = deserializationHandle(item)
+        this._registerClient(client, scopeName)
+        this.logger.info(`name: ${item.name}${item.group ? ',group: ' + item.group : ''}`, scopeName, 'user-recovery')
+      }
+    } catch (e) {
+      this.logger.error(e)
+      throw new Error("recovery local Client error")
     }
   }
 
@@ -52,7 +59,7 @@ export class ClientManager {
   public registerClient<T extends Client>(client: T, clientScopeName: string): T {
     if (client.name) {
       const isLogin = this.clientScopeMap.get(clientScopeName ?? CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)?.has(client.name)
-      this.logger.info(`name: ${client.name}${client.group ? ',group: ' + client.group : ''}`, clientScopeName ?? "", `user-${isLogin ? 'login' : 'register'}`)
+      this.logger.info(`name: ${client.name}${client.group ? ',group: ' + client.group : ''}`, clientScopeName ?? "", client.constructor.name, `user-${isLogin ? 'login' : 'register'}`)
       client = this._registerClient(client, clientScopeName)
       this.onClientChange()
       return client
@@ -68,11 +75,13 @@ export class ClientManager {
     if (!this.clientScopeMap.has(clientScopeName)) {
       this.clientScopeMap.set(clientScopeName, new Map())
     }
-    if (this.clientScopeMap.get(clientScopeName)?.has(client.name)) {
-      const oldClient = <Client>this.clientScopeMap.get(clientScopeName)?.get(client.name)
-      client.inherit(oldClient)
+    if (this.hasClient(client.name, clientScopeName)) {
+      const oldClient = this.getClient(client.name, clientScopeName)
+      if (oldClient) {
+        client.inherit(oldClient)
+      }
     }
-    this.clientScopeMap.get(clientScopeName)?.set(clientScopeName, client)
+    this.clientScopeMap.get(clientScopeName)?.set(client.name, client)
     client.setClientScope(clientScopeName)
     return client
   }
@@ -113,14 +122,14 @@ export class ClientManager {
    */
   public hasClient(name: string, clientScopeName?: string): boolean {
     if (clientScopeName) {
-      for (const [name, client] of this.clientScopeMap.get(CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE) || []) {
+      for (const [_clientScopeName, client] of (this.clientScopeMap.get(clientScopeName) || new Map())) {
         if (client.name === name) {
           return true
         }
       }
     } else {
       for (let clientScpoe of this.clientScopeMap.values()) {
-        for (const [name, client] of clientScpoe) {
+        for (const [_clientScopeName, client] of clientScpoe) {
           if (client.name === name) {
             return true
           }
@@ -134,17 +143,15 @@ export class ClientManager {
   public getClient(name: string, clientScopeName: string): Client | null
   public getClient(name: string, clientScopeName?: string): Client | Array<Client> | null {
     if (clientScopeName) {
-      for (let clientScpoe of this.clientScopeMap.values()) {
-        for (const [name, client] of clientScpoe) {
-          if (client.name === name) {
-            return client
-          }
+      for (const [_clientScopeName, client] of (this.clientScopeMap.get(clientScopeName) || new Map())) {
+        if (client.name === name) {
+          return client
         }
       }
     } else {
       const result: Array<Client> = []
       for (let clientScpoe of this.clientScopeMap.values()) {
-        for (const [name, client] of clientScpoe) {
+        for (const [_clientScopeName, client] of clientScpoe) {
           if (client.name === name) {
             result.push(client)
           }
@@ -163,14 +170,14 @@ export class ClientManager {
   public getClientByGroup(group: string, clientScopeName?: string): Array<Client> {
     const result: Array<Client> = []
     if (clientScopeName) {
-      for (const [name, client] of (this.clientScopeMap.get(clientScopeName) || [])) {
+      for (const [_clientScopeName, client] of (this.clientScopeMap.get(clientScopeName) || new Map())) {
         if (client.group === group) {
           result.push(client)
         }
       }
     } else {
       for (let clientScpoe of this.clientScopeMap.values()) {
-        for (const [name, client] of clientScpoe) {
+        for (const [_clientScopeName, client] of clientScpoe) {
           if (client.group === group) {
             result.push(client)
           }
@@ -199,16 +206,14 @@ export class ClientManager {
   }
 
   public clientLocalSave(sync = false): void {
-    let data: Array<{
-      name: string | undefined,
-      group: string | undefined
-    }> = []
-    for (let name of this.clientScopeMap.get(CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)?.keys() || []) {
-      const client = this.clientScopeMap.get(CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE)?.get(name)
-      data.push({
-        name: client?.name,
-        group: client?.group
-      })
+    let data: {
+      [clientScopeName: string]: Array<TypeObject<any>>
+    } = {}
+    for (let [clientScopeName, clientScpoe] of this.clientScopeMap) {
+      data[clientScopeName] = []
+      for (const [name, client] of clientScpoe) {
+        data[clientScopeName].push(client.serialization())
+      }
     }
     this.context.localStorageManager.set(ClientManager.LOCAL_STORAGE_SCOPE, 'clients', data, sync)
   }

@@ -4,6 +4,7 @@ import { AuthServerSocketPacket } from "./model/ServerSocketPacket";
 import { Context } from "./Context";
 import { Throttle } from "./decorator/Throttle";
 import { Logger } from "./Logger";
+import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "./Define";
 
 /**
  * 负责管理消息的状态及未发送的消息的持久化
@@ -22,20 +23,19 @@ export class MessageManager {
   public static LOCAL_STORAGE_SCOPE = 'MessageManager'
 
   constructor(
-    private readonly context: Context,
-    private readonly ebus: Ebus
+    private readonly context: Context
   ) {
-    this.ebus.on('server-ready', () => {
+    this.context.ebus.on('server-ready', () => {
       this.recoveryLocalMessage()
     })
-    this.ebus.on('message-start', (message) => {
+    this.context.ebus.on('message-start', (message) => {
       this.onMessageStart(message)
       this.onMessageChange()
     })
-    this.ebus.on('message-client-status', ({ name, mid, status }) => {
+    this.context.ebus.on('message-client-status', ({ name, mid, status }) => {
       this.onMessageClientStatus(name, mid, status)
     })
-    this.ebus.on('message-end', ({ message }) => {
+    this.context.ebus.on('message-end', ({ message }) => {
       this.onMessageEnd(message)
       this.onMessageChange()
     })
@@ -44,7 +44,7 @@ export class MessageManager {
 
   private recoveryLocalMessage(): void {
     for (let message of this.context.localStorageManager.get<Array<Message>>(MessageManager.LOCAL_STORAGE_SCOPE, 'messages', [], true)) {
-      this.ebus.emit('message-start', message)
+      this.context.ebus.emit('message-start', message)
     }
   }
 
@@ -60,7 +60,7 @@ export class MessageManager {
           namesStaus
         })
       } else {
-        this.ebus.emit('message-end', {
+        this.context.ebus.emit('message-end', {
           message,
           status: {
             [message.target]: 'no'
@@ -81,7 +81,7 @@ export class MessageManager {
           namesStaus
         })
       } else {
-        this.ebus.emit('message-end', {
+        this.context.ebus.emit('message-end', {
           message,
           status: {}
         })
@@ -112,7 +112,7 @@ export class MessageManager {
           return
         }
       }
-      this.ebus.emit('message-end', {
+      this.context.ebus.emit('message-end', {
         message: midItem.message,
         status: statusObject
       })

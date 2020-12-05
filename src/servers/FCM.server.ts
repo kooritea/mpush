@@ -14,7 +14,7 @@ const axios = Axios.create()
 
 export class FCMServer extends UncertainServer<FCMClient> {
 
-  public static CLIENT_SCOPE = "FCMServer"
+  public static CLIENT_SCOPE = "FCMClient"
 
   private readonly options: {
     serverKey: string,
@@ -33,6 +33,17 @@ export class FCMServer extends UncertainServer<FCMClient> {
       if (this.context.config.fcm.proxy) {
         this.options.proxy = new HttpsProxyAgent(this.context.config.fcm.proxy);
       }
+      this.context.clientManager.recoveryLocalClient(FCMServer.CLIENT_SCOPE, (data) => {
+        return new FCMClient(
+          data.token,
+          this.context.config.fcm.retryTimeout,
+          data.name,
+          data.group,
+          this.context.ebus,
+          this.options,
+          this.logger
+        )
+      })
       this.context.ebus.on('register-fcm', ({ client, token }) => {
         this.registerFCM(client, token)
       })
@@ -115,6 +126,7 @@ class FCMClient extends QueueClient {
   ) {
     super(retryTimeout, name, group)
   }
+
   protected send(message: Message) {
     this.logger.info(`${message.message.text}`, 'loop-send')
     this.ebus.emit('message-client-status', {
@@ -147,5 +159,13 @@ class FCMClient extends QueueClient {
       },
       httpsAgent: this.options.proxy
     })
+  }
+
+  public serialization(): TypeObject<any> {
+    return {
+      token: this.token,
+      name: this.name,
+      group: this.group
+    }
   }
 }

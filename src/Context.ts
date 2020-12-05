@@ -12,7 +12,7 @@ export class Context {
   public readonly config = Config
   constructor() {
     this.localStorageManager = new LocalStorageManager()
-    this.clientManager = new ClientManager(this, this.ebus)
-    this.messageManager = new MessageManager(this, this.ebus)
+    this.clientManager = new ClientManager(this)
+    this.messageManager = new MessageManager(this)
   }
 }

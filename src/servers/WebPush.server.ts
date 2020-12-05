@@ -8,9 +8,9 @@ import { Logger } from "../Logger";
 export class WebPushServer {
 
   public static LOCALSTORAGE_SCOPE: string = 'WebPushServer'
-  public static CLIENT_SCOPE = "WebPushServer"
+  public static CLIENT_SCOPE = "WebPushClient"
 
-  private options: WebPush.RequestOptions | undefined = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
+  private webPushOptions: WebPush.RequestOptions | undefined = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
   private logger: Logger = new Logger('WebPushServer')
   constructor(
     private readonly context: Context
@@ -23,6 +23,19 @@ export class WebPushServer {
         privateKey
       )
       WebPush.setGCMAPIKey(this.context.config.webpush.apiKey)
+
+      this.context.clientManager.recoveryLocalClient(WebPushServer.CLIENT_SCOPE, (data) => {
+        return new WebPushClient(
+          data.pushSubscription,
+          this.context.config.webpush.retryTimeout,
+          data.name,
+          data.group,
+          this.context.ebus,
+          this.logger,
+          this.webPushOptions
+        )
+      })
+
       this.context.ebus.on('register-webpush', ({ client, pushSubscription }) => {
         this.registerWebPush(client, pushSubscription)
       })
@@ -58,7 +71,7 @@ export class WebPushServer {
       client.group,
       this.context.ebus,
       this.logger,
-      this.options
+      this.webPushOptions
     )
     this.context.clientManager.registerClient(webpushClient, WebPushServer.CLIENT_SCOPE)
   }
@@ -105,7 +118,7 @@ class WebPushClient extends QueueClient {
     group: string,
     private ebus: Ebus,
     private logger: Logger,
-    private options?: WebPush.RequestOptions,
+    private webPushOptions?: WebPush.RequestOptions,
   ) {
     super(retryTimeout, name, group)
   }
@@ -135,11 +148,19 @@ class WebPushClient extends QueueClient {
       headers: {
         "Urgency": 'high'
       },
-      ...this.options
+      ...this.webPushOptions
     })
   }
 
   update(pushSubscription: WebPush.PushSubscription) {
     this.pushSubscription = pushSubscription
+  }
+
+  public serialization(): TypeObject<any> {
+    return {
+      pushSubscription: this.pushSubscription,
+      name: this.name,
+      group: this.group
+    }
   }
 }
