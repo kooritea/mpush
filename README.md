@@ -320,28 +320,31 @@ ws.on('open', function open() {
       group
     }
   }));
+  setInterval(()=>{
+    ws.ping()
+  }, 60000)
 });
 
 ws.on('message', function message(data) {
-  const message = JSON.parse(data)
-  switch(message.cmd){
+  const packet = JSON.parse(data)
+  switch(packet.cmd){
     case 'MESSAGE':{
       ws.send(JSON.stringify({
         cmd: "MESSAGE_CALLBACK",
         data: {
-          mid: message.data.mid
+          mid: packet.data.mid
         }
       }))
-      onMessage(message)
+      onMessage(packet)
       break
     }
     default:{
-      console.log(message)
+      console.log(packet)
     }
   }
 });
 
-function onMessage(message){
-  console.log(message)
+function onMessage(packet){
+  console.log(packet)
 }
 ```
