@@ -295,3 +295,53 @@ http {
 
 [通信方式（2.0）](./CLIENT_DEV.md)  
 [通信方式（2.1、2.2）](./CLIENT_DEV_2.1.md)
+
+## 七、nodejs客户端示例代码
+
+```javascript
+// npm install ws --save
+const WebSocket = require('ws')
+
+const server = 'wss://domain.example/path'
+const token = 'your token'
+const name = 'your name'
+const group = 'your group'
+
+const ws = new WebSocket(server);
+
+ws.on('error', console.error);
+
+ws.on('open', function open() {
+  ws.send(JSON.stringify({
+    cmd: "AUTH",
+    data: {
+      token,
+      name,
+      group
+    }
+  }));
+});
+
+ws.on('message', function message(data) {
+  const message = JSON.parse(data)
+  switch(message.cmd){
+    case 'MESSAGE':{
+      ws.send(JSON.stringify({
+        cmd: "MESSAGE_CALLBACK",
+        data: {
+          mid: message.data.mid
+        }
+      }))
+      onMessage(message)
+      break
+    }
+    default:{
+      console.log(message)
+    }
+  }
+});
+
+function onMessage(message){
+  console.log(message)
+}
+```
