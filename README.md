@@ -103,10 +103,7 @@ npm run dev
     "retryTimeout": 10000 // 向WebPush服务器发送请求等待时间,超时未成功会重试
   },
   "fcm": {
-    "projectId": "",// firebase SDK的项目参数，获取方式见下面第四大点
-    "applicationId": "",// firebase SDK的项目参数，获取方式见下面第四大点
-    "apiKey": "",// 同webpush的apiKey，firebase SDK的项目参数，获取方式见下面第四大点
-    "serverKey": "",// firebase SDK的项目参数，获取方式见下面第四大点
+    "account": {},// firebase SDK的项目参数，获取方式见下面第四大点
     "proxy": "http://127.0.0.1:62333",
     "retryTimeout": 10000
   }
@@ -249,12 +246,26 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 2. 创建一个项目
 
 3. 进入项目
-   点击左边的的[齿轮] -> 项目设置 -> 上面的 tab 分有常规、云消息传递等栏目
+   添加应用 -> 添加后在上面的 tab 的服务帐号 -> 生成新的私钥
 
-常规.项目编号 -> projectId
-常规.应用 ID -> applicationId
-常规.网络 API 密钥 -> apiKey
-云消息传递.服务器密钥 -> serverKey
+长这样
+```json
+{
+  type: string;
+  project_id: string;
+  private_key_id: string;
+  private_key: string;
+  client_email: string;
+  client_id: string;
+  auth_uri: string;
+  token_uri: string;
+  auth_provider_x509_cert_url: string;
+  client_x509_cert_url: string;
+  universe_domain: string;
+}
+```
+
+整个放到配置文件的fcm.account
 
 ## 五、HTTPS
 

@@ -32,10 +32,7 @@
     "retryTimeout": 10000
   },
   "fcm": {
-    "projectId": "",
-    "applicationId": "",
-    "apiKey": "",
-    "serverKey": "",
+    "account": {},
     "proxy": "http://127.0.0.1:62233",
     "retryTimeout": 10000
   }
