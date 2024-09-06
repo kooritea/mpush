@@ -1,5 +1,21 @@
-import * as _Config from '../config.json'
+import * as FS from 'fs'
+import * as Path from 'path'
+import { Logger } from './Logger'
 
+const logger: Logger = new Logger('Config')
+
+let _Config:any = null
+for(let filePath of [`${__dirname}/../config.local.json`,`${__dirname}/../config.json`]){
+  const resolveFilePath = Path.resolve(filePath)
+  if(FS.existsSync(resolveFilePath)){
+    _Config = JSON.parse(FS.readFileSync(resolveFilePath, 'utf8'))
+    logger.info(`Use ${resolveFilePath}`)
+    break
+  }
+}
+if(!_Config){
+  throw new Error('Not found config file')
+}
 export interface IConfig {
   token: string,
   http: {
