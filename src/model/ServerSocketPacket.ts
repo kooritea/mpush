@@ -1,3 +1,4 @@
+import { MessageStatus, TypeObject } from "src/typings"
 import { Message } from "./Message.model"
 
 /**

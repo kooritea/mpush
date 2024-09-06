@@ -11,6 +11,7 @@ import { QueueClient } from "../model/Client";
 import { Logger } from "../Logger";
 import { WebPushServer } from "./WebPush.server";
 import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "../Define";
+import { MessageStatus, TypeObject } from "src/typings";
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
@@ -181,11 +182,7 @@ export class WebsocketServer {
           name: packet.data.name,
           group: packet.data.group
         }, this.context.config.token),
-        msg: 'Successful authentication',
-        webpushPublicKey: this.context.localStorageManager.get<{ publicKey: string, privateKey: string }>(WebPushServer.LOCALSTORAGE_SCOPE, 'VAPIDKeys')?.publicKey,
-        fcmProjectId: this.context.config.fcm.projectId,
-        fcmApplicationId: this.context.config.fcm.applicationId,
-        fcmApiKey: this.context.config.fcm.apiKey
+        msg: 'Successful authentication'
       }))
       socket.emit('auth-success', packet.data)
     }

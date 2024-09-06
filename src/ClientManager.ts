@@ -5,6 +5,7 @@ import { Message } from "./model/Message.model";
 import { Logger } from "./Logger";
 import { Throttle } from "./decorator/Throttle";
 import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "./Define";
+import { TypeObject } from "./typings";
 
 /**
  * 负责Client的注册注销、持久化、监听新消息并分发

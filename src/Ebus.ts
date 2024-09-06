@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import { Message } from "./model/Message.model";
 import { Client } from "./model/Client";
 import * as WebPush from "web-push"
+import { MessageStatus, TypeObject } from "./typings";
 
 export class Ebus {
 

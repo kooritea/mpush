@@ -9,6 +9,7 @@ import * as Jsonwebtoken from 'jsonwebtoken'
 import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
 import { Logger } from "../Logger";
 import { WebPushServer } from "./WebPush.server";
+import { MessageStatus, TypeObject } from "src/typings";
 
 export class HttpServer {
 

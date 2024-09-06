@@ -5,6 +5,7 @@ import { Client, QueueClient } from "../model/Client";
 import { Message } from "../model/Message.model";
 import { Ebus } from "../Ebus";
 import { Logger } from "../Logger";
+import { MessageStatus, TypeObject } from "src/typings";
 export class WebPushServer {
 
   public static LOCALSTORAGE_SCOPE: string = 'WebPushServer'

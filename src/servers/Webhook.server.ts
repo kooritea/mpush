@@ -1,8 +1,8 @@
 import { Context } from "../Context";
 import { Message } from "../model/Message.model";
 import { QueueClient } from "../model/Client";
-import Axios, { AxiosInstance, AxiosPromise, AxiosProxyConfig } from 'axios'
-import * as HttpsProxyAgent from 'https-proxy-agent'
+import Axios, { AxiosInstance, AxiosPromise } from 'axios'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import { MessageServerSocketPacket, ServerSocketPacket } from "../model/ServerSocketPacket";
 import { Ebus } from "../Ebus";
 import { Logger } from "../Logger";
@@ -27,7 +27,7 @@ export class WebhookServer {
     })
   }
 
-  private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string, proxy: HttpsProxyAgent | undefined) {
+  private registerClient(url: string, method: 'GET' | 'POST', name: string, group: string, proxy: HttpsProxyAgent<string> | undefined) {
     const client = new WebhookClient(
       url,
       method,
@@ -52,7 +52,7 @@ class WebhookClient extends QueueClient {
     private method: 'GET' | 'POST',
     name: string,
     group: string,
-    proxy: HttpsProxyAgent | undefined,
+    proxy: HttpsProxyAgent<string> | undefined,
     private token: string,
     retryTimeout: number,
     private ebus: Ebus

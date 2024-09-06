@@ -5,6 +5,7 @@ import { Context } from "./Context";
 import { Throttle } from "./decorator/Throttle";
 import { Logger } from "./Logger";
 import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "./Define";
+import { MessageStatus, TypeObject } from "./typings";
 
 /**
  * 负责管理消息的状态及未发送的消息的持久化

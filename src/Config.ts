@@ -1,6 +1,56 @@
 import * as _Config from '../config.json'
 
-export const Config = {
+export interface IConfig {
+  token: string,
+  http: {
+    verifyToken: boolean,
+    cors: boolean,
+    port: number,
+    waitTimeout: number
+  },
+  websocket: {
+    verifyToken: boolean,
+    port: number,
+    authTimeout: number,
+    retryTimeout: number,
+    waitTimeout: number
+  },
+  webhook: {
+    retryTimeout: number,
+    clients: Array<{
+      url: string
+      method: string
+      name: string
+      group: string
+      proxy: string
+    }>,
+    proxy: string
+  },
+  webpush: {
+    apiKey: string,
+    proxy: string
+    retryTimeout: number
+  },
+  fcm: {
+    account: {
+      type: string,
+      project_id: string
+      private_key_id: string
+      private_key:string
+      client_email:string
+      client_id: string
+      auth_uri:string
+      token_uri:string
+      auth_provider_x509_cert_url: string
+      client_x509_cert_url:string
+      universe_domain:string
+    },    
+    proxy:string
+    retryTimeout: number
+  }
+}
+
+export const Config:IConfig = {
   token: _Config?.token || "",
   http: {
     port: _Config?.http?.port || 9093,
@@ -26,10 +76,7 @@ export const Config = {
     retryTimeout: Math.max(_Config?.webpush?.retryTimeout, 5000)
   },
   fcm: {
-    projectId: _Config?.fcm?.projectId,
-    applicationId: _Config?.fcm?.applicationId,
-    apiKey: _Config?.fcm?.apiKey,
-    serverKey: _Config?.fcm?.serverKey,
+    account: _Config?.fcm?.account,
     proxy: _Config?.fcm?.proxy,
     retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000)
   }

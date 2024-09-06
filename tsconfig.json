@@ -12,7 +12,8 @@
     "incremental": true,
     "resolveJsonModule": true,
     "strictNullChecks": true,
-    "lib": ["es6"]
+    "lib": ["es6"],
+    "typeRoots": ["./node_modules/@types", "./src/typings"],
   },
   "exclude": ["node_modules", "dist"]
 }
