@@ -138,10 +138,10 @@ class TelegramClient extends QueueClient {
     private ebus: Ebus,
     private logger: Logger
   ) {
-    super(retryTimeout, name, group)
+    super(Math.max(retryTimeout, 10000), name, group)
   }
 
-  protected send(message: Message) {
+  protected async send(message: Message) {
     this.logger.info(`${message.message.text}`, 'loop-send')
     this.ebus.emit('message-client-status', {
       mid: message.mid,
@@ -149,7 +149,7 @@ class TelegramClient extends QueueClient {
       status: 'wait'
     })
     let packet = new MessageServerSocketPacket(message)
-    this.sendPacket(packet).then((res) => {
+    await this.sendPacket(packet).then((res) => {
       this.ebus.emit('message-client-status', {
         mid: packet.data.mid,
         name: this.name,
@@ -234,16 +234,30 @@ class TelegramBot {
     })
   }
 
-  public sendMessage(chatId: string, telegramPacket: TelegramPacket) {
-    return this.axios.request<TelegramSendMessageResponse>({
-      url: '/sendMessage',
-      method: 'post',
-      data: {
-        chat_id: chatId,
-        parse_mode: telegramPacket.extra?.parse_mode || 'MarkdownV2',
-        text: telegramPacket.toString(),
-      },
-    })
+  public async sendMessage(chatId: string, telegramPacket: TelegramPacket): Promise<void> {
+    try {
+      await this.axios.request<TelegramSendMessageResponse>({
+        url: '/sendMessage',
+        method: 'post',
+        data: {
+          chat_id: chatId,
+          ...telegramPacket.toArgs()
+        },
+      })
+    } catch (e) {
+      if (e.isAxiosError && e.response?.data?.error_code === 400) {
+        await this.axios.request<TelegramSendMessageResponse>({
+          url: '/sendMessage',
+          method: 'post',
+          data: {
+            chat_id: chatId,
+            text: e.response?.data?.description
+          },
+        })
+      } else {
+        throw e
+      }
+    }
   }
 }
 
@@ -251,31 +265,58 @@ class TelegramPacket {
   constructor(
     private text: string,
     private desp?: unknown,
-    public extra?: TypeObject<string>,
+    public extra: TypeObject<string> = {},
   ) { }
 
-  public toString() {
-    let result = ``
-    if (this.extra?.parse_mode === 'HTML') {
-      result = `<div style="font-weight: bold;">${this.text}</div>`
+  public toArgs(): { text: string, parse_mode: string } {
+    let result = {
+      text: '',
+      parse_mode: Object.hasOwn(this.extra || {}, 'parse_mode') ? this.extra.parse_mode : 'MarkdownV2'
+    }
+    if (result.parse_mode === 'HTML') {
+      result.text = `<b>${this.text}</b>`
       if (this.desp) {
-        result += this.desp
+        result.text += this.desp
       }
     } else {
-      result = `*${this.text}*`
+      result.text = `*${this.text}*`
       if (this.desp) {
-        result += '\n'
+        result.text += '\n'
         if (typeof this.desp === 'object' && this.desp !== null) {
-          result += `\`${JSON.stringify(this.desp, null, 2)}\``
+          result.text += `\`${JSON.stringify(this.desp, null, 2)}\``
         } else {
-          if (this.extra?.parse_mode === 'MarkdownV2' || this.extra?.parse_mode === 'Markdown') {
-            result += `${this.desp}`
+          if (this.extra.parse_mode === 'MarkdownV2' || this.extra.parse_mode === 'Markdown') {
+            result.text += `${this.desp}`
           } else {
-            result += `\`${this.desp}\``
+            result.text += `\`${this.desp}\``
           }
         }
       }
+      if (this.extra.scheme) {
+        result.text += `\n[${this.replaceMdChar(this.extra.scheme)}](${this.replaceMdChar(this.extra.scheme)})`
+      }
     }
     return result
+  }
+
+  private replaceMdChar(text: string): string {
+    return text.replace(/\_/g, '\\_')
+      .replace(/\*/g, '\\*')
+      .replace(/\[/g, '\\[')
+      .replace(/\]/g, '\\]')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)')
+      .replace(/\~/g, '\\~')
+      .replace(/\`/g, '\\`')
+      .replace(/\>/g, '\\>')
+      .replace(/\#/g, '\\#')
+      .replace(/\+/g, '\\+')
+      .replace(/\-/g, '\\-')
+      .replace(/\=/g, '\\=')
+      .replace(/\|/g, '\\|')
+      .replace(/\{/g, '\\{')
+      .replace(/\}/g, '\\}')
+      .replace(/\./g, '\\.')
+      .replace(/\!/g, '\\!')
   }
 }

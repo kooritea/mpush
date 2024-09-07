@@ -8,7 +8,7 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2017",
+    "target": "es2022",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "strictNullChecks": true,
     "lib": [
-      "es6"
+      "es2022"
     ],
     "typeRoots": [
       "./node_modules/@types",

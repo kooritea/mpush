@@ -153,13 +153,15 @@ export abstract class QueueClient extends Client {
     const message = this.messages[0]
     if (message && !this.lock) {
       this.lock = true
-      if (this.retryTimeout > -1) {
-        this.timer = setTimeout(() => {
-          this.lock = false
-          this.next()
-        }, this.retryTimeout)
-      }
-      this.send(message)
+      const result = this.send(message)
+      Promise.resolve(result).then(() => {
+        if (this.retryTimeout > -1) {
+          this.timer = setTimeout(() => {
+            this.lock = false
+            this.next()
+          }, this.retryTimeout)
+        }
+      })
     }
   }
 
@@ -178,7 +180,7 @@ export abstract class QueueClient extends Client {
    * 当retryTimeout内没有comfirm会重新调用该方法
    * @param message 
    */
-  protected abstract send(message: Message): void
+  protected abstract send(message: Message): void | Promise<void>
 
   /**
    * 直接发送数据包,忽略队列

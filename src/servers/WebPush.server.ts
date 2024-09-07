@@ -10,7 +10,7 @@ export class WebPushServer {
   public static LOCALSTORAGE_SCOPE: string = 'WebPushServer'
   public static CLIENT_SCOPE = "WebPushClient"
 
-  private webPushOptions: WebPush.RequestOptions | undefined = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
+  private webPushOptions: WebPush.RequestOptions | undefined
   private logger: Logger = new Logger('WebPushServer')
   constructor(
     private readonly context: Context
@@ -23,7 +23,7 @@ export class WebPushServer {
         privateKey
       )
       WebPush.setGCMAPIKey(this.context.config.webpush.apiKey)
-
+      this.webPushOptions = this.context.config.webpush.proxy ? { proxy: this.context.config.webpush.proxy } : undefined
       this.context.clientManager.recoveryLocalClient(WebPushServer.CLIENT_SCOPE, (data) => {
         return new WebPushClient(
           data.pushSubscription,
