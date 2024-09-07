@@ -1,4 +1,4 @@
-# Mpush 2.2
+# Mpush 2.3
 
 ## 功能
 
@@ -7,6 +7,19 @@ mpush 是一套致力于用最简单,最快速的方式把消息从任何地方�
 
 ## 更新日志
 
+### 2.3
+
+- fcm更新为使用http v1 api
+- 添加了telegram bot作为接收端(未来加入发送)接入
+
+### 2.2
+
+- 2.1 的 FCM 接入改名为 WebPush socket 通信的 cmd 有所变化
+
+### 2.1
+
+- 新增 FCM 接入方式(2.1)
+
 ### 2.0
 
 - 使用 typescript 重新编写
@@ -14,13 +27,6 @@ mpush 是一套致力于用最简单,最快速的方式把消息从任何地方�
 - 新增 webhook 的接入方式
 - 新增 websocket 客户端双向传递消息
 
-### 2.1
-
-- 新增 FCM 接入方式(2.1)
-
-### 2.2
-
-- 2.1 的 FCM 接入改名为 WebPush socket 通信的 cmd 有所变化
 
 ## 安卓客户端仓库
 
@@ -104,6 +110,11 @@ npm run dev
   },
   "fcm": {
     "account": {},// firebase SDK的项目参数，获取方式见下面第四大点
+    "proxy": "http://127.0.0.1:62333",
+    "retryTimeout": 10000
+  },
+  "telegram": {
+    "botToken": string, // 找@botFather拿，拿到bot后回复/help 按提示认证和注册
     "proxy": "http://127.0.0.1:62333",
     "retryTimeout": 10000
   }
@@ -191,16 +202,18 @@ curl http://HOST:HTTP_PORT/kgroup.group?text=hello&desp=world
 
 #### (1) 使用 http POST 请求发送消息,POST 方法接收一个完整的消息包,格式如下
 
-```javascript
+```json
 {
-    cmd: "MESSAGE",
-    data : {
-      sendType: 'personal' | 'group',
-      target: string,
-      message: {
-        text: string,
-        desp: string,
-        extra: object
+    "cmd": "MESSAGE",
+    "data" : {
+      "sendType": "personal" | "group",
+      "target": string,
+      "message": {
+        "text": string,
+        "desp": string,
+        "extra": {
+          // 任意字段，由接收方自行定义，例如android客户端可以接收一个scheme作为点击通知时跳转的应用、telegram客户端接收一个parse_mode决定文本的解析方式
+        }
       }
     }
 }

@@ -22,18 +22,13 @@ export class ClientManager {
     this.context.ebus.on('message-start', (message) => {
       this.onMessageStart(message)
     })
-    this.recoveryLocalClient()
   }
 
   /**
    * 服务启动时尝试从本地恢复注册过的客户端  
    * 非互斥的非通用客户端的server自行传入调用进行恢复
    */
-  public recoveryLocalClient(): void
-  public recoveryLocalClient(scopeName: string, deserializationHandle: (data: TypeObject<any>) => Client): void
-  public recoveryLocalClient(scopeName: string = CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE, deserializationHandle: (data: TypeObject<any>) => Client = (data) => {
-    return new Client(data.name, data.group)
-  }): void {
+  public recoveryLocalClient(scopeName: string, deserializationHandle: (data: TypeObject<any>) => Client): void {
     try {
       let data = this.context.localStorageManager.get<{
         [clientScopeName: string]: Array<TypeObject<any>>

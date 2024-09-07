@@ -17,22 +17,22 @@ if(!_Config){
   throw new Error('Not found config file')
 }
 export interface IConfig {
-  token: string,
+  token: string
   http: {
-    verifyToken: boolean,
-    cors: boolean,
-    port: number,
+    verifyToken: boolean
+    cors: boolean
+    port: number
     waitTimeout: number
   },
   websocket: {
-    verifyToken: boolean,
-    port: number,
-    authTimeout: number,
-    retryTimeout: number,
+    verifyToken: boolean
+    port: number
+    authTimeout: number
+    retryTimeout: number
     waitTimeout: number
   },
   webhook: {
-    retryTimeout: number,
+    retryTimeout: number
     clients: Array<{
       url: string
       method: string
@@ -43,7 +43,7 @@ export interface IConfig {
     proxy: string
   },
   webpush: {
-    apiKey: string,
+    apiKey: string
     proxy: string
     retryTimeout: number
   },
@@ -63,6 +63,11 @@ export interface IConfig {
     },    
     proxy:string
     retryTimeout: number
+  },
+  telegram: {
+    botToken: string
+    retryTimeout: number
+    proxy: string
   }
 }
 
@@ -95,5 +100,10 @@ export const Config:IConfig = {
     account: _Config?.fcm?.account,
     proxy: _Config?.fcm?.proxy,
     retryTimeout: Math.max(_Config?.fcm?.retryTimeout, 5000)
+  },
+  telegram: {
+    botToken: _Config?.telegram.botToken,
+    retryTimeout: _Config?.telegram.retryTimeout,
+    proxy: _Config?.telegram.proxy,
   }
 }

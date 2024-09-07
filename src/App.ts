@@ -5,6 +5,7 @@ import { Context } from './Context'
 import { WebPushServer } from './servers/WebPush.server'
 import { FCMServer } from './servers/FCM.server'
 import { Logger } from './Logger'
+import { TelegramServer } from './servers/Telegram.server'
 
 export class App {
 
@@ -14,6 +15,7 @@ export class App {
   private webhookServer: WebhookServer
   private webpushServer: WebPushServer
   private fcmServer: FCMServer
+  private telegramServer: TelegramServer
   private logger: Logger = new Logger('App')
   constructor() {
     this.httpServer = new HttpServer(this.context)
@@ -21,6 +23,7 @@ export class App {
     this.webhookServer = new WebhookServer(this.context)
     this.webpushServer = new WebPushServer(this.context)
     this.fcmServer = new FCMServer(this.context)
+    this.telegramServer = new TelegramServer(this.context)
     this.context.ebus.emit('server-ready')
     this.logger.info('App ready')
     process.on("SIGINT", (code) => {
@@ -32,7 +35,6 @@ export class App {
       this.context.clientManager.clientLocalSave(true)
       this.context.messageManager.messageLocalSave(true)
       process.exit(0)
-
-    });
+    })
   }
 }
