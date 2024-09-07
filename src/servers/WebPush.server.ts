@@ -1,11 +1,10 @@
-import { Context } from "../Context";
+import { Context } from "../Context"
 import * as WebPush from "web-push"
-import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
-import { Client, QueueClient } from "../model/Client";
-import { Message } from "../model/Message.model";
-import { Ebus } from "../Ebus";
-import { Logger } from "../Logger";
-import { MessageStatus, TypeObject } from "src/typings";
+import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket"
+import { Client, QueueClient } from "../model/Client"
+import { Message } from "../model/Message.model"
+import { Ebus } from "../Ebus"
+import { Logger } from "../Logger"
 export class WebPushServer {
 
   public static LOCALSTORAGE_SCOPE: string = 'WebPushServer'

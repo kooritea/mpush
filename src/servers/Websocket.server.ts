@@ -1,17 +1,16 @@
-import { Context } from "src/Context";
+import { Context } from "src/Context"
 import * as Http from "http"
 import { Server, MessageEvent, Data as SocketData } from "ws"
-import { Message } from "../model/Message.model";
-import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterWebPushClientSocketPacket, MsgWebPushCbClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket";
-import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
-import * as Utils from "../Utils";
+import { Message } from "../model/Message.model"
+import { ClientSocketPacket, AuthClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, RegisterWebPushClientSocketPacket, MsgWebPushCbClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket"
+import { MessageServerSocketPacket, AuthServerSocketPacket, ServerSocketPacket, MsgReplyServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket"
+import * as Utils from "../Utils"
 import * as Jsonwebtoken from 'jsonwebtoken'
-import { Ebus } from "../Ebus";
-import { QueueClient } from "../model/Client";
-import { Logger } from "../Logger";
-import { WebPushServer } from "./WebPush.server";
-import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "../Define";
-import { MessageStatus, TypeObject } from "src/typings";
+import { Ebus } from "../Ebus"
+import { QueueClient } from "../model/Client"
+import { Logger } from "../Logger"
+import { WebPushServer } from "./WebPush.server"
+import { CLIENTMANAGER_UNCERTAIN_CLIENT_SCOPE } from "../Define"
 type Socket = MessageEvent['target']
 
 export class WebsocketServer {
@@ -49,7 +48,7 @@ export class WebsocketServer {
       let name: string = ""
       let timer = setTimeout(() => {
         socket.close()
-      }, this.context.config.websocket.authTimeout);
+      }, this.context.config.websocket.authTimeout)
       socket.onmessage = (event: MessageEvent) => {
         this.onSocketMessage(event.target, event.data, name)
       }

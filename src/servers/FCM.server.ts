@@ -1,31 +1,30 @@
 /**
  * 非可靠客户端，不与其他客户端互斥
  */
-import { Context } from "../Context";
-import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket";
-import { Client, QueueClient } from "../model/Client";
-import { Message } from "../model/Message.model";
-import { Ebus } from "../Ebus";
+import { Context } from "../Context"
+import { ServerSocketPacket, MessageServerSocketPacket, InfoServerSocketPacket } from "../model/ServerSocketPacket"
+import { Client, QueueClient } from "../model/Client"
+import { Message } from "../model/Message.model"
+import { Ebus } from "../Ebus"
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import Axios from 'axios'
-import { Logger } from "../Logger";
-import { UncertainServer } from "./Base.server";
-import { MessageStatus, TypeObject } from "src/typings";
-import { JWT } from "google-auth-library";
+import { Logger } from "../Logger"
+import { UncertainServer } from "./Base.server"
+import { JWT } from "google-auth-library"
 const axios = Axios.create()
 
 interface AccountInfo {
-  type: string;
-  project_id: string;
-  private_key_id: string;
-  private_key: string;
-  client_email: string;
-  client_id: string;
-  auth_uri: string;
-  token_uri: string;
-  auth_provider_x509_cert_url: string;
-  client_x509_cert_url: string;
-  universe_domain: string;
+  type: string
+  project_id: string
+  private_key_id: string
+  private_key: string
+  client_email: string
+  client_id: string
+  auth_uri: string
+  token_uri: string
+  auth_provider_x509_cert_url: string
+  client_x509_cert_url: string
+  universe_domain: string
 }
 
 export class FCMServer extends UncertainServer<FCMClient> {
@@ -40,14 +39,14 @@ export class FCMServer extends UncertainServer<FCMClient> {
 
   constructor(context: Context) {
     super(context)
-    if (this.context.config.fcm.account) {
+    if (this.context.config.fcm.account?.client_email && this.context.config.fcm.account?.private_key) {
       this.logger.info(`Init`)
       this.options = {
         account: this.context.config.fcm.account,
         proxy: undefined
       }
       if (this.context.config.fcm.proxy) {
-        this.options.proxy = new HttpsProxyAgent(this.context.config.fcm.proxy);
+        this.options.proxy = new HttpsProxyAgent(this.context.config.fcm.proxy)
       }
       this.context.clientManager.recoveryLocalClient(FCMServer.CLIENT_SCOPE, (data) => {
         return new FCMClient(
@@ -165,13 +164,13 @@ class FCMClient extends QueueClient {
 
   }
   async sendPacket(packet: ServerSocketPacket): Promise<void> {
-    const jwtClient =  new JWT(
+    const jwtClient = new JWT(
       this.options.account.client_email,
       '',
       this.options.account.private_key,
       ['https://www.googleapis.com/auth/firebase.messaging'],
-    );
-    const tokens = await jwtClient.authorize();
+    )
+    const tokens = await jwtClient.authorize()
     await axios.request({
       method: 'post',
       url: `https://fcm.googleapis.com/v1/projects/${this.options.account.project_id}/messages:send`,

@@ -1,6 +1,5 @@
 import { ServerSocketPacket } from "./ServerSocketPacket"
 import { Message } from "./Message.model"
-import { TypeObject } from "src/typings"
 
 /**
  * 附带消息队列和重试机制的客户端基类  

@@ -1,5 +1,3 @@
-import { TypeObject } from "src/typings"
-
 export class Message {
   public readonly sendType: "personal" | "group"
   public readonly target: string

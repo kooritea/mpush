@@ -1,15 +1,14 @@
 import * as Http from "http"
 import * as Url from "url"
-import * as querystring from 'querystring';
-import { Context } from "../Context";
-import { Message } from "../model/Message.model";
-import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgWebPushCbClientSocketPacket, AuthClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket";
+import * as querystring from 'querystring'
+import { Context } from "../Context"
+import { Message } from "../model/Message.model"
+import { ClientSocketPacket, MessageClientSocketPacket, MsgCbClientSocketPacket, MsgWebPushCbClientSocketPacket, AuthClientSocketPacket, RegisterFCMClientSocketPacket } from "../model/ClientSocketPacket"
 import * as Utils from '../Utils'
 import * as Jsonwebtoken from 'jsonwebtoken'
-import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket";
-import { Logger } from "../Logger";
-import { WebPushServer } from "./WebPush.server";
-import { MessageStatus, TypeObject } from "src/typings";
+import { MsgReplyServerSocketPacket, InfoServerSocketPacket, AuthServerSocketPacket } from "../model/ServerSocketPacket"
+import { Logger } from "../Logger"
+import { WebPushServer } from "./WebPush.server"
 
 export class HttpServer {
 
@@ -30,12 +29,12 @@ export class HttpServer {
     try {
       response.setHeader('content-type', 'application/json; charset=utf-8')
       if (this.context.config.http.cors) {
-        response.setHeader('Access-Control-Allow-Origin', request.headers['origin'] || '');
+        response.setHeader('Access-Control-Allow-Origin', request.headers['origin'] || '')
       }
       if (request.method === 'OPTIONS') {
         if (this.context.config.http.cors) {
-          response.setHeader('Access-Control-Allow-Headers', request.headers['access-control-request-headers'] || '');
-          response.setHeader('Access-Control-Allow-Methods', request.headers['access-control-request-method'] || '');
+          response.setHeader('Access-Control-Allow-Headers', request.headers['access-control-request-headers'] || '')
+          response.setHeader('Access-Control-Allow-Methods', request.headers['access-control-request-method'] || '')
           response.statusCode = 200
           response.end()
         } else {

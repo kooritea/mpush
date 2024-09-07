@@ -1,8 +1,8 @@
 {
-  "files.exclude": {
-    // exclude .js and .js.map files, when in a TypeScript project
-    // "node_modules": true,
-    // "**/*.js": { "when": "$(basename).ts"},
-    // "**/*.js.map": true
-  }
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.tabSize": 2,
+  "typescript.format.semicolons": "remove",
+  "editor.formatOnSave": true
 }

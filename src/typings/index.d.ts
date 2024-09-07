@@ -1,4 +1,4 @@
-export interface TypeObject<T> {
+interface TypeObject<T> {
   [key: string]: T
 }
 /**
@@ -11,4 +11,4 @@ export interface TypeObject<T> {
  * no 未找到该消息要发送的目标
  * 
  */
-export type MessageStatus = 'ready' | 'ok' | 'wait' | 'webpush-wait' | 'webpush-send' | 'webpush-ok' | 'fcm-wait' | 'fcm-send' | 'fcm-ok' | 'no'
+type MessageStatus = 'ready' | 'ok' | 'wait' | 'webpush-wait' | 'webpush-send' | 'webpush-ok' | 'fcm-wait' | 'fcm-send' | 'fcm-ok' | 'no'

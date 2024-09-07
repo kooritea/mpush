@@ -1,15 +1,14 @@
-import { EventEmitter } from "events";
-import { Message } from "./model/Message.model";
-import { Client } from "./model/Client";
+import { EventEmitter } from "events"
+import { Message } from "./model/Message.model"
+import { Client } from "./model/Client"
 import * as WebPush from "web-push"
-import { MessageStatus, TypeObject } from "./typings";
 
 export class Ebus {
 
   private emitter: EventEmitter = new EventEmitter()
 
 
-  on(event: 'server-ready', listener: () => void): void;
+  on(event: 'server-ready', listener: () => void): void
 
   /**
    * 接收到客户端想要发送的消息  
@@ -18,7 +17,7 @@ export class Ebus {
    * @param event 'message-start'
    * @param listener 
    */
-  on(event: 'message-start', listener: (message: Message) => void): void;
+  on(event: 'message-start', listener: (message: Message) => void): void
 
   /**
    * 收到接收方的接收确认,只代表某个接受方的状态  
@@ -30,7 +29,7 @@ export class Ebus {
     mid: string,
     name: string,
     status: MessageStatus
-  }) => void): void;
+  }) => void): void
 
   /**
    * 推送完成，所有接受方已接收消息或未找到接收方消息结束  
@@ -42,60 +41,60 @@ export class Ebus {
   on(event: 'message-end', listener: (payload: {
     message: Message,
     status: TypeObject<MessageStatus>
-  }) => void): void;
+  }) => void): void
   on(event: 'register-webpush', listener: (payload: {
     client: Client,
     pushSubscription: WebPush.PushSubscription
-  }) => void): void;
+  }) => void): void
   on(event: 'register-fcm', listener: (payload: {
     client: Client,
     token: string
-  }) => void): void;
+  }) => void): void
   on(event: 'message-webpush-callback', listener: (payload: {
     mid: string,
     name: string
-  }) => void): void;
+  }) => void): void
   on(event: 'message-fcm-callback', listener: (payload: {
     mid: string,
     name: string
-  }) => void): void;
+  }) => void): void
   on(event: 'unregister-client', listener: (payload: {
     client: Client
-  }) => void): void;
+  }) => void): void
   on(event: string, listener: (payload: any) => void): void {
     this.emitter.on(event, listener)
   }
 
-  emit(event: 'server-ready'): void;
-  emit(event: 'message-start', message: Message): void;
+  emit(event: 'server-ready'): void
+  emit(event: 'message-start', message: Message): void
   emit(event: 'message-client-status', payload: {
     mid: string,
     name: string,
     status: MessageStatus
-  }): void;
+  }): void
   emit(event: 'message-end', payload: {
     message: Message,
     status: TypeObject<MessageStatus>
-  }): void;
+  }): void
   emit(event: 'register-webpush', payload: {
     client: Client,
     pushSubscription: WebPush.PushSubscription
-  }): void;
+  }): void
   emit(event: 'register-fcm', payload: {
     client: Client,
     token: string
-  }): void;
+  }): void
   emit(event: 'message-webpush-callback', payload: {
     mid: string,
     name: string
-  }): void;
+  }): void
   emit(event: 'message-fcm-callback', payload: {
     mid: string,
     name: string
-  }): void;
+  }): void
   emit(event: 'unregister-client', payload: {
     client: Client
-  }): void;
+  }): void
   emit(event: string, payload?: any): void {
     this.emitter.emit(event, payload)
   }

@@ -1,4 +1,7 @@
 {
+  "ts-node": {
+    "files": true
+  },
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -12,8 +15,16 @@
     "incremental": true,
     "resolveJsonModule": true,
     "strictNullChecks": true,
-    "lib": ["es6"],
-    "typeRoots": ["./node_modules/@types", "./src/typings"],
+    "lib": [
+      "es6"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/typings"
+    ],
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
