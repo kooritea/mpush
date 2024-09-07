@@ -4,16 +4,18 @@ import { Logger } from './Logger'
 
 const logger: Logger = new Logger('Config')
 
-let _Config:any = null
-for(let filePath of [`${__dirname}/../config.local.json`,`${__dirname}/../config.json`]){
+let _Config: any = null
+for (let filePath of [`${__dirname}/../config.local.json`, `${__dirname}/../config.json`]) {
   const resolveFilePath = Path.resolve(filePath)
-  if(FS.existsSync(resolveFilePath)){
+  if (FS.existsSync(resolveFilePath)) {
     _Config = JSON.parse(FS.readFileSync(resolveFilePath, 'utf8'))
     logger.info(`Use ${resolveFilePath}`)
     break
+  } else {
+    logger.info(`Not found ${filePath}`)
   }
 }
-if(!_Config){
+if (!_Config) {
   throw new Error('Not found config file')
 }
 export interface IConfig {
@@ -52,16 +54,16 @@ export interface IConfig {
       type: string,
       project_id: string
       private_key_id: string
-      private_key:string
-      client_email:string
+      private_key: string
+      client_email: string
       client_id: string
-      auth_uri:string
-      token_uri:string
+      auth_uri: string
+      token_uri: string
       auth_provider_x509_cert_url: string
-      client_x509_cert_url:string
-      universe_domain:string
-    },    
-    proxy:string
+      client_x509_cert_url: string
+      universe_domain: string
+    },
+    proxy: string
     retryTimeout: number
   },
   telegram: {
@@ -71,7 +73,7 @@ export interface IConfig {
   }
 }
 
-export const Config:IConfig = {
+export const Config: IConfig = {
   token: _Config?.token || "",
   http: {
     port: _Config?.http?.port || 9093,

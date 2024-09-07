@@ -5,4 +5,4 @@ node_modules/
 dist/
 keys
 storage/
-config.local.json
+/*.local.*
