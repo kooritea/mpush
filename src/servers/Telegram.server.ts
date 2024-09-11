@@ -265,11 +265,12 @@ class TelegramPacket {
   constructor(
     private text: string,
     private desp?: unknown,
-    public extra: TypeObject<string> = {},
+    public extra: TypeObject<any> = {},
   ) { }
 
   public toArgs(): { text: string, parse_mode: string } {
     let result = {
+      ...(this.extra.telegram || {}),
       text: '',
       parse_mode: Object.hasOwn(this.extra || {}, 'parse_mode') ? this.extra.parse_mode : 'MarkdownV2'
     }
@@ -293,7 +294,16 @@ class TelegramPacket {
         }
       }
       if (this.extra.scheme) {
-        result.text += `\n[${this.replaceMdChar(this.extra.scheme)}](${this.replaceMdChar(this.extra.scheme)})`
+        if (!result.reply_markup) {
+          result.reply_markup = {}
+        }
+        if (!result.reply_markup.inline_keyboard) {
+          result.reply_markup.inline_keyboard = []
+        }
+        result.reply_markup.inline_keyboard.unshift([{
+          text: 'Open Scheme',
+          url: this.extra.scheme
+        }])
       }
     }
     return result
