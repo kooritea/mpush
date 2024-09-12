@@ -228,9 +228,10 @@ export class HttpServer {
     sendType: "personal" | "group",
     target: string
   } {
-    const pathname = Url.parse(url).pathname || ""
-    if (/\/(.*?)\.(send|group)/.test(pathname)) {
-      const args = pathname.match(/^\/(.*?)\.(.*?)$/)
+    const urlPaths = (new URL(url, 'http://127.0.0.1').pathname || "").split('/')
+    const pathname = urlPaths[urlPaths.length - 1]
+    if (/(.*?)\.(send|group)/.test(pathname)) {
+      const args = pathname.match(/^(.*?)\.(.*?)$/)
       if (args) {
         return {
           sendType: args[2] === 'send' ? 'personal' : 'group',
