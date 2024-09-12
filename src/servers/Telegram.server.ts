@@ -264,7 +264,7 @@ class TelegramBot {
 class TelegramPacket {
   constructor(
     private text: string,
-    private desp?: unknown,
+    private desp?: string,
     public extra: TypeObject<any> = {},
   ) { }
 
@@ -280,16 +280,16 @@ class TelegramPacket {
         result.text += this.desp
       }
     } else {
-      result.text = `*${this.text}*`
+      result.text = `*${this.replaceMdChar(this.text)}*`
       if (this.desp) {
         result.text += '\n'
         if (typeof this.desp === 'object' && this.desp !== null) {
-          result.text += `\`${JSON.stringify(this.desp, null, 2)}\``
+          result.text += `\`${this.replaceMdChar(JSON.stringify(this.desp, null, 2))}\``
         } else {
           if (this.extra.parse_mode === 'MarkdownV2' || this.extra.parse_mode === 'Markdown') {
             result.text += `${this.desp}`
           } else {
-            result.text += `\`${this.desp}\``
+            result.text += `\`${this.replaceMdChar(this.desp)}\``
           }
         }
       }
