@@ -30,7 +30,7 @@ export class TelegramServer extends UncertainServer<TelegramClient> {
     super(context)
     if (this.context.config.telegram.botToken) {
       this.logger.info(`Init`)
-      this.bot = new TelegramBot(this.context.config.telegram.botToken, (message) => { this.onNewMessage(message) }, this.context.config.telegram.proxy)
+      this.bot = new TelegramBot(this.context.config.telegram.botToken, (message) => { this.onNewMessage(message) }, this.logger, this.context.config.telegram.proxy)
       this.context.clientManager.recoveryLocalClient(TelegramServer.CLIENT_SCOPE, (data) => {
         this.authChatMap[data.chatId] = true
         return new TelegramClient(
@@ -186,7 +186,7 @@ class TelegramBot {
   private lastUpdateId: number = 0
 
   private fastLoopTimer: NodeJS.Timeout | null = null
-  constructor(token: string, private onNewMessage: (message: TelegramMessage) => void, proxy?: string) {
+  constructor(token: string, private onNewMessage: (message: TelegramMessage) => void, logger: Logger, proxy?: string) {
     this.axios = Axios.create({
       baseURL: `https://api.telegram.org/bot${token}`,
       httpsAgent: proxy ? new HttpsProxyAgent(proxy) : undefined,
@@ -204,6 +204,8 @@ class TelegramBot {
       this.fastLoopTimer = setTimeout(() => {
         this.fastLoopTimer = null
       }, 1000 * 60 * 10)
+    }).catch((e) => {
+      logger.error(`TelegramBot api error: ${e?.message || e}`)
     })
   }
 
