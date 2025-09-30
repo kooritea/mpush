@@ -174,6 +174,13 @@ token 存放在 http 头的 authorization 字段
 
 `接收到 webhook 请求后 需要返回 2xx的响应码,否则超过设置的时间后会重新发送该消息`
 
+#### (3) telegram
+
+- /auth {token}
+- /register {name} {group}
+
+向机器人发送以上两条消息完成注册
+
 ### 2、发送消息
 
 #### (1) 使用 http GET 请求发送消息,GET 方法接收 text 和 desp 两个字段，text 一般用作 title，参考 server 酱,除了 text 和 desp 参数,其他参数都会被放到 extra 字段中返回给接收方
